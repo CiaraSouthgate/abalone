@@ -34,6 +34,16 @@ const BoardTile = styled.div`
   justify-content: center;
   align-items: center;
   font-weight: bold;
+  font-size: 22px;
+  background-color: ${(props) => {
+    if (props.for === EMP) {
+      return 'brown';
+    } else if (props.for === MAX) {
+      return 'black';
+    } else {
+      return 'white';
+    }
+  }};
 `;
 
 const BoardBlankTile = styled.div`
@@ -63,7 +73,7 @@ const Game = () => {
             {Array(parseInt(i < 4 ? 4 - i : 0)).fill(<BoardBlankTile />)}
             {Array(parseInt(i > 4 ? i - 4 : 0)).fill(<BoardBlankTile />)}
             {Object.keys(gameState[k]).map((k2) => (
-              <BoardTile key={`${k}${k2}`}>{`${k}${k2}`}</BoardTile>
+              <BoardTile key={`${k}${k2}`} for={gameState[k][k2]} />
             ))}
           </BoardRow>
         ))}
