@@ -22,6 +22,7 @@ const Board = styled.div`
 
 const BoardRow = styled.div`
   display: flex;
+  justify-content: center;
 `;
 
 const BoardTile = styled.div`
@@ -46,12 +47,6 @@ const BoardTile = styled.div`
   }};
 `;
 
-const BoardBlankTile = styled.div`
-  width: ${TILE_WIDTH / 2 + MARGIN_SIZE}px;
-  height: ${TILE_HEIGHT}px;
-  background-color: #ffffff00;
-`;
-
 const Game = () => {
   const [gameState] = React.useState({
     i: { 5: MIN, 6: MIN, 7: EMP, 8: MAX, 9: MAX },
@@ -68,10 +63,8 @@ const Game = () => {
   return (
     <Wrapper>
       <Board>
-        {Object.keys(gameState).map((k, i) => (
+        {Object.keys(gameState).map((k) => (
           <BoardRow key={k}>
-            {Array(parseInt(i < 4 ? 4 - i : 0)).fill(<BoardBlankTile />)}
-            {Array(parseInt(i > 4 ? i - 4 : 0)).fill(<BoardBlankTile />)}
             {Object.keys(gameState[k]).map((k2) => (
               <BoardTile key={`${k}${k2}`} for={gameState[k][k2]} />
             ))}
