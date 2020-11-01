@@ -94,7 +94,7 @@ const ConfigRow = styled.div`
   margin: 10px 0;
 `;
 
-const Game = () => {
+export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.STANDARD);
   const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
@@ -194,5 +194,3 @@ const Game = () => {
     </Wrapper>
   );
 };
-
-export default Game;

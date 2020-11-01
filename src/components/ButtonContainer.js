@@ -1,31 +1,29 @@
 import React from 'react';
-import { Pause } from './Buttons/Pause';
-import { Start } from './Buttons/Start';
-import { Stop } from './Buttons/Stop';
-import { Undo } from './Buttons/Undo';
-import { Reset } from './Buttons/Reset';
-import styled from 'styled-components';
+import PauseIcon from '@material-ui/icons/Pause';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import StopIcon from '@material-ui/icons/Stop';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import UndoIcon from '@material-ui/icons/Undo';
+import { ButtonGroup, IconButton } from '@material-ui/core';
 
-const ButtonContainer = () => {
-  const Container = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    width: 90%;
-    max-width: 600px;
-    margin: 0 auto;
-    margin-top: 10px;
-  `;
-
+export const ButtonContainer = () => {
   return (
-    <Container>
-      <Start />
-      <Stop />
-      <Reset />
-      <Pause />
-      <Undo />
-    </Container>
+    <ButtonGroup>
+      <IconButton>
+        <PlayArrowIcon />
+      </IconButton>
+      <IconButton>
+        <StopIcon />
+      </IconButton>
+      <IconButton>
+        <AutorenewIcon />
+      </IconButton>
+      <IconButton>
+        <PauseIcon />
+      </IconButton>
+      <IconButton>
+        <UndoIcon />
+      </IconButton>
+    </ButtonGroup>
   );
 };
-
-export { ButtonContainer };
