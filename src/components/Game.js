@@ -1,9 +1,27 @@
 import React from 'react';
 import styled from 'styled-components';
+import {
+  MAX,
+  EMP,
+  BOARD_LAYOUTS,
+  MARVEL_COLORS,
+  GAME_MODE,
+  DEFAULT_MOVE_LIMIT,
+  DEFAULT_TIME_LIMIT_IN_MINUTES,
+  BOARD_LAYOUT_NAMES
+} from '../constants';
 
-const EMP = 0;
-const MAX = 1;
-const MIN = 2;
+import {
+  Modal,
+  FormControlLabel,
+  Checkbox,
+  FormLabel,
+  TextField,
+  Button,
+  Radio,
+  RadioGroup
+} from '@material-ui/core';
+
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
 const MARGIN_SIZE = 1;
@@ -47,21 +65,117 @@ const BoardTile = styled.div`
   }};
 `;
 
+const ConfigModal = styled(Modal)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Paper = styled.div`
+  background-color: white;
+  box-shadow: 6px 5px 17px 5px rgba(0, 0, 0, 0.21);
+  padding: 20px;
+`;
+
+const ConfigTitle = styled.h2``;
+
+const ConfigBody = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const ConfigRow = styled.div`
+  display: flex;
+  margin: 10px 0;
+`;
+
 const Game = () => {
-  const [gameState] = React.useState({
-    i: { 5: MIN, 6: MIN, 7: EMP, 8: MAX, 9: MAX },
-    h: { 4: MIN, 5: MIN, 6: MIN, 7: MAX, 8: MAX, 9: MAX },
-    g: { 3: EMP, 4: MIN, 5: MIN, 6: EMP, 7: MAX, 8: MAX, 9: EMP },
-    f: { 2: EMP, 3: EMP, 4: EMP, 5: EMP, 6: EMP, 7: EMP, 8: EMP, 9: EMP },
-    e: { 1: EMP, 2: EMP, 3: EMP, 4: EMP, 5: EMP, 6: EMP, 7: EMP, 8: EMP, 9: EMP },
-    d: { 1: EMP, 2: EMP, 3: EMP, 4: EMP, 5: EMP, 6: EMP, 7: EMP, 8: EMP },
-    c: { 1: EMP, 2: MAX, 3: MAX, 4: EMP, 5: MIN, 6: MIN, 7: EMP },
-    b: { 1: MAX, 2: MAX, 3: MAX, 4: MIN, 5: MIN, 6: MIN },
-    a: { 1: MAX, 2: MAX, 3: EMP, 4: MIN, 5: MIN }
-  });
+  const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
+  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.STANDARD);
+  const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
+  const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
+  const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
+  const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
+  const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
+
+  const handleInitBoardLayoutChange = (e) => {
+    setInitBoardLayout(parseInt(e.target.value));
+  };
+
+  const handleGameModeChange = (e) => {
+    setGameMode(parseInt(e.target.value));
+  };
+
+  const onPlayClick = () => {
+    setIsConfigModalShown(false);
+    if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
+      setGameState(BOARD_LAYOUTS.STANDARD);
+    } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
+      setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
+    } else {
+      setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
+    }
+  };
 
   return (
     <Wrapper>
+      <ConfigModal
+        open={isConfigModalShown}
+        onClose={() => {}}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description">
+        <Paper>
+          <ConfigTitle>Game Configuration</ConfigTitle>
+          <ConfigBody>
+            <FormLabel component="legend">Board Layout</FormLabel>
+            <ConfigRow row>
+              <RadioGroup row value={initBoardLayout} onChange={handleInitBoardLayoutChange}>
+                <FormControlLabel
+                  value={BOARD_LAYOUT_NAMES.STANDARD}
+                  control={<Radio />}
+                  label="Standard"
+                />
+                <FormControlLabel
+                  value={BOARD_LAYOUT_NAMES.GERMAN_DAISY}
+                  control={<Radio />}
+                  label="German Daisy"
+                />
+                <FormControlLabel
+                  value={BOARD_LAYOUT_NAMES.BELGIAN_DAISY}
+                  control={<Radio />}
+                  label="Belgian Daisy"
+                />
+              </RadioGroup>
+            </ConfigRow>
+            <FormLabel component="legend">Game Mode</FormLabel>
+            <ConfigRow>
+              <RadioGroup row value={gameMode} onChange={handleGameModeChange}>
+                <FormControlLabel value={GAME_MODE.VSHUMAN} control={<Radio />} label="vs. Human" />
+                <FormControlLabel
+                  value={GAME_MODE.VSCOMPUTER}
+                  control={<Radio />}
+                  label="vs. Computer"
+                />
+              </RadioGroup>
+            </ConfigRow>
+            <FormLabel component="legend">Extra Settings</FormLabel>
+            <ConfigRow style={{ justifyContent: 'space-between' }}>
+              <TextField label="Move Limit" variant="filled" size="small" defaultValue={50} />
+              <TextField
+                label="Time Limit (in minutes)"
+                variant="filled"
+                size="small"
+                defaultValue={15}
+              />
+            </ConfigRow>
+            <ConfigRow>
+              <Button onClick={onPlayClick} variant="contained" color="secondary" fullWidth>
+                PLAY
+              </Button>
+            </ConfigRow>
+          </ConfigBody>
+        </Paper>
+      </ConfigModal>
       <Board>
         {Object.keys(gameState).map((k) => (
           <BoardRow key={k}>
