@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { ButtonContainer } from './ButtonContainer';
 
 const EMP = 0;
 const MAX = 1;
@@ -13,11 +14,15 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  flex-direction: column;
 `;
 
 const Board = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const BoardRow = styled.div`
@@ -62,6 +67,7 @@ const Game = () => {
 
   return (
     <Wrapper>
+      <ButtonContainer />
       <Board>
         {Object.keys(gameState).map((k) => (
           <BoardRow key={k}>
