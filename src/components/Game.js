@@ -11,7 +11,16 @@ import {
   BOARD_LAYOUT_NAMES
 } from '../constants';
 
-import { Modal, FormControlLabel, Checkbox, FormLabel, TextField, Button } from '@material-ui/core';
+import {
+  Modal,
+  FormControlLabel,
+  Checkbox,
+  FormLabel,
+  TextField,
+  Button,
+  Radio,
+  RadioGroup
+} from '@material-ui/core';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -81,7 +90,7 @@ const ConfigRow = styled.div`
 `;
 
 const Game = () => {
-  const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.STANDARD);
+  const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.STANDARD);
   const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
@@ -89,12 +98,12 @@ const Game = () => {
   const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
 
-  const handleInitBoardLayoutChange = (boardLayout) => {
-    setInitBoardLayout(boardLayout);
+  const handleInitBoardLayoutChange = (e) => {
+    setInitBoardLayout(parseInt(e.target.value));
   };
 
-  const handleGameModeChange = (_gameMode) => {
-    setGameMode(_gameMode);
+  const handleGameModeChange = (e) => {
+    setGameMode(parseInt(e.target.value));
   };
 
   const onPlayClick = () => {
@@ -120,64 +129,34 @@ const Game = () => {
           <ConfigBody>
             <FormLabel component="legend">Board Layout</FormLabel>
             <ConfigRow row>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD}
-                    onChange={(e) => {
-                      handleInitBoardLayoutChange(BOARD_LAYOUT_NAMES.STANDARD);
-                    }}
-                  />
-                }
-                label="Standard"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={initBoardLayout === BOARD_LAYOUT_NAMES.GERMAN_DAISY}
-                    onChange={() => {
-                      handleInitBoardLayoutChange(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
-                    }}
-                  />
-                }
-                label="German Daisy"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY}
-                    onChange={() => {
-                      handleInitBoardLayoutChange(BOARD_LAYOUT_NAMES.BELGIAN_DAISY);
-                    }}
-                  />
-                }
-                label="Belgian Daisy"
-              />
+              <RadioGroup row value={initBoardLayout} onChange={handleInitBoardLayoutChange}>
+                <FormControlLabel
+                  value={BOARD_LAYOUT_NAMES.STANDARD}
+                  control={<Radio />}
+                  label="Standard"
+                />
+                <FormControlLabel
+                  value={BOARD_LAYOUT_NAMES.GERMAN_DAISY}
+                  control={<Radio />}
+                  label="German Daisy"
+                />
+                <FormControlLabel
+                  value={BOARD_LAYOUT_NAMES.BELGIAN_DAISY}
+                  control={<Radio />}
+                  label="Belgian Daisy"
+                />
+              </RadioGroup>
             </ConfigRow>
             <FormLabel component="legend">Game Mode</FormLabel>
             <ConfigRow>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={gameMode === GAME_MODE.VSHUMAN}
-                    onChange={(e) => {
-                      handleGameModeChange(GAME_MODE.VSHUMAN);
-                    }}
-                  />
-                }
-                label="Vs. Human"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={gameMode === GAME_MODE.VSCOMPUTER}
-                    onChange={() => {
-                      handleGameModeChange(GAME_MODE.VSCOMPUTER);
-                    }}
-                  />
-                }
-                label="Vs. Computer"
-              />
+              <RadioGroup row value={gameMode} onChange={handleGameModeChange}>
+                <FormControlLabel value={GAME_MODE.VSHUMAN} control={<Radio />} label="vs. Human" />
+                <FormControlLabel
+                  value={GAME_MODE.VSCOMPUTER}
+                  control={<Radio />}
+                  label="vs. Computer"
+                />
+              </RadioGroup>
             </ConfigRow>
             <FormLabel component="legend">Extra Settings</FormLabel>
             <ConfigRow style={{ justifyContent: 'space-between' }}>
