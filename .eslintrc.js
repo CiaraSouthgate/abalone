@@ -24,13 +24,9 @@ module.exports = {
     'plugin:prettier/recommended' // Make this the last element so prettier config overrides other formatting rules
   ],
   rules: {
-    'prettier/prettier': [
-      'error',
-      {
-        endOfLine: 'auto'
-      },
-      { usePrettierrc: true }
-    ], // Use our .prettierrc file as source
+    'prettier/prettier': ['warn', {
+      endOfLine: "auto"
+    }, { usePrettierrc: true }], // Use our .prettierrc file as source
     'no-unused-vars': 'off'
   }
 };
