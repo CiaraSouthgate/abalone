@@ -1,3 +1,2 @@
-import Game from './Game';
-
-export { Game };
+export * from './Game';
+export * from './ButtonContainer';
