@@ -21,6 +21,7 @@ import {
   Radio,
   RadioGroup
 } from '@material-ui/core';
+import { ButtonContainer } from './ButtonContainer';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -31,11 +32,15 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  flex-direction: column;
 `;
 
 const Board = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const BoardRow = styled.div`
@@ -107,7 +112,7 @@ const ScoreDisplay = styled.th`
   colspan: 0;
 `
 
-const Game = () => {
+export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.STANDARD);
   const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
@@ -195,6 +200,7 @@ const Game = () => {
           </ConfigBody>
         </Paper>
       </ConfigModal>
+      <ButtonContainer />
       <Board>
         {Object.keys(gameState).map((k) => (
           <BoardRow key={k}>
@@ -242,5 +248,3 @@ const Game = () => {
     </Wrapper>
   );
 };
-
-export default Game;
