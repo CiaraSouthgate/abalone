@@ -89,6 +89,10 @@ const ConfigRow = styled.div`
   margin: 10px 0;
 `;
 
+const Scoreboard = styled.table`
+  //stuff?
+`;
+
 const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.STANDARD);
@@ -185,6 +189,9 @@ const Game = () => {
           </BoardRow>
         ))}
       </Board>
+      <Scoreboard>
+        
+      </Scoreboard>
     </Wrapper>
   );
 };
