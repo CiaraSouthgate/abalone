@@ -1,3 +1,13 @@
+# To run:
+
+If yarn is not installed, install yarn: <https://classic.yarnpkg.com/en/docs/install/>
+Navigate to the root directory and run the following commands:
+- yarn
+- yarn start
+
+This will install all necessary packages, start the app on localhost, and open it in the browser.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
