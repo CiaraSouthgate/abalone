@@ -90,7 +90,8 @@ const ConfigRow = styled.div`
 `;
 
 const Scoreboard = styled.div`
-  float: right;
+  position: absolute;
+  right: 20px;
 
   table, th, td {
     border-collapse: collapse;
