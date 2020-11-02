@@ -89,9 +89,22 @@ const ConfigRow = styled.div`
   margin: 10px 0;
 `;
 
-const Scoreboard = styled.table`
-  //stuff?
+const Scoreboard = styled.div`
+  float: right;
+
+  table, th, td {
+    border-collapse: collapse;
+  }
+  th, td {
+    border-bottom: 1px solid black;
+    padding: 5px;
+    text-align: left;
+  }
 `;
+
+const ScoreDisplay = styled.th`
+  colspan: 0;
+`
 
 const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
@@ -101,6 +114,7 @@ const Game = () => {
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
+  const score = 0; // ???
 
   const handleInitBoardLayoutChange = (e) => {
     setInitBoardLayout(parseInt(e.target.value));
@@ -190,7 +204,34 @@ const Game = () => {
         ))}
       </Board>
       <Scoreboard>
-        
+        <tr>
+          <ScoreDisplay>Score: {score}</ScoreDisplay>
+        </tr>
+        <tr>
+          <th>Turn #</th>
+          <th>Player</th>
+          <th>Time</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Player 1</td>
+          <td>0:20</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Player 2</td>
+          <td>0:40</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Player 1</td>
+          <td>1:00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Player 2</td>
+          <td>1:20</td>
+        </tr>
       </Scoreboard>
     </Wrapper>
   );
