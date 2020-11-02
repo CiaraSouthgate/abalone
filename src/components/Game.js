@@ -211,26 +211,31 @@ const Game = () => {
         <tr>
           <th>Turn #</th>
           <th>Player</th>
+          <th>Move</th>
           <th>Time</th>
         </tr>
         <tr>
           <td>1</td>
           <td>Player 1</td>
+          <td>C4-&gt;E4</td>
           <td>0:20</td>
         </tr>
         <tr>
           <td>2</td>
           <td>Player 2</td>
+          <td>C4-&gt;E4</td>
           <td>0:40</td>
         </tr>
         <tr>
           <td>3</td>
           <td>Player 1</td>
+          <td>C4-&gt;E4</td>
           <td>1:00</td>
         </tr>
         <tr>
           <td>4</td>
           <td>Player 2</td>
+          <td>C4-&gt;E4</td>
           <td>1:20</td>
         </tr>
       </Scoreboard>
