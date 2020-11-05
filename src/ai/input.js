@@ -12,15 +12,16 @@ function readInputFile() {
     // read file as text
     reader.readAsText(file);
 
-    // when its done reading print to console.
+    // when its done reading, do the parsing
     reader.onload = function(){
+
         // split into lines
         let lines = reader.result.split('\n');
 
         // starting color is just first line
         let startingColour = lines[0];
 
-        // pass marble coordinates as string into parser and get array of marble coordinates.
+        // pass marble coordinates as string into coordinate parser and get array of marble coordinates.
         let marbleCoordinates = parseCoords(lines[1]);
 
         // results
@@ -37,7 +38,9 @@ function readInputFile() {
 
 // Function to parse coordinates from an inputString of marble coordinates.
 function parseCoords(inputString){
+    // parse all coordinates
     let arrayOfCoords = inputString.split(',');
+    // return coordinates
     return arrayOfCoords;
 }
 
