@@ -1,6 +1,6 @@
+import createInitialState from './state_generator';
 
-
-// handles input of text file to our state generator, passes the file text to 2 parsers.
+// handles input of text file to our state generator
 function readInputFile() {
     // get input tag
     let input = document.getElementById('input');
@@ -27,6 +27,9 @@ function readInputFile() {
         // results
         console.log("Starting colour", startingColour);
         console.log("Coordinates", marbleCoordinates);
+
+        // pass information to the state generator
+        createInitialState(marbleCoordinates);
     }
 
     // catch error
