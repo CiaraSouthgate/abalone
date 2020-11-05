@@ -1,5 +1,5 @@
 import React from 'react';
-import readInputFile from '../ai/input';
+import readInputFile from '../state_generation/input';
 
 export const InputFile = () => {
     return(
