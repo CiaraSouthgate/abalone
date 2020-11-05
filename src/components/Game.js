@@ -8,7 +8,8 @@ import {
   GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
-  BOARD_LAYOUT_NAMES
+  BOARD_LAYOUT_NAMES,
+  DIRECTIONS
 } from '../constants';
 
 import {
@@ -35,12 +36,21 @@ const Wrapper = styled.div`
   flex-direction: column;
 `;
 
-const Board = styled.div`
+const BoardContainer = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+`;
+
+const Board = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: red;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: burlywood;
 `;
 
 const BoardRow = styled.div`
@@ -49,19 +59,35 @@ const BoardRow = styled.div`
 `;
 
 const BoardTile = styled.div`
-  width: ${TILE_WIDTH}px;
-  height: ${TILE_HEIGHT}px;
+  /* width: ${TILE_WIDTH}px;
+  height: ${TILE_HEIGHT}px; */
+  user-select: none;
+  width: 4vw;
+  height: 4vw;
   border-radius: 50%;
-  border: 2px solid black;
+  /* border: 0.1vw solid black; */
   margin: 0px ${MARGIN_SIZE}px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
   font-size: 22px;
+  &:hover {
+    cursor: pointer;
+  }
+  color: ${(props) => {
+    if (props.for === MAX) {
+      return 'white';
+    } else {
+      return 'black';
+    }
+  }};
   background-color: ${(props) => {
+    if (props.selected) {
+      return 'red';
+    }
     if (props.for === EMP) {
-      return 'brown';
+      return '#00000050';
     } else if (props.for === MAX) {
       return 'black';
     } else {
@@ -98,28 +124,30 @@ const Scoreboard = styled.div`
   position: absolute;
   right: 20px;
 
-  table, th, td {
+  table,
+  th,
+  td {
     border-collapse: collapse;
   }
-  th, td {
+  th,
+  td {
     border-bottom: 1px solid black;
     padding: 5px;
     text-align: left;
   }
 `;
 
-const ScoreDisplay = styled.th`
-  colspan: 0;
-`
+const ScoreDisplay = styled.th``;
 
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
-  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.STANDARD);
+  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
   const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
+  const [selectedMarvels, setSelectedMarvels] = React.useState(new Set());
   const score = 0; // ???
 
   const handleInitBoardLayoutChange = (e) => {
@@ -130,6 +158,10 @@ export const Game = () => {
     setGameMode(parseInt(e.target.value));
   };
 
+  React.useEffect(() => {
+    console.log(gameState);
+  }, [gameState]);
+
   const onPlayClick = () => {
     setIsConfigModalShown(false);
     if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
@@ -138,6 +170,161 @@ export const Game = () => {
       setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
     } else {
       setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
+    }
+  };
+
+  const getPosition = (position, direction) => {
+    const k1 = position[0];
+    const k2 = parseInt(position[1]);
+
+    let newk1 = k1;
+    let newk2 = k2;
+    const ascii = k1.charCodeAt(0);
+    let newascii = ascii;
+
+    switch (direction) {
+      case DIRECTIONS.EAST:
+        newk2 = k2 + 1;
+        break;
+      case DIRECTIONS.WEST:
+        newk2 = k2 - 1;
+        break;
+      case DIRECTIONS.NORTH_EAST:
+        newascii = ascii + 1;
+        newk2 = k2 + 1;
+        break;
+      case DIRECTIONS.NORTH_WEST:
+        newascii = ascii + 1;
+        break;
+      case DIRECTIONS.SOUTH_EAST:
+        newascii = ascii - 1;
+        break;
+      case DIRECTIONS.SOUTH_WEST:
+        newascii = ascii - 1;
+        newk2 = k2 - 1;
+        break;
+    }
+    newk1 = String.fromCharCode(newascii);
+    if (newascii > 96 && newascii < 107 && gameState[newk1][newk2] !== undefined) {
+      return `${newk1}${newk2}`;
+    } else {
+      return null;
+    }
+  };
+
+  const getDirection = (position1, position2) => {
+    const pos1K1 = position1[0];
+    const pos1K2 = parseInt(position1[1]);
+    const pos2K1 = position2[0];
+    const pos2K2 = parseInt(position2[1]);
+
+    const k1Diff = pos1K1.charCodeAt(0) - pos2K1.charCodeAt(0);
+    const k2Diff = pos1K2 - pos2K2;
+
+    console.log(k1Diff, k2Diff);
+    if (k1Diff === -1 && k2Diff === 0) {
+      return DIRECTIONS.NORTH_WEST;
+    } else if (k1Diff === -1 && k2Diff === -1) {
+      return DIRECTIONS.NORTH_EAST;
+    } else if (k1Diff === 0 && k2Diff === -1) {
+      return DIRECTIONS.EAST;
+    } else if (k1Diff === 0 && k2Diff === 1) {
+      return DIRECTIONS.WEST;
+    } else if (k1Diff === 1 && k2Diff === 1) {
+      return DIRECTIONS.SOUTH_WEST;
+    } else if (k1Diff === 1 && k2Diff === 0) {
+      return DIRECTIONS.SOUTH_EAST;
+    }
+  };
+
+  const moveMarvel = (position, direction) => {
+    const k1 = position[0];
+    const k2 = parseInt(position[1]);
+
+    if (gameState[k1][k2] === EMP) {
+      return;
+    }
+
+    const newPosition = getPosition(position, direction);
+    console.log(newPosition);
+    const adder = gameState[k1][k2];
+    console.log(adder);
+    if (newPosition) {
+      const newK1 = newPosition[0];
+      const newK2 = parseInt(newPosition[1]);
+      const newGameState = { ...gameState };
+      newGameState[newK1][newK2] += 2;
+      newGameState[k1][k2] -= 2;
+      setGameState(newGameState);
+    }
+  };
+
+  const moveMarvels = (positions, direction) => {
+    const adder = gameState[positions[0][0]][parseInt(positions[0][1])];
+    const newGameState = JSON.parse(JSON.stringify(gameState));
+
+    for (const position of positions) {
+      const k1 = position[0];
+      const k2 = parseInt(position[1]);
+      const newPosition = getPosition(position, direction);
+      if (newPosition) {
+        const newK1 = newPosition[0];
+        const newK2 = parseInt(newPosition[1]);
+
+        if (!selectedMarvels.has(`${newK1}${newK2}`) && gameState[newK1][newK2] === adder) {
+          console.log('not valid move');
+          return;
+        }
+
+        newGameState[newK1][newK2] += adder;
+        newGameState[k1][k2] -= adder;
+      }
+    }
+    setGameState(newGameState);
+  };
+
+  const isNeighbor = (position1, position2) => {
+    return getDirection(position1, position2) !== undefined;
+  };
+
+  const isSame = (position1, position2) => {
+    return (
+      gameState[position1[0]][parseInt(position1[1])] ===
+      gameState[position2[0]][parseInt(position2[1])]
+    );
+  };
+
+  const onMarvelClick = (k1, k2) => {
+    if (gameState[k1][k2] !== EMP) {
+      if (selectedMarvels.has(`${k1}${k2}`)) {
+        setSelectedMarvels(new Set());
+        return;
+      }
+      if (selectedMarvels.size > 0) {
+        console.log(isNeighbor(Array.from(selectedMarvels)[0], `${k1}${k2}`));
+      }
+      // eslint-disable-next-line no-undef
+      const newSelectedMarvels = new Set(selectedMarvels);
+      newSelectedMarvels.add(`${k1}${k2}`);
+      setSelectedMarvels(newSelectedMarvels);
+    } else {
+      if (selectedMarvels.size === 0) {
+        return;
+      }
+      // const dir = getDirection(Array.from(selectedMarvels)[0], `${k1}${k2}`);
+      let dir = undefined;
+      selectedMarvels.forEach((val) => {
+        let temp = getDirection(val, `${k1}${k2}`);
+        if (temp !== undefined) {
+          dir = temp;
+        }
+      });
+      if (dir !== undefined) {
+        // moveMarvel(Array.from(selectedMarvels)[0], dir);
+        moveMarvels(Array.from(selectedMarvels), dir);
+      }
+      // eslint-disable-next-line no-undef
+      setSelectedMarvels(new Set());
     }
   };
 
@@ -201,15 +388,23 @@ export const Game = () => {
         </Paper>
       </ConfigModal>
       <ButtonContainer />
-      <Board>
-        {Object.keys(gameState).map((k) => (
-          <BoardRow key={k}>
-            {Object.keys(gameState[k]).map((k2) => (
-              <BoardTile key={`${k}${k2}`} for={gameState[k][k2]} />
-            ))}
-          </BoardRow>
-        ))}
-      </Board>
+      <BoardContainer>
+        <Board>
+          {Object.keys(gameState).map((k) => (
+            <BoardRow key={k}>
+              {Object.keys(gameState[k]).map((k2) => (
+                <BoardTile
+                  key={`${k}${k2}`}
+                  for={gameState[k][k2]}
+                  selected={selectedMarvels.has(`${k}${k2}`)}
+                  onClick={() => onMarvelClick(k, k2)}>
+                  {`${k}${k2}`}
+                </BoardTile>
+              ))}
+            </BoardRow>
+          ))}
+        </Board>
+      </BoardContainer>
       <Scoreboard>
         <tr>
           <ScoreDisplay>Score: {score}</ScoreDisplay>
