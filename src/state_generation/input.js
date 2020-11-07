@@ -1,4 +1,4 @@
-import createInitialState from './state_generator';
+import {createInitialState} from './state_generator';
 
 // handles input of text file to our state generator
 function readInputFile() {
@@ -29,7 +29,8 @@ function readInputFile() {
         console.log("Coordinates", marbleCoordinates);
 
         // pass information to the state generator
-        createInitialState(marbleCoordinates);
+        let state = createInitialState(marbleCoordinates);
+        console.log(state);
     }
 
     // catch error
