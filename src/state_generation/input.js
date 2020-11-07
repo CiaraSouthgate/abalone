@@ -29,8 +29,10 @@ function readInputFile() {
         console.log("Coordinates", marbleCoordinates);
 
         // pass information to the state generator
-        let state = createInitialState(marbleCoordinates);
-        console.log(state);
+        let initialState = createInitialState(marbleCoordinates);
+
+        // pass initial state to the move generator
+        console.log(initialState);
     }
 
     // catch error
