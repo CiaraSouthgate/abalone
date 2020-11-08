@@ -43,11 +43,13 @@ export function generateMoves(startingColour, marbleCoords, initialState){
   let state = initialState;
   // get coordinates of only the marbles we will be moving
   let single_marbles = getCoordinatesUsingColour(startingColour, marbleCoords);
+  console.log(single_marbles);
   // generate a list of duoing neighbour marbles
   let duo_marbles = getMarblePairs(single_marbles, state);
+  console.log(duo_marbles);
   // generate a list of trio neighbour marbles
-  // let trio_marbles = getMarbleTrios(single_marbles, state);
-
+  let trio_marbles = getMarbleTrios(duo_marbles, state);
+  console.log(trio_marbles);
   // Go through each list of marbles and check and generate moves for each one.
   
 
@@ -57,21 +59,121 @@ export function generateMoves(startingColour, marbleCoords, initialState){
 function getMarblePairs(coordinates, state) {
   let duo_marbles = [];
   for (let i = 0; i < coordinates.length; i++){
-    let marble = coordinates[i];
-    
+    let thisMarble = coordinates[i];
+    let neighbours = getNeighbours(thisMarble, state);
+    for (let k = 0; k < neighbours.length; k++){
+      if (thisMarble[2] == neighbours[k][2]){
+        duo_marbles.push(thisMarble.toLowerCase() + neighbours[k]);
+      }
+    }
   }
+  return duo_marbles;
 }
 
 // This function returns a list of trio marble neighbours
-function getMarbleTrios(coordinates, state){
-
+function getMarbleTrios(duo_coordinates, state){
+  let trio_marbles = [];
+  for (let i = 0; i < duo_coordinates.length; i++){
+    let marble_letter = duo_coordinates[i][3].charCodeAt(0) - duo_coordinates[i][0].charCodeAt(0);
+    let marble_num = duo_coordinates[i][4] - duo_coordinates[i][1];
+    let x = duo_coordinates[i][3].charCodeAt(0)+marble_letter;
+    let y = parseInt(duo_coordinates[i][4])+marble_num;
+    if (String.fromCharCode(x).search(/[^a-i\s]/) != -1 || y > 9 || y < 1){
+      continue;
+    }
+    let marble_colour = getColourFromCoordinate(
+      String.fromCharCode(x),
+      y,
+      state);
+    if (marble_colour == duo_coordinates[i][2]){
+      trio_marbles.push(duo_coordinates[i]+String.fromCharCode(x)+y+marble_colour);
+    }
+  }
+  return trio_marbles;
 }
 
-// This function returns a list of neighbours.
+// This function returns a list of neighbours
 function getNeighbours(coord, state){
-  let letter = coord[0].toLowerCase();
-  let num = coord[1];
-  
+  let letter = coord[0].toLowerCase().charCodeAt(0);
+  let num = parseInt(coord[1]);
+  let neighbours = [];
+  try {
+    let tempLetter = String.fromCharCode(letter-1);
+    let tempNum = num - 1;
+    if (state[tempLetter][tempNum] == undefined) {
+      throw Error();
+    };
+    let colour = getColourFromCoordinate(tempLetter, tempNum, state);
+    neighbours.push(tempLetter+tempNum+colour);
+  } catch (err) {
+    console.log();
+  }
+  try {
+    let tempLetter = String.fromCharCode(letter);
+    let tempNum = num-1;
+    if (state[tempLetter][tempNum] == undefined) {
+      throw Error();
+    };
+    let colour = getColourFromCoordinate(tempLetter, tempNum, state);
+    neighbours.push(tempLetter+tempNum+colour);
+  } catch(err) {
+    console.log();
+  }
+  try {
+    let tempLetter = String.fromCharCode(letter);
+    let tempNum = num+1;
+    if (state[tempLetter][tempNum] == undefined) {
+      throw Error();
+    };
+    let colour = getColourFromCoordinate(tempLetter, tempNum, state);
+    neighbours.push(tempLetter+tempNum+colour);
+  } catch(err) {
+    console.log();
+  }
+  try {
+    let tempLetter = String.fromCharCode(letter+1);
+    let tempNum = num;
+    if (state[tempLetter][tempNum] == undefined) {
+      throw Error();
+    };
+    let colour = getColourFromCoordinate(tempLetter, tempNum, state);
+    neighbours.push(tempLetter+tempNum+colour);
+  } catch(err) {
+    console.log();
+  }
+  try {
+    let tempLetter = String.fromCharCode(letter+1);
+    let tempNum = num+1;
+    if (state[tempLetter][tempNum] == undefined) {
+      throw Error();
+    };
+    let colour = getColourFromCoordinate(tempLetter, tempNum, state);
+    neighbours.push(tempLetter+tempNum+colour);
+  } catch(err) {
+    console.log();
+  }
+  try {
+    let tempLetter = String.fromCharCode(letter-1);
+    let tempNum = num;
+    if (state[tempLetter][tempNum] == undefined) {
+      throw Error();
+    };
+    let colour = getColourFromCoordinate(tempLetter, tempNum, state);
+    neighbours.push(tempLetter+tempNum+colour);
+  } catch(err) {
+    console.log();
+  }
+  return neighbours;
+}
+
+function getColourFromCoordinate(letter, num, state) {
+  if (state[letter][num] == 2) {
+    return "w";
+  } else if (state[letter][num] == 1) {
+    return "b";
+  } else {
+    return "emp";
+  };
 }
 
 // This function returns a list of coordinates for only the marbles that match the startingColour
