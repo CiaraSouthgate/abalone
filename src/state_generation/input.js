@@ -1,4 +1,5 @@
 import {createInitialState} from './state_generator';
+import {generateMoves} from './state_generator';
 
 // handles input of text file to our state generator
 function readInputFile() {
@@ -24,15 +25,12 @@ function readInputFile() {
         // pass marble coordinates as string into coordinate parser and get array of marble coordinates.
         let marbleCoordinates = parseCoords(lines[1]);
 
-        // results
-        console.log("Starting colour", startingColour);
-        console.log("Coordinates", marbleCoordinates);
-
         // pass information to the state generator
         let initialState = createInitialState(marbleCoordinates);
 
-        // pass initial state to the move generator
-        console.log(initialState);
+        // pass info to move generator
+        let moves = generateMoves(startingColour, marbleCoordinates, initialState);
+        
     }
 
     // catch error
