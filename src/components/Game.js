@@ -287,24 +287,61 @@ export const Game = () => {
     return getDirection(position1, position2) !== undefined;
   };
 
-  const isSame = (position1, position2) => {
+  const isFriendly = (position1, position2) => {
     return (
       gameState[position1[0]][parseInt(position1[1])] ===
       gameState[position2[0]][parseInt(position2[1])]
     );
   };
 
+  const getMarvelPositionBetween = (position1, position2) => {
+    const pos1K1 = position1[0].charCodeAt(0);
+    const pos1K2 = parseInt(position1[1]);
+    const pos2K1 = position2[0].charCodeAt(0);
+    const pos2K2 = parseInt(position2[1]);
+
+    if (Math.abs(pos1K1 - pos2K1) === 2) {
+      if (pos1K2 > pos2K2) {
+        return `${String.fromCharCode(pos1K1 - 1)}${pos1K2 - 1}`;
+      } else if (pos1K2 < pos2K2) {
+        return `${String.fromCharCode(pos2K1 - 1)}${pos2K2 - 1}`;
+      } else if (pos1K2 === pos2K2 && pos1K1 > pos2K1) {
+        return `${String.fromCharCode(pos1K1 - 1)}${pos1K2}`;
+      } else if (pos1K2 === pos2K2 && pos2K1 > pos1K1) {
+        return `${String.fromCharCode(pos2K1 - 1)}${pos1K2}`;
+      }
+    } else if (pos1K1 === pos2K1) {
+      if (pos1K2 > pos2K2) {
+        return `${position1[0]}${pos1K2 - 1}`;
+      } else if (pos1K2 < pos2K2) {
+        return `${position1[0]}${pos2K2 - 1}`;
+      }
+    }
+    return null;
+  };
+
   const onMarvelClick = (k1, k2) => {
     if (gameState[k1][k2] !== EMP) {
+      if (selectedMarvels.size > 1) {
+        setSelectedMarvels(new Set());
+        return;
+      }
       if (selectedMarvels.has(`${k1}${k2}`)) {
         setSelectedMarvels(new Set());
         return;
       }
-      if (selectedMarvels.size > 0) {
-        console.log(isNeighbor(Array.from(selectedMarvels)[0], `${k1}${k2}`));
+      const newSelectedMarvels = new Set(selectedMarvels);
+      if (selectedMarvels.size === 1) {
+        // console.log(isNeighbor(Array.from(selectedMarvels)[0], `${k1}${k2}`));
+        // console.log(getMarvelPositionBetween(Array.from(selectedMarvels)[0], `${k1}${k2}`));
+        const selectedMarvel = Array.from(selectedMarvels)[0];
+        const posBetween = getMarvelPositionBetween(selectedMarvel, `${k1}${k2}`);
+        if (posBetween !== null && isFriendly(selectedMarvel, posBetween)) {
+          newSelectedMarvels.add(posBetween);
+        }
       }
       // eslint-disable-next-line no-undef
-      const newSelectedMarvels = new Set(selectedMarvels);
+
       newSelectedMarvels.add(`${k1}${k2}`);
       setSelectedMarvels(newSelectedMarvels);
     } else {
@@ -327,6 +364,8 @@ export const Game = () => {
       setSelectedMarvels(new Set());
     }
   };
+
+  const getOpponentsNeighbors = (position, direction) => {};
 
   return (
     <Wrapper>
