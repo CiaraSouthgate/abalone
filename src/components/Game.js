@@ -6,7 +6,7 @@ import {
   WHT,
   EMP,
   BOARD_LAYOUTS,
-  MARVEL_COLORS,
+  MARBEL_COLORS,
   GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
@@ -145,12 +145,12 @@ export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
   const [turn, setTurn] = React.useState(BLK);
-  const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
+  const [playerColor] = React.useState(MARBEL_COLORS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
-  const [timeLimitInWHTutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
+  const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
-  const [selectedMarvels, setSelectedMarvels] = React.useState(new Set());
+  const [selectedMarbels, setselectedMarbels] = React.useState(new Set());
   const score = 0; // ???
 
   const handleInitBoardLayoutChange = (e) => {
@@ -177,24 +177,24 @@ export const Game = () => {
   };
 
   const getPosition = (position, direction) => {
-    const k1 = position[0];
-    const k2 = parseInt(position[1]);
+    const row = position[0];
+    const col = parseInt(position[1]);
 
-    let newk1 = k1;
-    let newk2 = k2;
-    const ascii = k1.charCodeAt(0);
+    let newrow = row;
+    let newcol = col;
+    const ascii = row.charCodeAt(0);
     let newascii = ascii;
 
     switch (direction) {
       case DIRECTIONS.EAST:
-        newk2 = k2 + 1;
+        newcol = col + 1;
         break;
       case DIRECTIONS.WEST:
-        newk2 = k2 - 1;
+        newcol = col - 1;
         break;
       case DIRECTIONS.NORTH_EAST:
         newascii = ascii + 1;
-        newk2 = k2 + 1;
+        newcol = col + 1;
         break;
       case DIRECTIONS.NORTH_WEST:
         newascii = ascii + 1;
@@ -204,61 +204,61 @@ export const Game = () => {
         break;
       case DIRECTIONS.SOUTH_WEST:
         newascii = ascii - 1;
-        newk2 = k2 - 1;
+        newcol = col - 1;
         break;
     }
-    newk1 = String.fromCharCode(newascii);
-    if (newascii > 96 && newascii < 107 && gameState[newk1][newk2] !== undefined) {
-      return `${newk1}${newk2}`;
+    newrow = String.fromCharCode(newascii);
+    if (newascii > 96 && newascii < 107 && gameState[newrow][newcol] !== undefined) {
+      return `${newrow}${newcol}`;
     } else {
       return null;
     }
   };
 
   const getDirection = (position1, position2) => {
-    const pos1K1 = position1[0];
-    const pos1K2 = parseInt(position1[1]);
-    const pos2K1 = position2[0];
-    const pos2K2 = parseInt(position2[1]);
+    const pos1row = position1[0];
+    const pos1col = parseInt(position1[1]);
+    const pos2row = position2[0];
+    const pos2col = parseInt(position2[1]);
 
-    const k1Diff = pos1K1.charCodeAt(0) - pos2K1.charCodeAt(0);
-    const k2Diff = pos1K2 - pos2K2;
+    const rowDiff = pos1row.charCodeAt(0) - pos2row.charCodeAt(0);
+    const colDiff = pos1col - pos2col;
 
-    console.log(k1Diff, k2Diff);
-    if (k1Diff === -1 && k2Diff === 0) {
+    console.log(rowDiff, colDiff);
+    if (rowDiff === -1 && colDiff === 0) {
       return DIRECTIONS.NORTH_WEST;
-    } else if (k1Diff === -1 && k2Diff === -1) {
+    } else if (rowDiff === -1 && colDiff === -1) {
       return DIRECTIONS.NORTH_EAST;
-    } else if (k1Diff === 0 && k2Diff === -1) {
+    } else if (rowDiff === 0 && colDiff === -1) {
       return DIRECTIONS.EAST;
-    } else if (k1Diff === 0 && k2Diff === 1) {
+    } else if (rowDiff === 0 && colDiff === 1) {
       return DIRECTIONS.WEST;
-    } else if (k1Diff === 1 && k2Diff === 1) {
+    } else if (rowDiff === 1 && colDiff === 1) {
       return DIRECTIONS.SOUTH_WEST;
-    } else if (k1Diff === 1 && k2Diff === 0) {
+    } else if (rowDiff === 1 && colDiff === 0) {
       return DIRECTIONS.SOUTH_EAST;
     }
   };
 
-  const moveMarvels = (positions, direction) => {
+  const moveMarbels = (positions, direction) => {
     const adder = gameState[positions[0][0]][parseInt(positions[0][1])];
     const newGameState = JSON.parse(JSON.stringify(gameState));
 
     for (const position of positions) {
-      const k1 = position[0];
-      const k2 = parseInt(position[1]);
+      const row = position[0];
+      const col = parseInt(position[1]);
       const newPosition = getPosition(position, direction);
       if (newPosition) {
-        const newK1 = newPosition[0];
-        const newK2 = parseInt(newPosition[1]);
+        const newrow = newPosition[0];
+        const newcol = parseInt(newPosition[1]);
 
-        if (!selectedMarvels.has(`${newK1}${newK2}`) && gameState[newK1][newK2] === adder) {
+        if (!selectedMarbels.has(`${newrow}${newcol}`) && gameState[newrow][newcol] === adder) {
           console.log('not valid move');
           return;
         }
 
-        newGameState[newK1][newK2] += adder;
-        newGameState[k1][k2] -= adder;
+        newGameState[newrow][newcol] += adder;
+        newGameState[row][col] -= adder;
       }
     }
     setGameState(newGameState);
@@ -275,82 +275,82 @@ export const Game = () => {
     );
   };
 
-  const getMarvelPositionBetween = (position1, position2) => {
-    const pos1K1 = position1[0].charCodeAt(0);
-    const pos1K2 = parseInt(position1[1]);
-    const pos2K1 = position2[0].charCodeAt(0);
-    const pos2K2 = parseInt(position2[1]);
+  const getMarbelPositionBetween = (position1, position2) => {
+    const pos1row = position1[0].charCodeAt(0);
+    const pos1col = parseInt(position1[1]);
+    const pos2row = position2[0].charCodeAt(0);
+    const pos2col = parseInt(position2[1]);
 
-    if (Math.abs(pos1K1 - pos2K1) === 2) {
-      if (pos1K2 > pos2K2 && pos1K2 - pos2K2 === 2) {
-        return `${String.fromCharCode(pos1K1 - 1)}${pos1K2 - 1}`;
-      } else if (pos1K2 < pos2K2 && pos2K2 - pos1K2 === 2) {
-        return `${String.fromCharCode(pos2K1 - 1)}${pos2K2 - 1}`;
-      } else if (pos1K2 === pos2K2 && pos1K1 > pos2K1) {
-        return `${String.fromCharCode(pos1K1 - 1)}${pos1K2}`;
-      } else if (pos1K2 === pos2K2 && pos2K1 > pos1K1) {
-        return `${String.fromCharCode(pos2K1 - 1)}${pos1K2}`;
+    if (Math.abs(pos1row - pos2row) === 2) {
+      if (pos1col > pos2col && pos1col - pos2col === 2) {
+        return `${String.fromCharCode(pos1row - 1)}${pos1col - 1}`;
+      } else if (pos1col < pos2col && pos2col - pos1col === 2) {
+        return `${String.fromCharCode(pos2row - 1)}${pos2col - 1}`;
+      } else if (pos1col === pos2col && pos1row > pos2row) {
+        return `${String.fromCharCode(pos1row - 1)}${pos1col}`;
+      } else if (pos1col === pos2col && pos2row > pos1row) {
+        return `${String.fromCharCode(pos2row - 1)}${pos1col}`;
       }
-    } else if (pos1K1 === pos2K1) {
-      if (pos1K2 > pos2K2 && pos1K2 - pos2K2 === 2) {
-        return `${position1[0]}${pos1K2 - 1}`;
-      } else if (pos1K2 < pos2K2 && pos2K2 - pos1K2 === 2) {
-        return `${position1[0]}${pos2K2 - 1}`;
+    } else if (pos1row === pos2row) {
+      if (pos1col > pos2col && pos1col - pos2col === 2) {
+        return `${position1[0]}${pos1col - 1}`;
+      } else if (pos1col < pos2col && pos2col - pos1col === 2) {
+        return `${position1[0]}${pos2col - 1}`;
       }
     }
     return null;
   };
 
-  const onMarvelClick = (k1, k2) => {
-    if (gameState[k1][k2] !== EMP) {
-      // Push opponent marvel logic
-      if (gameState[k1][k2] !== turn) {
-        // Calculate the number of selected marvel
-        console.log(Array.from(selectedMarvels).length);
+  const onMarbelClick = (row, col) => {
+    if (gameState[row][col] !== EMP) {
+      // Push opponent marbel logic
+      if (gameState[row][col] !== turn) {
+        // Calculate the number of selected marbel
+        console.log(Array.from(selectedMarbels).length);
         return;
       }
-      if (selectedMarvels.size > 1) {
-        setSelectedMarvels(new Set());
+      if (selectedMarbels.size > 1) {
+        setselectedMarbels(new Set());
         return;
       }
-      if (selectedMarvels.has(`${k1}${k2}`)) {
-        setSelectedMarvels(new Set());
+      if (selectedMarbels.has(`${row}${col}`)) {
+        setselectedMarbels(new Set());
         return;
       }
-      const newSelectedMarvels = new Set(selectedMarvels);
-      if (selectedMarvels.size === 1) {
-        const selectedMarvel = Array.from(selectedMarvels)[0];
-        const posBetween = getMarvelPositionBetween(selectedMarvel, `${k1}${k2}`);
-        if (posBetween !== null && isFriendly(selectedMarvel, posBetween)) {
-          newSelectedMarvels.add(posBetween);
-        } else if (!isNeighbor(Array.from(selectedMarvels)[0], `${k1}${k2}`)) {
-          setSelectedMarvels(new Set([`${k1}${k2}`]));
+      const newselectedMarbels = new Set(selectedMarbels);
+      if (selectedMarbels.size === 1) {
+        const selectedMarbel = Array.from(selectedMarbels)[0];
+        const posBetween = getMarbelPositionBetween(selectedMarbel, `${row}${col}`);
+        if (posBetween !== null && isFriendly(selectedMarbel, posBetween)) {
+          newselectedMarbels.add(posBetween);
+        } else if (!isNeighbor(Array.from(selectedMarbels)[0], `${row}${col}`)) {
+          setselectedMarbels(new Set([`${row}${col}`]));
           return;
         }
       }
-      newSelectedMarvels.add(`${k1}${k2}`);
-      setSelectedMarvels(newSelectedMarvels);
+      newselectedMarbels.add(`${row}${col}`);
+      setselectedMarbels(newselectedMarbels);
     } else {
-      if (selectedMarvels.size === 0) {
+      if (selectedMarbels.size === 0) {
         return;
       }
       let dir = undefined;
-      selectedMarvels.forEach((val) => {
-        let temp = getDirection(val, `${k1}${k2}`);
+      selectedMarbels.forEach((val) => {
+        let temp = getDirection(val, `${row}${col}`);
         if (temp !== undefined) {
           dir = temp;
         }
       });
       if (dir !== undefined) {
-        moveMarvels(Array.from(selectedMarvels), dir);
+        moveMarbels(Array.from(selectedMarbels), dir);
       }
-      setSelectedMarvels(new Set());
+      setselectedMarbels(new Set());
       setTurn(turn === BLK ? WHT : BLK);
     }
   };
 
-  const onMarvelHover = (k1, k2) => {
-    console.log(k1, k2);
+  const onMarbelHover = (row, col) => {
+    console.log(row, col);
   };
 
   const getOpponentsNeighbors = (position, direction) => {};
@@ -419,14 +419,14 @@ export const Game = () => {
         <Board>
           {Object.keys(gameState).map((k) => (
             <BoardRow key={k}>
-              {Object.keys(gameState[k]).map((k2) => (
+              {Object.keys(gameState[k]).map((col) => (
                 <BoardTile
-                  key={`${k}${k2}`}
-                  for={gameState[k][k2]}
-                  selected={selectedMarvels.has(`${k}${k2}`)}
-                  onClick={() => onMarvelClick(k, k2)}
-                  onMouseEnter={() => onMarvelHover(k, k2)}>
-                  {`${k}${k2}`}
+                  key={`${k}${col}`}
+                  for={gameState[k][col]}
+                  selected={selectedMarbels.has(`${k}${col}`)}
+                  onClick={() => onMarbelClick(k, col)}
+                  onMouseEnter={() => onMarbelHover(k, col)}>
+                  {`${k}${col}`}
                 </BoardTile>
               ))}
             </BoardRow>
