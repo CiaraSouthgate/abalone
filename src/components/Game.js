@@ -2,6 +2,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
+  MIN,
   MAX,
   EMP,
   BOARD_LAYOUTS,
@@ -143,6 +144,7 @@ const ScoreDisplay = styled.th``;
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
+  const [turn, setTurn] = React.useState(MAX);
   const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
@@ -238,28 +240,6 @@ export const Game = () => {
     }
   };
 
-  const moveMarvel = (position, direction) => {
-    const k1 = position[0];
-    const k2 = parseInt(position[1]);
-
-    if (gameState[k1][k2] === EMP) {
-      return;
-    }
-
-    const newPosition = getPosition(position, direction);
-    console.log(newPosition);
-    const adder = gameState[k1][k2];
-    console.log(adder);
-    if (newPosition) {
-      const newK1 = newPosition[0];
-      const newK2 = parseInt(newPosition[1]);
-      const newGameState = { ...gameState };
-      newGameState[newK1][newK2] += 2;
-      newGameState[k1][k2] -= 2;
-      setGameState(newGameState);
-    }
-  };
-
   const moveMarvels = (positions, direction) => {
     const adder = gameState[positions[0][0]][parseInt(positions[0][1])];
     const newGameState = JSON.parse(JSON.stringify(gameState));
@@ -314,7 +294,7 @@ export const Game = () => {
     } else if (pos1K1 === pos2K1) {
       if (pos1K2 > pos2K2 && pos1K2 - pos2K2 === 2) {
         return `${position1[0]}${pos1K2 - 1}`;
-      } else if (pos1K2 < pos2K2 && pos1K1 > pos2K1) {
+      } else if (pos1K2 < pos2K2 && pos2K2 - pos1K2 === 2) {
         return `${position1[0]}${pos2K2 - 1}`;
       }
     }
@@ -323,6 +303,12 @@ export const Game = () => {
 
   const onMarvelClick = (k1, k2) => {
     if (gameState[k1][k2] !== EMP) {
+      // Push opponent marvel logic
+      if (gameState[k1][k2] !== turn) {
+        // Calculate the number of selected marvel
+        console.log(Array.from(selectedMarvels).length);
+        return;
+      }
       if (selectedMarvels.size > 1) {
         setSelectedMarvels(new Set());
         return;
@@ -359,6 +345,7 @@ export const Game = () => {
         moveMarvels(Array.from(selectedMarvels), dir);
       }
       setSelectedMarvels(new Set());
+      setTurn(turn === MAX ? MIN : MAX);
     }
   };
 
