@@ -2,8 +2,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
-  MIN,
-  MAX,
+  BLK,
+  WHT,
   EMP,
   BOARD_LAYOUTS,
   MARVEL_COLORS,
@@ -78,7 +78,7 @@ const BoardTile = styled.div`
     cursor: pointer;
   }
   color: ${(props) => {
-    if (props.for === MAX) {
+    if (props.for === BLK) {
       return 'white';
     } else {
       return 'black';
@@ -90,7 +90,7 @@ const BoardTile = styled.div`
     }
     if (props.for === EMP) {
       return '#00000050';
-    } else if (props.for === MAX) {
+    } else if (props.for === BLK) {
       return 'black';
     } else {
       return 'white';
@@ -144,11 +144,11 @@ const ScoreDisplay = styled.th``;
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
-  const [turn, setTurn] = React.useState(MAX);
+  const [turn, setTurn] = React.useState(BLK);
   const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
-  const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
+  const [timeLimitInWHTutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarvels, setSelectedMarvels] = React.useState(new Set());
   const score = 0; // ???
@@ -345,7 +345,7 @@ export const Game = () => {
         moveMarvels(Array.from(selectedMarvels), dir);
       }
       setSelectedMarvels(new Set());
-      setTurn(turn === MAX ? MIN : MAX);
+      setTurn(turn === BLK ? WHT : BLK);
     }
   };
 
@@ -400,7 +400,7 @@ export const Game = () => {
             <ConfigRow style={{ justifyContent: 'space-between' }}>
               <TextField label="Move Limit" variant="filled" size="small" defaultValue={50} />
               <TextField
-                label="Time Limit (in minutes)"
+                label="Time Limit (in WHTutes)"
                 variant="filled"
                 size="small"
                 defaultValue={15}
