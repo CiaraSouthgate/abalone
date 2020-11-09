@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React from 'react';
 import styled from 'styled-components';
 import {
@@ -301,9 +302,9 @@ export const Game = () => {
     const pos2K2 = parseInt(position2[1]);
 
     if (Math.abs(pos1K1 - pos2K1) === 2) {
-      if (pos1K2 > pos2K2) {
+      if (pos1K2 > pos2K2 && pos1K2 - pos2K2 === 2) {
         return `${String.fromCharCode(pos1K1 - 1)}${pos1K2 - 1}`;
-      } else if (pos1K2 < pos2K2) {
+      } else if (pos1K2 < pos2K2 && pos2K2 - pos1K2 === 2) {
         return `${String.fromCharCode(pos2K1 - 1)}${pos2K2 - 1}`;
       } else if (pos1K2 === pos2K2 && pos1K1 > pos2K1) {
         return `${String.fromCharCode(pos1K1 - 1)}${pos1K2}`;
@@ -332,23 +333,21 @@ export const Game = () => {
       }
       const newSelectedMarvels = new Set(selectedMarvels);
       if (selectedMarvels.size === 1) {
-        // console.log(isNeighbor(Array.from(selectedMarvels)[0], `${k1}${k2}`));
-        // console.log(getMarvelPositionBetween(Array.from(selectedMarvels)[0], `${k1}${k2}`));
         const selectedMarvel = Array.from(selectedMarvels)[0];
         const posBetween = getMarvelPositionBetween(selectedMarvel, `${k1}${k2}`);
         if (posBetween !== null && isFriendly(selectedMarvel, posBetween)) {
           newSelectedMarvels.add(posBetween);
+        } else if (!isNeighbor(Array.from(selectedMarvels)[0], `${k1}${k2}`)) {
+          setSelectedMarvels(new Set([`${k1}${k2}`]));
+          return;
         }
       }
-      // eslint-disable-next-line no-undef
-
       newSelectedMarvels.add(`${k1}${k2}`);
       setSelectedMarvels(newSelectedMarvels);
     } else {
       if (selectedMarvels.size === 0) {
         return;
       }
-      // const dir = getDirection(Array.from(selectedMarvels)[0], `${k1}${k2}`);
       let dir = undefined;
       selectedMarvels.forEach((val) => {
         let temp = getDirection(val, `${k1}${k2}`);
@@ -357,12 +356,14 @@ export const Game = () => {
         }
       });
       if (dir !== undefined) {
-        // moveMarvel(Array.from(selectedMarvels)[0], dir);
         moveMarvels(Array.from(selectedMarvels), dir);
       }
-      // eslint-disable-next-line no-undef
       setSelectedMarvels(new Set());
     }
+  };
+
+  const onMarvelHover = (k1, k2) => {
+    console.log(k1, k2);
   };
 
   const getOpponentsNeighbors = (position, direction) => {};
@@ -436,7 +437,8 @@ export const Game = () => {
                   key={`${k}${k2}`}
                   for={gameState[k][k2]}
                   selected={selectedMarvels.has(`${k}${k2}`)}
-                  onClick={() => onMarvelClick(k, k2)}>
+                  onClick={() => onMarvelClick(k, k2)}
+                  onMouseEnter={() => onMarvelHover(k, k2)}>
                   {`${k}${k2}`}
                 </BoardTile>
               ))}
