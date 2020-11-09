@@ -312,9 +312,9 @@ export const Game = () => {
         return `${String.fromCharCode(pos2K1 - 1)}${pos1K2}`;
       }
     } else if (pos1K1 === pos2K1) {
-      if (pos1K2 > pos2K2) {
+      if (pos1K2 > pos2K2 && pos1K2 - pos2K2 === 2) {
         return `${position1[0]}${pos1K2 - 1}`;
-      } else if (pos1K2 < pos2K2) {
+      } else if (pos1K2 < pos2K2 && pos1K1 > pos2K1) {
         return `${position1[0]}${pos2K2 - 1}`;
       }
     }
