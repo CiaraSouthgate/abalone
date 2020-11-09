@@ -51,7 +51,8 @@ export function generateMoves(startingColour, marbleCoords, initialState){
   let single_marble_moves = getSingleMarbleMoves(single_marbles, state);
   console.log(single_marble_moves);
 
-  // let double_marble_moves = getDoubleMarbleMoves();
+  let double_marble_moves = getDoubleMarbleMoves(duo_marbles, state);
+  console.log(double_marble_moves);
 
   // let triple_marble_moves = getTripleMarbleMoves();
 
@@ -84,7 +85,6 @@ function getDirection(pos1, pos2){
   let pos1K2 = parseInt(pos1[1]);
   let pos2K1 = pos2[0];
   let pos2K2 = parseInt(pos2[1]);
-
   const k1Diff = pos1K1.charCodeAt(0) - pos2K1.charCodeAt(0);
   const k2Diff = pos1K2 - pos2K2;
   if (k1Diff === -1 && k2Diff === 0) {
@@ -96,25 +96,198 @@ function getDirection(pos1, pos2){
   } else if (k1Diff === 0 && k2Diff === 1) {
       return "W";
   } else if (k1Diff === 1 && k2Diff === 1) {
-      return "SW";
+      return "SW";  
   } else if (k1Diff === 1 && k2Diff === 0) {
       return "SE";
   }
+  return "Invalid";
 }
 
 // This function will go through each pair of marbles and return all the possible moves as an array of strings.
 // coordinates is the coordinates of all marble pairs on the given state
 // state is the state where we will be finding the legal moves
 function getDoubleMarbleMoves(coordinates, state){
-  
-  return '';
+  let moves = [];
+  console.log(coordinates);
+  for (let i = 0; i < coordinates.length; i++) {
+    let marble1 = coordinates[i].substr(0,3);
+    let marble2 = coordinates[i].substr(3,3);
+    let x1 = getNeighbours(marble1, state);
+    let x2 = getNeighbours(marble2, state);
+    let neighbours = mergeNoDuplicates(x1, x2);
+    neighbours.splice(neighbours.indexOf(x1));
+    neighbours.splice(neighbours.indexOf(x2));
+    
+    // all directions
+    let directions = ["E", "W", "SW", "SE", "NW", "NE"];
+    // inline directions
+    let dir1 = getDirection(marble1, marble2);
+    let dir2 = getDirection(marble2, marble1);
+
+    // Check the inline directions for inline moves.
+    let inline_moves = getInlineMovesForPairs(dir1, dir2, marble1, marble2, state);
+    console.log(inline_moves);
+    
+    // for (let k = 0; k < neighbours.length;k++){
+      
+    // }
+
+  }
+  return moves;
 }
+
+function getNeighbourInDirection(direction, coordinate, state){
+  if(direction == "E"){
+    let num = parseInt(coordinate[1])+1;
+    let letter = coordinate[0];
+    return state[letter][num];
+  }else if(direction == "W") {
+    let num = parseInt(coordinate[1])-1;
+    let letter = coordinate[0];
+    return state[letter][num];
+  }else if(direction == "SW"){
+    let num = parseInt(coordinate[1])-1;
+    let letter = coordinate[0];
+    letter = String.fromCharCode(letter.charCodeAt(0) - 1);
+    return state[letter][num];
+  }else if(direction == "SE"){
+    let num = parseInt(coordinate[1]);
+    let letter = coordinate[0];
+    letter = String.fromCharCode(letter.charCodeAt(0) - 1);
+    return state[letter][num];
+  }else if(direction == "NW"){
+    let num = parseInt(coordinate[1]);
+    let letter = coordinate[0];
+    letter = String.fromCharCode(letter.charCodeAt(0) + 1);
+    return state[letter][num];
+  }else if(direction == "NE"){
+    let num = parseInt(coordinate[1])+1;
+    let letter = coordinate[0];
+    letter = String.fromCharCode(letter.charCodeAt(0) + 1);
+    return state[letter][num];
+  }
+return "invalid direction";
+}
+
+function getCoordinateByDirection(coordinate, direction, state){
+  if(direction == "E"){
+    let num = parseInt(coordinate[1])+1;
+    let letter = coordinate[0];
+    let colour = getColourFromCoordinate(letter, num, state);
+    return `${letter}${num}${colour}`;
+  }else if(direction == "W") {
+    let num = parseInt(coordinate[1])-1;
+    let letter = coordinate[0];
+    let colour = getColourFromCoordinate(letter, num, state);
+    return `${letter}${num}${colour}`;
+  }else if(direction == "SW"){
+    let num = parseInt(coordinate[1])-1;
+    let letter = coordinate[0];
+    letter = String.fromCharCode(letter.charCodeAt(0) - 1);
+    let colour = getColourFromCoordinate(letter, num, state);
+    return `${letter}${num}${colour}`;
+  }else if(direction == "SE"){
+    let num = parseInt(coordinate[1]);
+    let letter = coordinate[0];
+    letter = String.fromCharCode(letter.charCodeAt(0) - 1);
+    let colour = getColourFromCoordinate(letter, num, state);
+    return `${letter}${num}${colour}`;
+  }else if(direction == "NW"){
+    let num = parseInt(coordinate[1]);
+    let letter = coordinate[0];
+    letter = String.fromCharCode(letter.charCodeAt(0) + 1);
+    let colour = getColourFromCoordinate(letter, num, state);
+    return `${letter}${num}${colour}`;
+  }else if(direction == "NE"){
+    let num = parseInt(coordinate[1])+1;
+    let letter = coordinate[0];
+    letter = String.fromCharCode(letter.charCodeAt(0) + 1);
+    let colour = getColourFromCoordinate(letter, num, state);
+    return `${letter}${num}${colour}`;
+  }
+}
+
+function getInlineMovesForPairs(dir1, dir2, marble1, marble2, state){
+  let moves = [];
+  let val1 = getNeighbourInDirection(dir1, marble1, state);
+  let val2 = getNeighbourInDirection(dir1, marble2, state);
+  let val3 = getNeighbourInDirection(dir2, marble1, state);
+  let val4 = getNeighbourInDirection(dir2, marble2, state);
+  let letter1 = marble1[0]
+  let num1 = marble1[1]
+  let letter2 = marble2[0]
+  let num2 = marble2[1]
+  if (val1 != state[letter1][num1]){
+    if (val1 == 0){
+      let move = `INLINE ${marble1+marble2} ${dir1}`;
+      moves.push(move);
+    } else {
+      let opponent_marble_coordinate = getCoordinateByDirection(marble1, dir1, state);
+      let move = checkSumitoForPair(opponent_marble_coordinate, dir1, state);
+      if (!move){
+        moves.push(move);
+      }
+    }
+  } 
+  if (val3 != state[letter1][num1]){
+    if (val3 == 0){
+      let move = `INLINE ${marble1+marble2} ${dir2}`;
+      moves.push(move);
+    } else {
+      let opponent_marble_coordinate = getCoordinateByDirection(marble1, dir1, state);
+      let move = checkSumitoForPair(opponent_marble_coordinate, dir1, state);
+      if (!move){
+        moves.push(move);
+      }
+  }
+}
+  if (val2 != state[letter2][num2]){
+    if (val2 == 0){
+      let move = `INLINE ${marble1+marble2} ${dir1}`;
+      moves.push(move);
+    }else {
+      let opponent_marble_coordinate = getCoordinateByDirection(marble1, dir1, state);
+      let move = checkSumitoForPair(opponent_marble_coordinate, dir1, state);
+      if (!move){
+        moves.push(move);
+      }
+  }
+}
+  if (val4 != state[letter2][num2]){
+    if (val4 == 0){
+      let move = `INLINE ${marble1+marble2} ${dir2}`;
+      moves.push(move);
+    }else {
+      let opponent_marble_coordinate = getCoordinateByDirection(marble1, dir1, state);
+      let move = checkSumitoForPair(opponent_marble_coordinate, dir1, state);
+      if (!move){
+        moves.push(move);
+      }
+  }
+  }
+return moves;
+}
+
+function checkSumitoForPair(){
+
+}
+
+function mergeNoDuplicates(...arrays) { 
+  let mergedArray = []; 
+
+  arrays.forEach(array => { 
+      mergedArray = [...mergedArray, ...array] 
+  }); 
+
+  return [...new Set([...mergedArray])]; 
+} 
 
 // This function will go through each triple group of marbles and return all the possible moves as an array of strings.
 // coordinates is the coordinates for all 3 marble groupings
 // state is the state where we will be finding the legal moves
 function getTripleMarbleMoves(coordinates, state){
-  return '';
+  let moves = [];
+  return moves;
 }
 
 
