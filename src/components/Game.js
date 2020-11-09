@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
-  MAX,
+  BLK,
   EMP,
   BOARD_LAYOUTS,
   MARVEL_COLORS,
@@ -62,7 +62,7 @@ const BoardTile = styled.div`
   background-color: ${(props) => {
     if (props.for === EMP) {
       return 'brown';
-    } else if (props.for === MAX) {
+    } else if (props.for === BLK) {
       return 'black';
     } else {
       return 'white';
