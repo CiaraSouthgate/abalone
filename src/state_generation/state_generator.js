@@ -43,17 +43,80 @@ export function generateMoves(startingColour, marbleCoords, initialState){
   let state = initialState;
   // get coordinates of only the marbles we will be moving
   let single_marbles = getCoordinatesUsingColour(startingColour, marbleCoords);
-  console.log(single_marbles);
   // generate a list of duoing neighbour marbles
   let duo_marbles = getMarblePairs(single_marbles, state);
-  console.log(duo_marbles);
   // generate a list of trio neighbour marbles
   let trio_marbles = getMarbleTrios(duo_marbles, state);
-  console.log(trio_marbles);
   // Go through each list of marbles and check and generate moves for each one.
-  
+  let single_marble_moves = getSingleMarbleMoves(single_marbles, state);
+  console.log(single_marble_moves);
+
+  // let double_marble_moves = getDoubleMarbleMoves();
+
+  // let triple_marble_moves = getTripleMarbleMoves();
 
 }
+
+// This function will go through each single marble and return all the possible moves as an array of strings
+// coordinates is a list of coordinates of single marbles
+// state is the state where we will be finding the legal moves
+function getSingleMarbleMoves(coordinates, state){
+  // moves will be placed in here
+  let moves = [];
+  // go through each marble and find the valid moves.
+  for (let i = 0; i<coordinates.length; i++){
+    let neighbours = getNeighbours(coordinates[i], state);
+    for (let k = 0; k < neighbours.length; k++){
+      if (neighbours[k].includes("emp")){
+        // get the direction and create the correct move string
+        let direction = getDirection(neighbours[k], coordinates[i].toLowerCase());
+        let coord = coordinates[i].substr(0, 2).toUpperCase();
+        let thisMove = `SINGLE ${coord} ${direction}`;
+        moves.push(thisMove);
+      }
+    }
+  }
+  return moves;
+}
+
+function getDirection(pos1, pos2){
+  let pos1K1 = pos1[0];
+  let pos1K2 = parseInt(pos1[1]);
+  let pos2K1 = pos2[0];
+  let pos2K2 = parseInt(pos2[1]);
+
+  const k1Diff = pos1K1.charCodeAt(0) - pos2K1.charCodeAt(0);
+  const k2Diff = pos1K2 - pos2K2;
+  if (k1Diff === -1 && k2Diff === 0) {
+      return "NW";
+  } else if (k1Diff === -1 && k2Diff === -1) {
+      return "NE";
+  } else if (k1Diff === 0 && k2Diff === -1) {
+      return "E";
+  } else if (k1Diff === 0 && k2Diff === 1) {
+      return "W";
+  } else if (k1Diff === 1 && k2Diff === 1) {
+      return "SW";
+  } else if (k1Diff === 1 && k2Diff === 0) {
+      return "SE";
+  }
+}
+
+// This function will go through each pair of marbles and return all the possible moves as an array of strings.
+// coordinates is the coordinates of all marble pairs on the given state
+// state is the state where we will be finding the legal moves
+function getDoubleMarbleMoves(coordinates, state){
+  
+  return '';
+}
+
+// This function will go through each triple group of marbles and return all the possible moves as an array of strings.
+// coordinates is the coordinates for all 3 marble groupings
+// state is the state where we will be finding the legal moves
+function getTripleMarbleMoves(coordinates, state){
+  return '';
+}
+
 
 // This function returns a list of duo marble neighbours
 function getMarblePairs(coordinates, state) {
@@ -182,12 +245,12 @@ function getCoordinatesUsingColour(startingColour, marbleCoords){
   // If the starting colour is white then get the coordinates for the white marbles
   if (startingColour.includes("w")){
     for (let i = 0; i < marbleCoords.length; i++){
-      if (marbleCoords[i].includes("w")){coordinates.push(marbleCoords[i])};
+      if (marbleCoords[i].includes("w")){coordinates.push(marbleCoords[i].toLowerCase())};
     }
   // If the starting colour is black then get the coordinates for the black marbles
   } else {
     for (let i = 0; i < marbleCoords.length; i++){
-      if (marbleCoords[i].includes("b")){coordinates.push(marbleCoords[i])};
+      if (marbleCoords[i].includes("b")){coordinates.push(marbleCoords[i].toLowerCase())};
     }
   }
   return coordinates;
