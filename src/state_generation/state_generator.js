@@ -208,9 +208,74 @@ const getDoubleMarbleMoves = (marblePairs, state) => {
   for (let i = 0; i < marblePairs.length; i++){
     let [marble1, marble2] = getMarblesFromPair(marblePairs[i]);
     let [inline, sidestep] = setMultiMoveGroups(marble1, marble2);
-    
+    let sidestep_moves = getSideStepMovesPair(marble1, marble2, state, sidestep);
+    console.log(i);
+    console.log(sidestep_moves);
+    // let inline_moves = getInlineMovesPair(marble1, marble2, state, inline);
   }
+
   return moves;
+}
+
+const getSideStepMovesPair = (marble1, marble2, state, sidestep) => {
+  let sidestep_moves = [];
+  for (let i = 0; i < sidestep.length; i++){
+    let neighbour1 = getNeighbourWithDirection(marble1, sidestep[i], state);
+    let neighbour2 = getNeighbourWithDirection(marble2, sidestep[i], state);
+    if(neighbour1 == EMP && neighbour2 == EMP){
+      let move = `SIDESTEP ${marble1[0].toUpperCase()}${marble1[1]}${marble2[0].toUpperCase()}${marble2[1]} ${sidestep[i]}`;
+      sidestep_moves.push(move);
+    }
+  }
+  return sidestep_moves;
+}
+
+
+// Will return EMP, WHT, BLK, undefined (if out of bounds)
+const getNeighbourWithDirection = (marble, direction, state) => {
+  try{
+    
+    // marble is a string in the form xxx
+    // direction is a string which represents the direction
+    // state is the state
+
+    // Must check which direction is given, and depending on the direction I must check the neighbour in that direction
+    let modifier = convertDirectionToCoordinateModifier(direction);
+    let marbleLetter = String.fromCharCode( (marble[0].charCodeAt(0) + modifier[0]) );
+    let marbleNum = parseInt(marble[1]) + modifier[1];
+    let checkedMarble = state[marbleLetter][marbleNum];
+    return checkedMarble;
+  }catch(ignore){};
+}
+
+// This function will return a coordinate modifier, which is used to check a neighbour in a given direction
+const convertDirectionToCoordinateModifier = (direction) => {
+  let modifier;
+  switch (direction) {
+    case "E":
+    modifier = [0, 1];
+    break;
+    case "W":
+    modifier = [0, -1];
+    break;
+    case "NE":
+    modifier = [1, 1];
+    break;
+    case "NW":
+    modifier = [1, 0];
+    break;
+    case "SE":
+    modifier = [-1, 0];
+    break;
+    case "SW":
+    modifier = [-1, -1];
+    break;
+  };
+  return modifier;
+}
+
+const getInlineMovesPair = (marble1, marble2, state, sidestep) => {
+  return ["", ""];
 }
 
 
