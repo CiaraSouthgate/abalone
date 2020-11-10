@@ -16,6 +16,14 @@ const BOARD_LAYOUT_NAMES = {
   GERMAN_DAISY: 1,
   BELGIAN_DAISY: 2
 };
+const DIRECTION = {
+  NE: 'NE',
+  E: 'E',
+  SE: 'SE',
+  SW: 'SW',
+  W: 'W',
+  NW: 'NW'
+}
 const BOARD_LAYOUTS = {
   STANDARD: {
     i: { 5: WHT, 6: WHT, 7: WHT, 8: WHT, 9: WHT },
@@ -61,5 +69,6 @@ export {
   GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
-  BOARD_LAYOUT_NAMES
+  BOARD_LAYOUT_NAMES,
+  DIRECTION
 };

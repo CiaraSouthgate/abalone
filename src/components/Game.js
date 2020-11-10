@@ -22,6 +22,7 @@ import {
   RadioGroup
 } from '@material-ui/core';
 import { ButtonContainer } from './ButtonContainer';
+import {InputFile} from "./InputFile";
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -61,11 +62,11 @@ const BoardTile = styled.div`
   font-size: 22px;
   background-color: ${(props) => {
     if (props.for === EMP) {
-      return 'brown';
+      return 'transparent';
     } else if (props.for === BLK) {
       return 'black';
     } else {
-      return 'white';
+      return 'beige';
     }
   }};
 `;
@@ -196,6 +197,10 @@ export const Game = () => {
               <Button onClick={onPlayClick} variant="contained" color="secondary" fullWidth>
                 PLAY
               </Button>
+            </ConfigRow>
+            <FormLabel component='legend'>State Generation</FormLabel>
+            <ConfigRow>
+              <InputFile />
             </ConfigRow>
           </ConfigBody>
         </Paper>

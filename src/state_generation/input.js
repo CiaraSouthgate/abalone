@@ -2,7 +2,7 @@ import {createInitialState} from './state_generator';
 import {generateMoves} from './state_generator';
 
 // handles input of text file to our state generator
-function readInputFile() {
+export const parseInputFile = () => {
     // get input tag
     let input = document.getElementById('input');
     // get file
@@ -14,7 +14,7 @@ function readInputFile() {
     reader.readAsText(file);
 
     // when its done reading, do the parsing
-    reader.onload = function(){
+    reader.onload = () => {
 
         // split into lines
         let lines = reader.result.split('\n');
@@ -34,18 +34,16 @@ function readInputFile() {
     }
 
     // catch error
-    reader.onerror = function(){
+    reader.onerror = () => {
         console.log(reader.error);
     }
-};
+}
 
 
 // Function to parse coordinates from an inputString of marble coordinates.
-function parseCoords(inputString){
+const parseCoords = (inputString) => {
     // parse all coordinates
     let arrayOfCoords = inputString.split(',');
     // return coordinates
     return arrayOfCoords;
 }
-
-export default readInputFile;
