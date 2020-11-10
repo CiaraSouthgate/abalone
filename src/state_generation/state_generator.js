@@ -217,6 +217,7 @@ const getDoubleMarbleMoves = (marblePairs, state) => {
   return moves;
 }
 
+// This function returns all legal sidestep moves given the coordinates of two adjacent marbles, the state, and the directions to check.
 const getSideStepMovesPair = (marble1, marble2, state, sidestep) => {
   let sidestep_moves = [];
   for (let i = 0; i < sidestep.length; i++){
@@ -234,7 +235,6 @@ const getSideStepMovesPair = (marble1, marble2, state, sidestep) => {
 // Will return EMP, WHT, BLK, undefined (if out of bounds)
 const getNeighbourWithDirection = (marble, direction, state) => {
   try{
-    
     // marble is a string in the form xxx
     // direction is a string which represents the direction
     // state is the state
@@ -274,6 +274,7 @@ const convertDirectionToCoordinateModifier = (direction) => {
   return modifier;
 }
 
+// This function returns all the legal inline moves, given the coordinates of two adjacent marbles, the state, and the directions to check.
 const getInlineMovesPair = (marble1, marble2, state, sidestep) => {
   return ["", ""];
 }
