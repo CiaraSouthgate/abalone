@@ -118,9 +118,12 @@ const getMarblePairs = (coordinates, state) => {
   for (let i = 0; i < coordinates.length; i++) {
     const thisMarble = coordinates[i];
     const neighbours = getNeighbours(thisMarble, state);
-    for (let k = 0; k < neighbours.length; k++) {
-      if (thisMarble[2] === neighbours[k][2]) {
-        duo_marbles.push(thisMarble.toLowerCase() + neighbours[k]);
+    for (let neighbour in neighbours) {
+      if (thisMarble > neighbour) {
+        if (thisMarble.charAt(2) === neighbour.charAt(2)) {
+          duo_marbles.push(thisMarble.toLowerCase() + neighbour);
+
+        }
       }
     }
   }
