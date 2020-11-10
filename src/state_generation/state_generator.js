@@ -78,10 +78,13 @@ export const generateMoves = (startingColour, marbleCoords, initialState) => {
   const trio_marbles = getMarbleTrios(duo_marbles, initialState);
   // Go through each list of marbles and check and generate moves for each one.
   const single_marble_moves = getSingleMarbleMoves(single_marbles, initialState);
+  console.log(single_marble_moves);
 
-  let double_marble_moves = getDoubleMarbleMoves(duo_marbles, initialState);
+  const double_marble_moves = getDoubleMarbleMoves(duo_marbles, initialState);
+  console.log(double_marble_moves);
 
-  const triple_marble_moves = getTripleMarbleMoves(trio_marbles, initialState);
+  // const triple_marble_moves = getTripleMarbleMoves(trio_marbles, initialState);
+  // console.log(triple_marble_moves);
 
 }
 
@@ -209,9 +212,9 @@ const getDoubleMarbleMoves = (marblePairs, state) => {
     let [marble1, marble2] = getMarblesFromPair(marblePairs[i]);
     let [inline, sidestep] = setMultiMoveGroups(marble1, marble2);
     let sidestep_moves = getSideStepMovesPair(marble1, marble2, state, sidestep);
-    console.log(i);
-    console.log(sidestep_moves);
-    // let inline_moves = getInlineMovesPair(marble1, marble2, state, inline);
+    let inline_moves = getInlineMovesPair(marble1, marble2, state, inline);
+    let all_moves = sidestep_moves.concat(inline_moves);
+    moves = moves.concat(all_moves)
   }
 
   return moves;
@@ -248,6 +251,38 @@ const getNeighbourWithDirection = (marble, direction, state) => {
   }catch(ignore){};
 }
 
+const getNeighbourCoordinateWithDirection = (marble, direction, state) => {
+  try{
+    // marble is a string in the form xxx
+    // direction is a string which represents the direction
+    // state is the state
+
+    // Must check which direction is given, and depending on the direction I must check the neighbour in that direction
+    let modifier = convertDirectionToCoordinateModifier(direction);
+    let marbleLetter = String.fromCharCode( (marble[0].charCodeAt(0) + modifier[0]) );
+    let marbleNum = parseInt(marble[1]) + modifier[1];
+    let marbleColour = state[marbleLetter][marbleNum];
+    marbleColour = convertColourValueToString(marbleColour);
+    return `${marbleLetter}${marbleNum}${marbleColour}`;
+  }catch(ignore){};
+}
+
+const convertColourValueToString = (colour) => {
+  let string;
+  switch (colour) {
+    case EMP:
+      string = "emp";
+      break;
+    case BLK:
+      string = "b";
+      break;
+    case WHT:
+      string = "w";
+      break;
+  }
+  return string;
+}
+
 // This function will return a coordinate modifier, which is used to check a neighbour in a given direction
 const convertDirectionToCoordinateModifier = (direction) => {
   let modifier;
@@ -274,9 +309,70 @@ const convertDirectionToCoordinateModifier = (direction) => {
   return modifier;
 }
 
+// This function will count the number of same coloured marbles in a row, in the given direction.
+const countMarblesInDirection = (startingMarble, direction, state, colour) => {
+  let marble = getNeighbourWithDirection(startingMarble, direction, state);
+  let nextMarble = getNeighbourCoordinateWithDirection(startingMarble, direction, state);
+  if (marble != colour) {
+    return 1;
+  } else if (marble == colour) {
+    return 1 + countMarblesInDirection(nextMarble, direction, state, colour);
+  }
+}
+
 // This function returns all the legal inline moves, given the coordinates of two adjacent marbles, the state, and the directions to check.
-const getInlineMovesPair = (marble1, marble2, state, sidestep) => {
-  return ["", ""];
+const getInlineMovesPair = (marble1, marble2, state, inline) => {
+  let inline_moves = [];
+  let marble1Directions = ["E", "SE", "SW"];
+  for(let i = 0; i < inline.length; i++){
+    let direction = inline[i];
+    let val = marble1Directions.indexOf(direction);
+    // if val does not equal -1 then that means we need to check the neighbour of marble1 in the given direction, else marble2.
+    if(val != -1){
+      // get the neighbours value
+      let neighbour = getNeighbourWithDirection(marble1, direction, state);
+      let marble1Letter = marble1[0];
+      let marble1Num = marble1[1];
+      let thisMarbleColour = state[marble1Letter][marble1Num];
+      if (neighbour == 0) {
+        let move = `INLINE ${marble1[0].toUpperCase()}${marble1[1]}${marble2[0].toUpperCase()}${marble2[1]} ${direction}`;
+        inline_moves.push(move);
+      }
+      // If this neighbour is not the same colour as this marble, and its not undefined, then it is an opponents marble.
+      if (neighbour != thisMarbleColour && neighbour != undefined) {
+        let colourOfOpponent = neighbour;
+        let neighbourCoordinate = getNeighbourCoordinateWithDirection(marble2, direction, state);
+        let numOfOpposingMarbles = countMarblesInDirection(neighbourCoordinate, direction, state, colourOfOpponent);
+        if (numOfOpposingMarbles < 2) {
+          let move = `INLINE ${marble1[0].toUpperCase()}${marble1[1]}${marble2[0].toUpperCase()}${marble2[1]} ${direction}`;
+          inline_moves.push(move);
+        }
+      }
+
+    } else {
+
+      // get the neighbours value
+      let neighbour = getNeighbourWithDirection(marble2, direction, state);
+      let marble1Letter = marble1[0];
+      let marble1Num = marble1[1];
+      let thisMarbleColour = state[marble1Letter][marble1Num];
+      if (neighbour == 0) {
+        let move = `INLINE ${marble1[0].toUpperCase()}${marble1[1]}${marble2[0].toUpperCase()}${marble2[1]} ${direction}`;
+        inline_moves.push(move);
+      }
+      // If this neighbour is not the same colour as this marble, and its not undefined, then it is an opponents marble.
+      if (neighbour != thisMarbleColour && neighbour != undefined) {
+        let colourOfOpponent = neighbour;
+        let neighbourCoordinate = getNeighbourCoordinateWithDirection(marble2, direction, state);
+        let numOfOpposingMarbles = countMarblesInDirection(neighbourCoordinate, direction, state, colourOfOpponent);
+        if (numOfOpposingMarbles < 2) {
+          let move = `INLINE ${marble1[0].toUpperCase()}${marble1[1]}${marble2[0].toUpperCase()}${marble2[1]} ${direction}`;
+          inline_moves.push(move);
+        }
+      }
+    }
+  }
+  return inline_moves;
 }
 
 
