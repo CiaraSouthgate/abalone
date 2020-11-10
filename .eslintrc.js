@@ -27,6 +27,7 @@ module.exports = {
     'prettier/prettier': ['warn', {
       endOfLine: "auto"
     }, { usePrettierrc: true }], // Use our .prettierrc file as source
-    'no-unused-vars': 'off'
+    'no-unused-vars': 'warn',
+    'no-empty': 'off'
   }
 };
