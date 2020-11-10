@@ -208,49 +208,48 @@ const getDoubleMarbleMoves = (coordinates, state) => {
 // This function will go through each triple group of marbles and return all the possible moves as an array of strings.
 // coordinates is the coordinates for all 3 marble groupings
 // state is the state where we will be finding the legal moves
-// 0: "a4wb5wc6w"
-// 1: "a5wb5wc5w"
-// 2: "b4wb5wb6w"
-// 3: "b6wb5wb4w"
-// 4: "c5wb5wa5w"
-// 5: "c6wb5wa4w"
-// 6: "g4wh5wi6w"
-// 7: "g5wh5wi5w"
-// 8: "h4wh5wh6w"
-// 9: "h6wh5wh4w"
-// 10: "i5wh5wg5w"
-// 11: "i6wh5wg4w"
 const getTripleMarbleMoves = (coordinates, state) => {
   const moves = [];
   coordinates.forEach(set => {
+    console.log(set)
     const marbles = [];
-    let inline;
-    let sidestep;
 
     for (let i = 0; i < 3; i++) {
       const marble = set.substr(i * 3, 3);
       marbles.push({row: marble.charAt(0), col: parseInt(marble.charAt(1))});
     }
 
-    const rowDir = getDirection(marbles[0], marbles[1]);
-    switch (rowDir) {
-      case DIRECTION.NW:
-      case DIRECTION.SE:
-        inline = [DIRECTION.NW, DIRECTION.SE];
-        sidestep = [DIRECTION.E, DIRECTION.W, DIRECTION.NE, DIRECTION.SW];
-        break;
-      case DIRECTION.E:
-      case DIRECTION.W:
-        inline = [DIRECTION.E, DIRECTION.W];
-        sidestep = [DIRECTION.NW, DIRECTION.SE, DIRECTION.NE, DIRECTION.SW];
-        break;
-      case DIRECTION.NE:
-      case DIRECTION.SW:
-        inline = [DIRECTION.SW, DIRECTION.NE];
-        sidestep = [DIRECTION.E, DIRECTION.W, DIRECTION.NW, DIRECTION.SE];
-        break;
-    }
+    const groups = setMultiMoveGroups(marbles[0].row + marbles[0].col,
+      marbles[1].row + marbles[0].col);
+    const inline = groups[0];
+    const sidestep = groups[1];
 
-    
+    //TODO finish this
   })
+}
+
+const setMultiMoveGroups = (marble1, marble2) => {
+  let inline;
+  let sidestep;
+
+  const rowDir = getDirection(marble1, marble2);
+  switch (rowDir) {
+    case DIRECTION.NW:
+    case DIRECTION.SE:
+      inline = [DIRECTION.NW, DIRECTION.SE];
+      sidestep = [DIRECTION.E, DIRECTION.W, DIRECTION.NE, DIRECTION.SW];
+      break;
+    case DIRECTION.E:
+    case DIRECTION.W:
+      inline = [DIRECTION.E, DIRECTION.W];
+      sidestep = [DIRECTION.NW, DIRECTION.SE, DIRECTION.NE, DIRECTION.SW];
+      break;
+    case DIRECTION.NE:
+    case DIRECTION.SW:
+      inline = [DIRECTION.SW, DIRECTION.NE];
+      sidestep = [DIRECTION.E, DIRECTION.W, DIRECTION.NW, DIRECTION.SE];
+      break;
+  }
+
+  return [inline, sidestep];
 }
