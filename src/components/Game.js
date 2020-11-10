@@ -6,7 +6,7 @@ import {
   WHT,
   EMP,
   BOARD_LAYOUTS,
-  Marble_COLORS,
+  MARBLE_COLORS,
   GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
@@ -145,7 +145,7 @@ export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
   const [turn, setTurn] = React.useState(BLK);
-  const [playerColor] = React.useState(Marble_COLORS.BLACK);
+  const [playerColor] = React.useState(MARBLE_COLORS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);

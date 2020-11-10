@@ -1,7 +1,7 @@
 const EMP = 0;
 const BLK = 1;
 const WHT = 2;
-const MARBEL_COLORS = {
+const MARBLE_COLORS = {
   BLACK: 0,
   WHITE: 1
 };
@@ -66,7 +66,7 @@ export {
   EMP,
   BLK,
   WHT,
-  MARBEL_COLORS,
+  MARBLE_COLORS,
   GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
