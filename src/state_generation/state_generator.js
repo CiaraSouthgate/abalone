@@ -74,6 +74,7 @@ export const generateMoves = (startingColour, marbleCoords, initialState) => {
   const single_marbles = getCoordinatesUsingColour(startingColour, marbleCoords);
   // generate a list of duoing neighbour marbles
   const duo_marbles = getMarblePairs(single_marbles, initialState);
+  console.log(duo_marbles);
   // generate a list of trio neighbour marbles
   const trio_marbles = getMarbleTrios(duo_marbles, initialState);
   // Go through each list of marbles and check and generate moves for each one.
@@ -118,11 +119,10 @@ const getMarblePairs = (coordinates, state) => {
   for (let i = 0; i < coordinates.length; i++) {
     const thisMarble = coordinates[i];
     const neighbours = getNeighbours(thisMarble, state);
-    for (let neighbour in neighbours) {
-      if (thisMarble > neighbour) {
-        if (thisMarble.charAt(2) === neighbour.charAt(2)) {
-          duo_marbles.push(thisMarble.toLowerCase() + neighbour);
-
+    for (let k = 0; k < neighbours.length; k++) {
+      if (thisMarble < neighbours[k]) {
+        if (thisMarble.charAt(2) === neighbours[k].charAt(2)) {
+          duo_marbles.push(thisMarble.toLowerCase() + neighbours[k]);
         }
       }
     }
