@@ -6,7 +6,7 @@ import {
   WHT,
   EMP,
   BOARD_LAYOUTS,
-  MARBEL_COLORS,
+  Marble_COLORS,
   GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
@@ -145,12 +145,12 @@ export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
   const [turn, setTurn] = React.useState(BLK);
-  const [playerColor] = React.useState(MARBEL_COLORS.BLACK);
+  const [playerColor] = React.useState(Marble_COLORS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
-  const [selectedMarbels, setselectedMarbels] = React.useState(new Set());
+  const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
   const score = 0; // ???
 
   const handleInitBoardLayoutChange = (e) => {
@@ -240,7 +240,7 @@ export const Game = () => {
     }
   };
 
-  const moveMarbels = (positions, direction) => {
+  const moveMarbles = (positions, direction) => {
     const adder = gameState[positions[0][0]][parseInt(positions[0][1])];
     const newGameState = JSON.parse(JSON.stringify(gameState));
 
@@ -252,7 +252,7 @@ export const Game = () => {
         const newrow = newPosition[0];
         const newcol = parseInt(newPosition[1]);
 
-        if (!selectedMarbels.has(`${newrow}${newcol}`) && gameState[newrow][newcol] === adder) {
+        if (!selectedMarbles.has(`${newrow}${newcol}`) && gameState[newrow][newcol] === adder) {
           console.log('not valid move');
           return;
         }
@@ -275,7 +275,7 @@ export const Game = () => {
     );
   };
 
-  const getMarbelPositionBetween = (position1, position2) => {
+  const getMarblePositionBetween = (position1, position2) => {
     const pos1row = position1[0].charCodeAt(0);
     const pos1col = parseInt(position1[1]);
     const pos2row = position2[0].charCodeAt(0);
@@ -301,55 +301,55 @@ export const Game = () => {
     return null;
   };
 
-  const onMarbelClick = (row, col) => {
+  const onMarbleClick = (row, col) => {
     if (gameState[row][col] !== EMP) {
-      // Push opponent marbel logic
+      // Push opponent Marble logic
       if (gameState[row][col] !== turn) {
-        // Calculate the number of selected marbel
-        console.log(Array.from(selectedMarbels).length);
+        // Calculate the number of selected Marble
+        console.log(Array.from(selectedMarbles).length);
         return;
       }
-      if (selectedMarbels.size > 1) {
-        setselectedMarbels(new Set());
+      if (selectedMarbles.size > 1) {
+        setselectedMarbles(new Set());
         return;
       }
-      if (selectedMarbels.has(`${row}${col}`)) {
-        setselectedMarbels(new Set());
+      if (selectedMarbles.has(`${row}${col}`)) {
+        setselectedMarbles(new Set());
         return;
       }
-      const newselectedMarbels = new Set(selectedMarbels);
-      if (selectedMarbels.size === 1) {
-        const selectedMarbel = Array.from(selectedMarbels)[0];
-        const posBetween = getMarbelPositionBetween(selectedMarbel, `${row}${col}`);
-        if (posBetween !== null && isFriendly(selectedMarbel, posBetween)) {
-          newselectedMarbels.add(posBetween);
-        } else if (!isNeighbor(Array.from(selectedMarbels)[0], `${row}${col}`)) {
-          setselectedMarbels(new Set([`${row}${col}`]));
+      const newselectedMarbles = new Set(selectedMarbles);
+      if (selectedMarbles.size === 1) {
+        const selectedMarble = Array.from(selectedMarbles)[0];
+        const posBetween = getMarblePositionBetween(selectedMarble, `${row}${col}`);
+        if (posBetween !== null && isFriendly(selectedMarble, posBetween)) {
+          newselectedMarbles.add(posBetween);
+        } else if (!isNeighbor(Array.from(selectedMarbles)[0], `${row}${col}`)) {
+          setselectedMarbles(new Set([`${row}${col}`]));
           return;
         }
       }
-      newselectedMarbels.add(`${row}${col}`);
-      setselectedMarbels(newselectedMarbels);
+      newselectedMarbles.add(`${row}${col}`);
+      setselectedMarbles(newselectedMarbles);
     } else {
-      if (selectedMarbels.size === 0) {
+      if (selectedMarbles.size === 0) {
         return;
       }
       let dir = undefined;
-      selectedMarbels.forEach((val) => {
+      selectedMarbles.forEach((val) => {
         let temp = getDirection(val, `${row}${col}`);
         if (temp !== undefined) {
           dir = temp;
         }
       });
       if (dir !== undefined) {
-        moveMarbels(Array.from(selectedMarbels), dir);
+        moveMarbles(Array.from(selectedMarbles), dir);
       }
-      setselectedMarbels(new Set());
+      setselectedMarbles(new Set());
       setTurn(turn === BLK ? WHT : BLK);
     }
   };
 
-  const onMarbelHover = (row, col) => {
+  const onMarbleHover = (row, col) => {
     console.log(row, col);
   };
 
@@ -423,9 +423,9 @@ export const Game = () => {
                 <BoardTile
                   key={`${k}${col}`}
                   for={gameState[k][col]}
-                  selected={selectedMarbels.has(`${k}${col}`)}
-                  onClick={() => onMarbelClick(k, col)}
-                  onMouseEnter={() => onMarbelHover(k, col)}>
+                  selected={selectedMarbles.has(`${k}${col}`)}
+                  onClick={() => onMarbleClick(k, col)}
+                  onMouseEnter={() => onMarbleHover(k, col)}>
                   {`${k}${col}`}
                 </BoardTile>
               ))}
