@@ -74,14 +74,12 @@ export const generateMoves = (startingColour, marbleCoords, initialState) => {
   const single_marbles = getCoordinatesUsingColour(startingColour, marbleCoords);
   // generate a list of duoing neighbour marbles
   const duo_marbles = getMarblePairs(single_marbles, initialState);
-  console.log(duo_marbles);
   // generate a list of trio neighbour marbles
   const trio_marbles = getMarbleTrios(duo_marbles, initialState);
   // Go through each list of marbles and check and generate moves for each one.
   const single_marble_moves = getSingleMarbleMoves(single_marbles, initialState);
-  console.log(single_marble_moves)
 
-  // let double_marble_moves = getDoubleMarbleMoves();
+  let double_marble_moves = getDoubleMarbleMoves(duo_marbles, initialState);
 
   const triple_marble_moves = getTripleMarbleMoves(trio_marbles, initialState);
 
@@ -201,11 +199,26 @@ const getSingleMarbleMoves = (coordinates, state) => {
 }
 
 // This function will go through each pair of marbles and return all the possible moves as an array of strings.
-// coordinates is the coordinates of all marble pairs on the given state
+// marblePairs is the coordinates of all marble pairs on the given state
 // state is the state where we will be finding the legal moves
-const getDoubleMarbleMoves = (coordinates, state) => {
+const getDoubleMarbleMoves = (marblePairs, state) => {
+  // Where all the resulting inline and sidestep moves will be stored.
+  let moves = [];
 
-  return '';
+  for (let i = 0; i < marblePairs.length; i++){
+    let [marble1, marble2] = getMarblesFromPair(marblePairs[i]);
+    let [inline, sidestep] = setMultiMoveGroups(marble1, marble2);
+    
+  }
+  return moves;
+}
+
+
+// This function returns the string representation of each marble coordinate in a marble pair.
+const getMarblesFromPair = (marblePair) => {
+  let marble1 = marblePair.substr(0,3);
+  let marble2 = marblePair.substr(3,3);
+  return [marble1, marble2];
 }
 
 // This function will go through each triple group of marbles and return all the possible moves as an array of strings.
@@ -214,7 +227,6 @@ const getDoubleMarbleMoves = (coordinates, state) => {
 const getTripleMarbleMoves = (coordinates, state) => {
   const moves = [];
   coordinates.forEach(set => {
-    console.log(set)
     const marbles = [];
 
     for (let i = 0; i < 3; i++) {
