@@ -13,6 +13,7 @@ export const createInitialState = (marbleCoords) => {
     // set up initial state using coordinates.
     state[letter][num] = color === 'w' ? WHT : BLK;
   });
+  return state;
 };
 
 const getColourStringFromCoordinate = (letter, num) => {
@@ -50,13 +51,17 @@ export const generateMoves = (startingColour, marbleCoords) => {
   const trio_marbles = getMarbleTrios(duo_marbles);
   // Go through each list of marbles and check and generate moves for each one.
   const single_marble_moves = getSingleMarbleMoves(single_marbles);
-  console.log(single_marble_moves);
+  //console.log(single_marble_moves);
 
   const double_marble_moves = getMarbleGroupMoves(duo_marbles);
-  console.log(double_marble_moves);
+  //console.log(double_marble_moves);
 
   const triple_marble_moves = getMarbleGroupMoves(trio_marbles);
-  console.log(triple_marble_moves);
+  //console.log(triple_marble_moves);
+
+  // return moves
+  single_marble_moves.concat(double_marble_moves, triple_marble_moves);
+  return single_marble_moves;
 };
 
 // This function will go through each single marble and return all the possible moves as an array of strings

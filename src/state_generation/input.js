@@ -28,6 +28,9 @@ export const parseInputFile = () => {
 
     // pass info to move generator
     let moves = generateMoves(startingColour, marbleCoordinates);
+
+    // do stuff???
+    return [initialState, moves];
   };
 
   // catch error
