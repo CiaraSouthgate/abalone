@@ -1,7 +1,7 @@
 const EMP = 0;
 const BLK = 1;
 const WHT = 2;
-const MARVEL_COLORS = {
+const MARBLE_COLOURS = {
   BLACK: 0,
   WHITE: 1
 };
@@ -15,6 +15,14 @@ const BOARD_LAYOUT_NAMES = {
   STANDARD: 0,
   GERMAN_DAISY: 1,
   BELGIAN_DAISY: 2
+};
+const DIRECTION = {
+  NE: 'NE',
+  E: 'E',
+  SE: 'SE',
+  SW: 'SW',
+  W: 'W',
+  NW: 'NW'
 };
 const BOARD_LAYOUTS = {
   STANDARD: {
@@ -49,6 +57,17 @@ const BOARD_LAYOUTS = {
     c: { 1: EMP, 2: BLK, 3: BLK, 4: EMP, 5: WHT, 6: WHT, 7: EMP },
     b: { 1: BLK, 2: BLK, 3: BLK, 4: WHT, 5: WHT, 6: WHT },
     a: { 1: BLK, 2: BLK, 3: EMP, 4: WHT, 5: WHT }
+  },
+  BLANK: {
+    i: { 5: EMP, 6: EMP, 7: EMP, 8: EMP, 9: EMP },
+    h: { 4: EMP, 5: EMP, 6: EMP, 7: EMP, 8: EMP, 9: EMP },
+    g: { 3: EMP, 4: EMP, 5: EMP, 6: EMP, 7: EMP, 8: EMP, 9: EMP },
+    f: { 2: EMP, 3: EMP, 4: EMP, 5: EMP, 6: EMP, 7: EMP, 8: EMP, 9: EMP },
+    e: { 1: EMP, 2: EMP, 3: EMP, 4: EMP, 5: EMP, 6: EMP, 7: EMP, 8: EMP, 9: EMP },
+    d: { 1: EMP, 2: EMP, 3: EMP, 4: EMP, 5: EMP, 6: EMP, 7: EMP, 8: EMP },
+    c: { 1: EMP, 2: EMP, 3: EMP, 4: EMP, 5: EMP, 6: EMP, 7: EMP },
+    b: { 1: EMP, 2: EMP, 3: EMP, 4: EMP, 5: EMP, 6: EMP },
+    a: { 1: EMP, 2: EMP, 3: EMP, 4: EMP, 5: EMP }
   }
 };
 
@@ -57,9 +76,10 @@ export {
   EMP,
   BLK,
   WHT,
-  MARVEL_COLORS,
+  MARBLE_COLOURS,
   GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
-  BOARD_LAYOUT_NAMES
+  BOARD_LAYOUT_NAMES,
+  DIRECTION
 };

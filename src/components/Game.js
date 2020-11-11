@@ -2,26 +2,27 @@ import React from 'react';
 import styled from 'styled-components';
 import {
   BLK,
-  EMP,
+  BOARD_LAYOUT_NAMES,
   BOARD_LAYOUTS,
-  MARVEL_COLORS,
-  GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
-  BOARD_LAYOUT_NAMES
+  EMP,
+  GAME_MODE,
+  MARBLE_COLOURS,
+  WHT
 } from '../constants';
 
 import {
-  Modal,
-  FormControlLabel,
-  Checkbox,
-  FormLabel,
-  TextField,
   Button,
+  FormControlLabel,
+  FormLabel,
+  Modal,
   Radio,
-  RadioGroup
+  RadioGroup,
+  TextField
 } from '@material-ui/core';
 import { ButtonContainer } from './ButtonContainer';
+import { InputFile } from './InputFile';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -60,12 +61,13 @@ const BoardTile = styled.div`
   font-weight: bold;
   font-size: 22px;
   background-color: ${(props) => {
-    if (props.for === EMP) {
-      return 'brown';
-    } else if (props.for === BLK) {
-      return 'black';
-    } else {
-      return 'white';
+    switch (props.state) {
+      case BLK:
+        return 'black';
+      case WHT:
+        return 'beige';
+      default:
+        return 'transparent';
     }
   }};
 `;
@@ -98,10 +100,13 @@ const Scoreboard = styled.div`
   position: absolute;
   right: 20px;
 
-  table, th, td {
+  table,
+  th,
+  td {
     border-collapse: collapse;
   }
-  th, td {
+  th,
+  td {
     border-bottom: 1px solid black;
     padding: 5px;
     text-align: left;
@@ -110,12 +115,12 @@ const Scoreboard = styled.div`
 
 const ScoreDisplay = styled.th`
   colspan: 0;
-`
+`;
 
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.STANDARD);
-  const [playerColor] = React.useState(MARVEL_COLORS.BLACK);
+  const [playerColor] = React.useState(MARBLE_COLOURS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
@@ -197,15 +202,19 @@ export const Game = () => {
                 PLAY
               </Button>
             </ConfigRow>
+            <FormLabel component="legend">State Generation</FormLabel>
+            <ConfigRow>
+              <InputFile />
+            </ConfigRow>
           </ConfigBody>
         </Paper>
       </ConfigModal>
       <ButtonContainer />
       <Board>
-        {Object.keys(gameState).map((k) => (
-          <BoardRow key={k}>
-            {Object.keys(gameState[k]).map((k2) => (
-              <BoardTile key={`${k}${k2}`} for={gameState[k][k2]} />
+        {Object.keys(gameState).map((row) => (
+          <BoardRow key={row}>
+            {Object.keys(gameState[row]).map((col) => (
+              <BoardTile key={`${row}${col}`} state={gameState[row][col]} />
             ))}
           </BoardRow>
         ))}
