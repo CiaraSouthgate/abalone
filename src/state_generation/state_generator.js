@@ -332,3 +332,8 @@ const setMultiMoveGroups = (marble1, marble2) => {
 
   return [inline, sidestep];
 };
+
+export const generateOutput = data => {
+  // do stuff
+  return ["this", "that"];
+}

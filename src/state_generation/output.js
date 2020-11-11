@@ -4,9 +4,9 @@ let textfile = null;
 const createOutputFile = text => {
     let data = new Blob([text], {type: 'text/plain'});
 
-    if (textfile != null) {
-        window.URL.revokeObjectURL(textfile);
-    }
+    //if (textfile != null) {
+    window.URL.revokeObjectURL(textfile);
+    //}
 
     textfile = window.URL.createObjectURL(data);
     // Returns URL to the data
