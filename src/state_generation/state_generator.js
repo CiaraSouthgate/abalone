@@ -49,15 +49,13 @@ export const generateMoves = (startingColour, marbleCoords) => {
   const duo_marbles = getMarblePairs(single_marbles);
   // generate a list of trio neighbour marbles
   const trio_marbles = getMarbleTrios(duo_marbles);
+
   // Go through each list of marbles and check and generate moves for each one.
   const single_marble_moves = getSingleMarbleMoves(single_marbles);
-  //console.log(single_marble_moves);
 
   const double_marble_moves = getMarbleGroupMoves(duo_marbles);
-  //console.log(double_marble_moves);
 
   const triple_marble_moves = getMarbleGroupMoves(trio_marbles);
-  //console.log(triple_marble_moves);
 
   // return moves
   return single_marble_moves.concat(double_marble_moves, triple_marble_moves);
@@ -333,14 +331,17 @@ const setMultiMoveGroups = (marble1, marble2) => {
   return [inline, sidestep];
 };
 
-export const generateOutput = data => {
-  let current_state = data[0];
-  let moves = data[1];
+export const generateOutput = moves => {
   let new_states = "";
   let moves_string = "";
   
-  // generate new states
+  // generate new states from moves
   for (let i = 0; i < moves.length; i++) {
+    // get data from current move and apply to state
+    let current_state = state;
+    let move_data = moves[i].split(" ");
+    let move_type = move_data[0], marbles = move_data[1], direction = move_data[2];
+    // add data as string to list
     let new_state = "whee\n";
     moves_string += moves[i] + "\n";
     new_states += new_state;

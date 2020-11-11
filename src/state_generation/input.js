@@ -24,13 +24,13 @@ export const parseInputFile = (callback) => {
     let marbleCoordinates = parseCoords(lines[1].toLowerCase());
 
     // pass information to the state generator
-    let initialState = createInitialState(marbleCoordinates);
+    createInitialState(marbleCoordinates);
 
     // pass info to move generator
     let moves = generateMoves(startingColour, marbleCoordinates);
 
     // do callback with finished data
-    callback(generateOutput([initialState, moves]));
+    callback(generateOutput(moves));
   };
 
   // catch error
