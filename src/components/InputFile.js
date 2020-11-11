@@ -7,11 +7,12 @@ export const InputFile = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    let data = parseInputFile(inputRef.current.files[0]);
-    // Download output file for states
-    downloadTextfile(data[0], 'Test#.state');
-    // Download output file for moves
-    downloadTextfile(data[1], 'Test#.moves');
+    parseInputFile( (data) => {
+      // Download output file for states
+      downloadTextfile(data[0], 'Test#.board');
+      // Download output file for moves
+      downloadTextfile(data[1], 'Test#.move');
+    });
   };
 
   return (

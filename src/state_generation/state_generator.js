@@ -60,8 +60,7 @@ export const generateMoves = (startingColour, marbleCoords) => {
   //console.log(triple_marble_moves);
 
   // return moves
-  single_marble_moves.concat(double_marble_moves, triple_marble_moves);
-  return single_marble_moves;
+  return single_marble_moves.concat(double_marble_moves, triple_marble_moves);
 };
 
 // This function will go through each single marble and return all the possible moves as an array of strings

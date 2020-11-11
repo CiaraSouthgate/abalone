@@ -17,6 +17,7 @@ export const downloadTextfile = (data, filename) => {
     let link = document.createElement('a');
     link.setAttribute('download', filename);
     link.href = createOutputFile(data);
+    link.hidden = true;
     document.body.appendChild(link);
 
     window.requestAnimationFrame(() => {
