@@ -334,6 +334,18 @@ const setMultiMoveGroups = (marble1, marble2) => {
 };
 
 export const generateOutput = data => {
-  // do stuff
-  return ["this", "that"];
+  let current_state = data[0];
+  let moves = data[1];
+  let new_states = "";
+  let moves_string = "";
+  
+  // generate new states
+  for (let i = 0; i < moves.length; i++) {
+    let new_state = "whee\n";
+    moves_string += moves[i] + "\n";
+    new_states += new_state;
+  }
+
+  // slice removes last \n from strings
+  return [new_states.slice(0,-1), moves_string.slice(0,-1)];
 }

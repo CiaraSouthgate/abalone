@@ -8,7 +8,6 @@ export const InputFile = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     parseInputFile( (data) => {
-      //console.log(data);
       // Download output file for states
       downloadTextfile(data[0], 'TestN.board');
       // Download output file for moves
