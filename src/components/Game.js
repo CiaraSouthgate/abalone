@@ -6,7 +6,7 @@ import {
   BOARD_LAYOUT_NAMES,
   BOARD_LAYOUTS,
   DEFAULT_MOVE_LIMIT,
-  DEFAULT_TIME_LIMIT_IN_MINUTES,
+  DEFAULT_TIME_LIMIT_IN_SECONDS,
   EMP,
   GAME_MODE,
   MARBLE_COLOURS,
@@ -145,10 +145,10 @@ export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
   const [turn, setTurn] = React.useState(BLK);
-  const [playerColor] = React.useState(MARBLE_COLOURS.BLACK);
+  const [playerColour] = React.useState(MARBLE_COLOURS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
-  const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
+  const [timeLimitInSeconds] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
   const score = 0; // ???
@@ -398,12 +398,17 @@ export const Game = () => {
             </ConfigRow>
             <FormLabel component="legend">Extra Settings</FormLabel>
             <ConfigRow style={{ justifyContent: 'space-between' }}>
-              <TextField label="Move Limit" variant="filled" size="small" defaultValue={50} />
               <TextField
-                label="Time Limit (in WHTutes)"
+                label="Move Limit"
                 variant="filled"
                 size="small"
-                defaultValue={15}
+                defaultValue={moveLimit}
+              />
+              <TextField
+                label="Time Limit (in seconds)"
+                variant="filled"
+                size="small"
+                defaultValue={timeLimitInSeconds}
               />
             </ConfigRow>
             <ConfigRow>
