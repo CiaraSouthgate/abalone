@@ -331,6 +331,7 @@ const setMultiMoveGroups = (marble1, marble2) => {
   return [inline, sidestep];
 };
 
+// generates the output required for submission
 export const generateOutput = moves => {
   let new_states = "";
   let moves_string = "";
@@ -338,11 +339,9 @@ export const generateOutput = moves => {
   // generate new states from moves
   for (let i = 0; i < moves.length; i++) {
     // get data from current move and apply to state
-    let current_state = state;
     let move_data = moves[i].split(" ");
-    let move_type = move_data[0], marbles = move_data[1], direction = move_data[2];
-    // add data as string to list
-    let new_state = "whee\n";
+    let new_state = generateNewBoardAsString(move_data);
+    // add data as string to bigger string
     moves_string += moves[i] + "\n";
     new_states += new_state;
   }
@@ -350,3 +349,64 @@ export const generateOutput = moves => {
   // slice removes last \n from strings
   return [new_states.slice(0,-1), moves_string.slice(0,-1)];
 }
+
+// generates a string representing a board from a move string
+const generateNewBoardAsString = move_data => {
+  let current_state = state;
+  let move_type = move_data[0], marbles = move_data[1], direction = move_data[2];
+  let marble_list = [];
+
+  // parse marbles
+  for (let i = 0; i < marbles.length / 2; i++) {
+    let new_marble = [marbles[i*2].toLowerCase(), marbles[i*2+1]];
+    marble_list.push(new_marble);
+  }
+  // parse direction
+  let coordinate_mod = convertDirectionToCoordinateModifier(direction);
+  
+  // do stuff
+  // general case (no extra movement required)
+  marble_list.forEach( (item) => {
+    // remove old marble
+    current_state[item[0]][item[1]] = EMP;
+  });
+  marble_list.forEach( (item) => {
+    // add new marble if not oob
+    let change_result = changeStateMarble(current_state, item, coordinate_mod, WHT);
+    if (change_result != undefined) { current_state = change_result[0]; }
+    while (change_result != undefined && change_result[1] == BLK) { // sumito
+      change_result = changeStateMarble(current_state, change_result[2], coordinate_mod, BLK);
+      current_state = change_result[0];
+    }
+  })
+
+  let marble_array = getMarblesAsArray(current_state);
+  // sorting?
+
+  return marble_array.join(",")
+}
+
+// changes the given state by editing a marble
+// returns the state, the marble previously in the spot, and a link to that spot for recursive calls
+const changeStateMarble = (state, marble, modifier, marble_col) => {
+  try {
+    let new_letter_pos = String.fromCharCode(marble[0].charCodeAt(0) + modifier[0]);
+    let new_num_pos = parseInt(marble[1]) + modifier[1];
+    let current_marble = state[new_letter_pos][new_num_pos];
+    state[new_letter_pos][new_num_pos] = marble_col;
+    return [state, current_marble, new_letter_pos+String(new_num_pos)];
+  } catch (ignore) {}
+}
+
+// get all the marbles on the board as an array of strings
+const getMarblesAsArray = (state) => {
+  return [];
+}
+
+// get a marble on the board as a string
+const getMarbleAsString = (marble, state) => {
+  const marbleLetter = String.fromCharCode(marble[0].charCodeAt(0));
+  const marbleNum = parseInt(marble[1]);
+  const marbleColour = convertColourValueToString(state[marbleLetter][marbleNum]);
+  return `${marbleLetter}${marbleNum}${marbleColour}`;
+};
