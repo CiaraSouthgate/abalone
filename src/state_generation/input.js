@@ -30,7 +30,7 @@ export const parseInputFile = (callback) => {
     let moves = generateMoves(startingColour, marbleCoordinates);
 
     // do callback with finished data
-    callback(generateOutput(moves));
+    callback(generateOutput(moves, startingColour));
   };
 
   // catch error
