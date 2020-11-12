@@ -3,28 +3,28 @@ import React from 'react';
 import styled from 'styled-components';
 import {
   BLK,
-  WHT,
-  EMP,
+  BOARD_LAYOUT_NAMES,
   BOARD_LAYOUTS,
-  MARBLE_COLORS,
-  GAME_MODE,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_MINUTES,
-  BOARD_LAYOUT_NAMES,
-  DIRECTIONS
+  EMP,
+  GAME_MODE,
+  MARBLE_COLOURS,
+  WHT,
+  DIRECTION
 } from '../constants';
 
 import {
-  Modal,
-  FormControlLabel,
-  Checkbox,
-  FormLabel,
-  TextField,
   Button,
+  FormControlLabel,
+  FormLabel,
+  Modal,
   Radio,
-  RadioGroup
+  RadioGroup,
+  TextField
 } from '@material-ui/core';
 import { ButtonContainer } from './ButtonContainer';
+import { InputFile } from './InputFile';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -145,7 +145,7 @@ export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
   const [turn, setTurn] = React.useState(BLK);
-  const [playerColor] = React.useState(MARBLE_COLORS.BLACK);
+  const [playerColor] = React.useState(MARBLE_COLOURS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [timeLimitInMinutes] = React.useState(DEFAULT_TIME_LIMIT_IN_MINUTES);
@@ -186,23 +186,23 @@ export const Game = () => {
     let newascii = ascii;
 
     switch (direction) {
-      case DIRECTIONS.EAST:
+      case DIRECTION.E:
         newcol = col + 1;
         break;
-      case DIRECTIONS.WEST:
+      case DIRECTION.W:
         newcol = col - 1;
         break;
-      case DIRECTIONS.NORTH_EAST:
+      case DIRECTION.NE:
         newascii = ascii + 1;
         newcol = col + 1;
         break;
-      case DIRECTIONS.NORTH_WEST:
+      case DIRECTION.NW:
         newascii = ascii + 1;
         break;
-      case DIRECTIONS.SOUTH_EAST:
+      case DIRECTION.SE:
         newascii = ascii - 1;
         break;
-      case DIRECTIONS.SOUTH_WEST:
+      case DIRECTION.SW:
         newascii = ascii - 1;
         newcol = col - 1;
         break;
@@ -226,17 +226,17 @@ export const Game = () => {
 
     console.log(rowDiff, colDiff);
     if (rowDiff === -1 && colDiff === 0) {
-      return DIRECTIONS.NORTH_WEST;
+      return DIRECTION.NW;
     } else if (rowDiff === -1 && colDiff === -1) {
-      return DIRECTIONS.NORTH_EAST;
+      return DIRECTION.NE;
     } else if (rowDiff === 0 && colDiff === -1) {
-      return DIRECTIONS.EAST;
+      return DIRECTION.E;
     } else if (rowDiff === 0 && colDiff === 1) {
-      return DIRECTIONS.WEST;
+      return DIRECTION.W;
     } else if (rowDiff === 1 && colDiff === 1) {
-      return DIRECTIONS.SOUTH_WEST;
+      return DIRECTION.SW;
     } else if (rowDiff === 1 && colDiff === 0) {
-      return DIRECTIONS.SOUTH_EAST;
+      return DIRECTION.SE;
     }
   };
 
@@ -410,6 +410,10 @@ export const Game = () => {
               <Button onClick={onPlayClick} variant="contained" color="secondary" fullWidth>
                 PLAY
               </Button>
+            </ConfigRow>
+            <FormLabel component="legend">State Generation</FormLabel>
+            <ConfigRow>
+              <InputFile />
             </ConfigRow>
           </ConfigBody>
         </Paper>
