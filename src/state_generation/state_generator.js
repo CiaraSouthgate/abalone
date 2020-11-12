@@ -1,3 +1,4 @@
+import { Rowing } from '@material-ui/icons';
 import { BLK, BOARD_LAYOUTS, DIRECTION, EMP, WHT } from '../constants';
 
 const state = BOARD_LAYOUTS.BLANK;
@@ -13,6 +14,7 @@ export const createInitialState = (marbleCoords) => {
     // set up initial state using coordinates.
     state[letter][num] = color === 'w' ? WHT : BLK;
   });
+  return state;
 };
 
 const getColourStringFromCoordinate = (letter, num) => {
@@ -48,15 +50,16 @@ export const generateMoves = (startingColour, marbleCoords) => {
   const duo_marbles = getMarblePairs(single_marbles);
   // generate a list of trio neighbour marbles
   const trio_marbles = getMarbleTrios(duo_marbles);
+
   // Go through each list of marbles and check and generate moves for each one.
   const single_marble_moves = getSingleMarbleMoves(single_marbles);
-  console.log(single_marble_moves);
 
   const double_marble_moves = getMarbleGroupMoves(duo_marbles);
-  console.log(double_marble_moves);
 
   const triple_marble_moves = getMarbleGroupMoves(trio_marbles);
-  console.log(triple_marble_moves);
+
+  // return moves
+  return single_marble_moves.concat(double_marble_moves, triple_marble_moves);
 };
 
 // This function will go through each single marble and return all the possible moves as an array of strings
@@ -152,7 +155,7 @@ const getSingleMarbleMoves = (coordinates) => {
     for (let k = 0; k < neighbours.length; k++) {
       if (neighbours[k].includes('emp')) {
         // get the direction and create the correct move string
-        const direction = getDirection(neighbours[k], coordinates[i]);
+        const direction = getDirection(coordinates[i], neighbours[k]);
         const coord = coordinates[i].substr(0, 2).toUpperCase();
         const thisMove = `SINGLE ${coord} ${direction}`;
         moves.push(thisMove);
@@ -327,4 +330,113 @@ const setMultiMoveGroups = (marble1, marble2) => {
   }
 
   return [inline, sidestep];
+};
+
+// generates the output required for submission
+export const generateOutput = (moves, startingColour) => {
+  let new_states = "";
+  let moves_string = "";
+  
+  // generate new states from moves
+  for (let i = 0; i < moves.length; i++) {
+    // get data from current move and apply to state
+    let move_data = moves[i].split(" ");
+    let new_state = generateNewBoardAsString(move_data, startingColour);
+    // add data as string to bigger string
+    moves_string += moves[i] + "\n";
+    new_states += new_state + "\n";
+  }
+
+  // slice removes last \n from strings
+  return [new_states.slice(0,-1), moves_string.slice(0,-1)];
+}
+
+// generates a string representing a board from a move string
+const generateNewBoardAsString = (move_data, startingColour) => {
+  let current_state = JSON.parse(JSON.stringify(state)); // deep copy state
+  let move_type = move_data[0], marbles = move_data[1], direction = move_data[2];
+  let marble_list = [];
+  const myColour = startingColour == 'w' ? WHT : BLK;
+  const notMyColour = startingColour == 'w' ? BLK : WHT;
+
+  // parse marbles
+  for (let i = 0; i < marbles.length / 2; i++) {
+    let new_marble = [marbles[i*2].toLowerCase(), marbles[i*2+1]];
+    marble_list.push(new_marble);
+  }
+  // parse direction
+  let coordinate_mod = convertDirectionToCoordinateModifier(direction);
+  
+  // move the marbles
+  marble_list.forEach( (item) => {
+    // remove old marble
+    current_state[item[0]][item[1]] = EMP;
+  });
+  marble_list.forEach( (item) => {
+    // add new marble if not oob
+    let change_result = changeStateMarble(current_state, item, coordinate_mod, myColour);
+    if (change_result != undefined) { current_state = change_result[0]; }
+    while (change_result != undefined && change_result[1] == notMyColour) { // sumito
+      change_result = changeStateMarble(current_state, change_result[2], coordinate_mod, notMyColour);
+      if (change_result != undefined) { current_state = change_result[0]; }
+    }
+  } );
+
+  let marble_array = getMarblesAsArray(current_state);
+  // sorting
+  marble_array.sort( (a, b) => { a[1] - b[1] } ); // by columns
+  marble_array.sort( (a, b) => { a.charCodeAt(0) - b.charCodeAt(0) } ); // by rows
+  marble_array.sort( (a, b) => { 
+    if (a[2] =='b' && b[2] == 'w') return -1;
+    if (a[2] =='w' && b[2] == 'b') return 1;
+    else return 0;
+  } ); // by colour
+
+  return marble_array.join(",")
+}
+
+// changes the given state by editing a marble
+// returns the state, the marble previously in the spot, and a link to that spot for recursive calls
+const changeStateMarble = (cur_state, marble, modifier, marble_col) => {
+  try {
+    let new_letter_pos = String.fromCharCode(marble[0].charCodeAt(0) + modifier[0]);
+    let new_num_pos = parseInt(marble[1]) + modifier[1];
+    let current_marble = cur_state[new_letter_pos][new_num_pos];
+    cur_state[new_letter_pos][new_num_pos] = marble_col;
+    return [cur_state, current_marble, new_letter_pos+String(new_num_pos)];
+  } catch (ignore) {} // if oob, return undefined
+}
+
+// get all the marbles on the board as an array of strings
+const getMarblesAsArray = (cur_state) => {
+  let board_string_array = [];
+  const board_index = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+  const row_index = { i: [ 5, 6, 7, 8, 9 ],
+                      h: [ 4, 5, 6, 7, 8, 9 ],
+                      g: [ 3, 4, 5, 6, 7, 8, 9 ],
+                      f: [ 2, 3, 4, 5, 6, 7, 8, 9 ],
+                      e: [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ],
+                      d: [ 1, 2, 3, 4, 5, 6, 7, 8 ],
+                      c: [ 1, 2, 3, 4, 5, 6, 7 ],
+                      b: [ 1, 2, 3, 4, 5, 6 ],
+                      a: [ 1, 2, 3, 4, 5 ]
+  }
+  board_index.forEach( row => {
+    row_index[row].forEach( spot => {
+      let marble_string = getMarbleAsString(row+String(spot), cur_state);
+      if (marble_string[2] != 'e') {
+        board_string_array.push(marble_string);
+      }
+    })
+  })
+  return board_string_array;
+}
+
+// get a marble on the board as a string
+const getMarbleAsString = (marble, cur_state) => {
+  const marbleLetter = String.fromCharCode(marble[0].charCodeAt(0));
+  const marbleUpper = marbleLetter.toUpperCase();
+  const marbleNum = parseInt(marble[1]);
+  const marbleColour = convertColourValueToString(cur_state[marbleLetter][marbleNum]);
+  return `${marbleUpper}${marbleNum}${marbleColour}`;
 };

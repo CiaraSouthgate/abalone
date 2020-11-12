@@ -1,7 +1,7 @@
-import { createInitialState, generateMoves } from './state_generator';
+import { createInitialState, generateMoves, generateOutput } from './state_generator';
 
 // handles input of text file to our state generator
-export const parseInputFile = () => {
+export const parseInputFile = (callback) => {
   // get input tag
   let input = document.getElementById('input');
   // get file
@@ -24,10 +24,13 @@ export const parseInputFile = () => {
     let marbleCoordinates = parseCoords(lines[1].toLowerCase());
 
     // pass information to the state generator
-    let initialState = createInitialState(marbleCoordinates);
+    createInitialState(marbleCoordinates);
 
     // pass info to move generator
     let moves = generateMoves(startingColour, marbleCoordinates);
+
+    // do callback with finished data
+    callback(generateOutput(moves, startingColour));
   };
 
   // catch error

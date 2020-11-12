@@ -1,5 +1,5 @@
 import React from 'react';
-import { parseInputFile } from '../state_generation';
+import { parseInputFile, downloadTextfile } from '../state_generation';
 import { Button } from '@material-ui/core';
 
 export const InputFile = () => {
@@ -7,7 +7,12 @@ export const InputFile = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    parseInputFile(inputRef.current.files[0]);
+    parseInputFile( (data) => {
+      // Download output file for states
+      downloadTextfile(data[0], 'TestN.board');
+      // Download output file for moves
+      downloadTextfile(data[1], 'TestN.move');
+    });
   };
 
   return (
