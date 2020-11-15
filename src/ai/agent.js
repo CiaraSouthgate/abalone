@@ -36,23 +36,25 @@ const max_value = (state, alpha, beta, d) => {
     if (cutoff_test(state, depth)) return spencer_heuristic(state);
     let v = neg_inf;
     let marble_coordinates = getMarblesAsArray(state);
-    for(action in generateMoves(max_colour, marble_coordinates)){
-        v = Math.max(v, min_value(result(state, action), alpha, beta, d-1))
+    let actions = generateMoves(max_colour, marble_coordinates);
+    for(let i = 0; i < actions.length; i++){
+        v = Math.max(v, min_value(result(state, actions[i]), alpha, beta, d-1))
         if (v > beta) return v;
         alpha = Math.max(alpha, v); 
         // Sets the best move
-        best_move = action;
+        best_move = actions[i];
     }
     return v;
-} 
+}
 
 // Returns a utility value
 const min_value = (state, alpha, beta, d) => {
     if (cutoff_test(state, depth)) return spencer_heuristic(state);
     let v = pos_inf;
     let marble_coordinates = getMarblesAsArray(state);
-    for (action in generateMoves(min_colour, marble_coordinates)){
-        v = Math.min(v, max_value(result(state, action), alpha, beta, d-1))
+    let actions = generateMoves(min_colour, marble_coordinates);
+    for (let i = 0; i < actions.length; i++){
+        v = Math.min(v, max_value(result(state, actions[i]), alpha, beta, d-1))
         if (v <= a) return v;
         beta = Math.min(beta, v);
     }
