@@ -193,7 +193,7 @@ const getNeighbourCoordinateWithDirection = (marble, direction) => {
   } catch (ignore) {}
 };
 
-const convertColourValueToString = (colour) => {
+export const convertColourValueToString = (colour) => {
   switch (colour) {
     case EMP:
       return 'emp';
