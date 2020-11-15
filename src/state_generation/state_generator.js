@@ -142,7 +142,6 @@ const getNeighbours = (coord) => {
       }
     } catch (ignored) {}
   });
-
   return neighbours;
 };
 
@@ -346,7 +345,6 @@ export const generateOutput = (moves, startingColour) => {
     moves_string += moves[i] + '\n';
     new_states += new_state + '\n';
   }
-
   // slice removes last \n from strings
   return [new_states.slice(0, -1), moves_string.slice(0, -1)];
 };

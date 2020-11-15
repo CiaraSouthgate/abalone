@@ -1,29 +1,43 @@
 const { generateMoves } = require("../state_generation");
+const { spencer_heuristic } = require("./evaluation_function");
+const { getMarblesAsArray } = require("../state_generation");
 
 // negative infinity
 const neg_inf = Number.NEGATIVE_INFINITY;
 // positive infinity
 const pos_inf = Number.POSITIVE_INFINITY;
+// global variable for depth
+var depth = 5;
 // global variable for best move
 var best_move;
 
+var max_colour;
+var min_colour;
 
-// Replace utility() with your heuristic function.
-// 
+
+// -------
+// Alberto: result(state, action) needs to be replaced by a function that takes the state and a single action as input and returns the resulting state.
+// -------
 
 // Returns an action
-const Alpha_Beta_Search = (state) => {
-    let v = max_value(state, neg_inf, pos_inf);
+const Alpha_Beta_Search = (state, startingColour) => {
+    max_colour = startingColour;
+    if (max_colour == "w") {
+        min_colour = "b";
+    } else {
+        min_colour = "w";
+    };
+    let v = max_value(state, neg_inf, pos_inf, depth);
     return best_move;
 }
 
-
 // Returns a utility value
-const max_value = (state, alpha, beta, depth) => {
-    if (cutoff_test(state, depth)) return utility(state);
+const max_value = (state, alpha, beta, d) => {
+    if (cutoff_test(state, depth)) return spencer_heuristic(state);
     let v = neg_inf;
-    for(action in generateMoves(state)){
-        v = Math.max(v, min_value(result(state, action), alpha, beta, depth-1))
+    let marble_coordinates = getMarblesAsArray(state);
+    for(action in generateMoves(max_colour, marble_coordinates)){
+        v = Math.max(v, min_value(result(state, action), alpha, beta, d-1))
         if (v > beta) return v;
         alpha = Math.max(alpha, v); 
         // Sets the best move
@@ -33,11 +47,12 @@ const max_value = (state, alpha, beta, depth) => {
 } 
 
 // Returns a utility value
-const min_value = (state, alpha, beta, depth) => {
-    if (cutoff_test(state, depth)) return utility(state);
+const min_value = (state, alpha, beta, d) => {
+    if (cutoff_test(state, depth)) return spencer_heuristic(state);
     let v = pos_inf;
-    for (action in generateMoves(state)){
-        v = Math.min(v, max_value(result(state, action), alpha, beta, depth-1))
+    let marble_coordinates = getMarblesAsArray(state);
+    for (action in generateMoves(min_colour, marble_coordinates)){
+        v = Math.min(v, max_value(result(state, action), alpha, beta, d-1))
         if (v <= a) return v;
         beta = Math.min(beta, v);
     }
