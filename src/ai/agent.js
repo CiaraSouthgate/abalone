@@ -1,6 +1,6 @@
 const { generateMoves } = require("../state_generation");
 const { spencer_heuristic } = require("./evaluation_function");
-const { getMarblesAsArray } = require("../state_generation");
+const { getMarblesAsArray, createStateFromMove } = require("../state_generation");
 
 // negative infinity
 const neg_inf = Number.NEGATIVE_INFINITY;
@@ -38,7 +38,7 @@ const max_value = (state, alpha, beta, d) => {
     let marble_coordinates = getMarblesAsArray(state);
     let actions = generateMoves(max_colour, marble_coordinates);
     for(let i = 0; i < actions.length; i++){
-        v = Math.max(v, min_value(result(state, actions[i]), alpha, beta, d-1))
+        v = Math.max(v, min_value(createStateFromMove(state, actions[i]), alpha, beta, d-1))
         if (v > beta) return v;
         alpha = Math.max(alpha, v); 
         // Sets the best move
@@ -54,7 +54,7 @@ const min_value = (state, alpha, beta, d) => {
     let marble_coordinates = getMarblesAsArray(state);
     let actions = generateMoves(min_colour, marble_coordinates);
     for (let i = 0; i < actions.length; i++){
-        v = Math.min(v, max_value(result(state, actions[i]), alpha, beta, d-1))
+        v = Math.min(v, max_value(createStateFromMove(state, actions[i]), alpha, beta, d-1))
         if (v <= alpha) return v;
         beta = Math.min(beta, v);
     }
