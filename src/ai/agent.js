@@ -55,7 +55,7 @@ const min_value = (state, alpha, beta, d) => {
     let actions = generateMoves(min_colour, marble_coordinates);
     for (let i = 0; i < actions.length; i++){
         v = Math.min(v, max_value(result(state, actions[i]), alpha, beta, d-1))
-        if (v <= a) return v;
+        if (v <= alpha) return v;
         beta = Math.min(beta, v);
     }
     return v;
