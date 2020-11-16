@@ -29,6 +29,8 @@ export const parseInputFile = (callback) => {
     // pass info to move generator
     let moves = generateMoves(startingColour, marbleCoordinates);
 
+    console.log(moves);
+
     // do callback with finished data
     callback(generateOutput(moves, startingColour));
   };

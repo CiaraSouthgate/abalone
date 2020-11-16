@@ -167,38 +167,38 @@ export const Game = () => {
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
   const score = 0; // ???
 
-  React.useEffect(() => {
-    const coords = [
-      'A3b',
-      'B2b',
-      'B3b',
-      'C3b',
-      'C4b',
-      'G7b',
-      'G8b',
-      'H7b',
-      'H8b',
-      'H9b',
-      'I8b',
-      'I9b',
-      'A4w',
-      'A5w',
-      'B4w',
-      'B5w',
-      'B6w',
-      'C5w',
-      'C6w',
-      'G4w',
-      'G5w',
-      'H4w',
-      'H5w',
-      'H6w',
-      'I5w',
-      'I6w'
-    ];
-    const gs = coordinatesToGameState(coords);
-    setGameState(gs);
-  }, []);
+  // React.useEffect(() => {
+  //   const coords = [
+  //     'A3b',
+  //     'B2b',
+  //     'B3b',
+  //     'C3b',
+  //     'C4b',
+  //     'G7b',
+  //     'G8b',
+  //     'H7b',
+  //     'H8b',
+  //     'H9b',
+  //     'I8b',
+  //     'I9b',
+  //     'A4w',
+  //     'A5w',
+  //     'B4w',
+  //     'B5w',
+  //     'B6w',
+  //     'C5w',
+  //     'C6w',
+  //     'G4w',
+  //     'G5w',
+  //     'H4w',
+  //     'H5w',
+  //     'H6w',
+  //     'I5w',
+  //     'I6w'
+  //   ];
+  //   const gs = coordinatesToGameState(coords);
+  //   setGameState(gs);
+  // }, []);
 
   React.useEffect(() => {
     const coords = convertGameStateToCordinateArray(gameState);
@@ -224,13 +224,13 @@ export const Game = () => {
 
   const onPlayClick = () => {
     setIsConfigModalShown(false);
-    // if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
-    //   setGameState(BOARD_LAYOUTS.STANDARD);
-    // } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
-    //   setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
-    // } else {
-    //   setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
-    // }
+    if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
+      setGameState(BOARD_LAYOUTS.STANDARD);
+    } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
+      setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
+    } else {
+      setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
+    }
   };
 
   const getPosition = (position, direction) => {
