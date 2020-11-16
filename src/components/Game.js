@@ -338,7 +338,8 @@ export const Game = () => {
 
         const dir = parseInt(prompt(moves.join(' / ')));
         // if empty string then continue.
-        if (!dir) {
+        if (isNaN(dir)) {
+          console.log("user cancelled");
           return;
         }
         try {
@@ -347,14 +348,14 @@ export const Game = () => {
           moves[dir].split(' '),
           mapToColour(turn)
         );
-        } catch(err) {
-          console.log("not a valid option");
-          return;
-        }
         const newGameState = coordinatesToGameState(nextBoardConfig);
         setGameState(newGameState);
         setselectedMarbles(new Set());
         setTurn(turn === BLK ? WHT : BLK);
+        } catch(err) {
+          console.log("not a valid option");
+          return;
+        }
       }
     }
   };
