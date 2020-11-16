@@ -13,7 +13,7 @@ import {
   WHT,
   DIRECTION
 } from '../constants';
-
+import { Alpha_Beta_Search } from '../ai/agent';
 import {
   Button,
   FormControlLabel,
@@ -25,6 +25,18 @@ import {
 } from '@material-ui/core';
 import { ButtonContainer } from './ButtonContainer';
 import { InputFile } from './InputFile';
+import {
+  convertGameStateToCordinateArray,
+  coordinatesToGameState,
+  getLegalMoveInfo,
+  mapToColour
+} from '../utils/movement';
+import {
+  createInitialState,
+  generateMoves,
+  getMarbleCoordinateInDirectionWithOffset,
+  getNextBoardConfiguration
+} from '../state_generation';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -144,6 +156,7 @@ const ScoreDisplay = styled.th``;
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
+  const [legalMoves, setLegalMoves] = React.useState([]);
   const [turn, setTurn] = React.useState(BLK);
   const [playerColour] = React.useState(MARBLE_COLOURS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
@@ -152,6 +165,17 @@ export const Game = () => {
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
   const score = 0; // ???
+
+  React.useEffect(() => {
+    const coords = convertGameStateToCordinateArray(gameState);
+    createInitialState(coords);
+    const moves = generateMoves(mapToColour(turn), coords);
+    setLegalMoves(moves);
+    if (turn === BLK) {
+      const move = Alpha_Beta_Search(gameState, turn);
+      console.log(move);
+    }
+  }, [gameState]);
 
   const handleInitBoardLayoutChange = (e) => {
     setInitBoardLayout(parseInt(e.target.value));
@@ -235,30 +259,6 @@ export const Game = () => {
     }
   };
 
-  const moveMarbles = (positions, direction) => {
-    const adder = gameState[positions[0][0]][parseInt(positions[0][1])];
-    const newGameState = JSON.parse(JSON.stringify(gameState));
-
-    for (const position of positions) {
-      const row = position[0];
-      const col = parseInt(position[1]);
-      const newPosition = getPosition(position, direction);
-      if (newPosition) {
-        const newrow = newPosition[0];
-        const newcol = parseInt(newPosition[1]);
-
-        if (!selectedMarbles.has(`${newrow}${newcol}`) && gameState[newrow][newcol] === adder) {
-          console.log('not valid move');
-          return;
-        }
-
-        newGameState[newrow][newcol] += adder;
-        newGameState[row][col] -= adder;
-      }
-    }
-    setGameState(newGameState);
-  };
-
   const isNeighbor = (position1, position2) => {
     return getDirection(position1, position2) !== undefined;
   };
@@ -297,12 +297,8 @@ export const Game = () => {
   };
 
   const onMarbleClick = (row, col) => {
-    if (gameState[row][col] !== EMP) {
+    if (gameState[row][col] === turn) {
       // Push opponent Marble logic
-      if (gameState[row][col] !== turn) {
-        // Calculate the number of selected Marble
-        return;
-      }
       if (selectedMarbles.size > 1) {
         setselectedMarbles(new Set());
         return;
@@ -325,27 +321,24 @@ export const Game = () => {
       newselectedMarbles.add(`${row}${col}`);
       setselectedMarbles(newselectedMarbles);
     } else {
-      if (selectedMarbles.size === 0) {
-        return;
+      const moves = getLegalMoveInfo(legalMoves, selectedMarbles);
+      if (moves.length !== 0) {
+        console.log(moves);
+
+        const dir = parseInt(prompt(moves.join(' / ')));
+
+        const nextBoardConfig = getNextBoardConfiguration(
+          gameState,
+          moves[dir].split(' '),
+          mapToColour(turn)
+        );
+        const newGameState = coordinatesToGameState(nextBoardConfig);
+        setGameState(newGameState);
+        setselectedMarbles(new Set());
+        setTurn(turn === BLK ? WHT : BLK);
       }
-      let dir = undefined;
-      selectedMarbles.forEach((val) => {
-        let temp = getDirection(val, `${row}${col}`);
-        if (temp !== undefined) {
-          dir = temp;
-        }
-      });
-      if (dir !== undefined) {
-        moveMarbles(Array.from(selectedMarbles), dir);
-      }
-      setselectedMarbles(new Set());
-      setTurn(turn === BLK ? WHT : BLK);
     }
   };
-
-  const onMarbleHover = (row, col) => {};
-
-  const getOpponentsNeighbors = (position, direction) => {};
 
   return (
     <Wrapper>
@@ -425,8 +418,7 @@ export const Game = () => {
                   key={`${k}${col}`}
                   for={gameState[k][col]}
                   selected={selectedMarbles.has(`${k}${col}`)}
-                  onClick={() => onMarbleClick(k, col)}
-                  onMouseEnter={() => onMarbleHover(k, col)}>
+                  onClick={() => onMarbleClick(k, col)}>
                   {`${k}${col}`}
                 </BoardTile>
               ))}
