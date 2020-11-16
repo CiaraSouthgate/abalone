@@ -1,11 +1,15 @@
-// The number of marbles
-
 import { keys } from '@material-ui/core/styles/createBreakpoints';
 import { BLK, DIRECTION, WHT } from '../constants';
 
+export const jihyoHeuristic = (state, colour) => {
+  return (
+    numberOfMarblesEvaluation(state, colour) + formationBreakAndCoherenceEvaluation(state, colour)
+  );
+};
+
 // The function returns difference in
 // the number of marbles between mine and the opponent's.
-const numberOfMarblesEvaluation = (state, colour) => {
+export const numberOfMarblesEvaluation = (state, colour) => {
   const opponentColour = colour === WHT ? BLK : WHT;
   let nMarbles = 0;
   let nOpponentMarbles = 0;
@@ -23,8 +27,7 @@ const numberOfMarblesEvaluation = (state, colour) => {
 };
 
 // Formation break
-
-const formationBreakAndCoherenceEvaluation = (state, colour) => {
+export const formationBreakAndCoherenceEvaluation = (state, colour) => {
   let breakScore = 0;
   let coherenceScore = 0;
   const opponentColour = colour === WHT ? BLK : WHT;
@@ -55,6 +58,65 @@ const formationBreakAndCoherenceEvaluation = (state, colour) => {
   return breakScore + Math.floor(coherenceScore);
 };
 
+export const spencer_heuristic = (state, colour) => {
+  let positioningValue = 0;
+  let numOpponentMarbles = 0;
+  Object.keys(state).forEach((row) => {
+    Object.keys(state[row]).forEach((column) => {
+      let thisMarble = state[row][column];
+      if (thisMarble === colour) {
+        let coord = `${row}${column}`;
+        positioningValue += centerPositionEvaluation(coord);
+      } else if (thisMarble !== 0) {
+        numOpponentMarbles++;
+      }
+    });
+  });
+  let opponentMarbleValue = aggressiveMoveEvaluation(numOpponentMarbles);
+  return opponentMarbleValue + positioningValue;
+};
+
+const MAX_MARBLES = 14;
+
+const aggressiveMoveEvaluation = (num) => {
+  return MAX_MARBLES / num;
+};
+
+const centerPositionEvaluation = (position) => {
+  // These are all the positions on the edge of the board.
+  let bad_positions = [
+    'i5',
+    'i6',
+    'i7',
+    'i8',
+    'i9',
+    'h4',
+    'h9',
+    'g3',
+    'g9',
+    'f2',
+    'f9',
+    'e1',
+    'e9',
+    'd1',
+    'd8',
+    'c1',
+    'c7',
+    'b1',
+    'b7',
+    'a1',
+    'a2',
+    'a3',
+    'a4',
+    'a5'
+  ];
+  if (bad_positions.includes(position)) {
+    return -1;
+  } else {
+    return 1;
+  }
+};
+
 const getNextPosition = (row, column, direction) => {
   let nextRow = row;
   let nextColumn = column;
@@ -82,5 +144,3 @@ const getNextPosition = (row, column, direction) => {
   }
   return [nextRow, nextColumn];
 };
-
-export { numberOfMarblesEvaluation, formationBreakAndCoherenceEvaluation };

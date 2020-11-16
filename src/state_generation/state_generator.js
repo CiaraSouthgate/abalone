@@ -1,4 +1,4 @@
-import { Rowing } from '@material-ui/icons';
+/* eslint-disable no-undef */
 import { BLK, BOARD_LAYOUTS, DIRECTION, EMP, WHT } from '../constants';
 
 const state = BOARD_LAYOUTS.BLANK;
@@ -142,7 +142,6 @@ const getNeighbours = (coord) => {
       }
     } catch (ignored) {}
   });
-
   return neighbours;
 };
 
@@ -193,7 +192,7 @@ const getNeighbourCoordinateWithDirection = (marble, direction) => {
   } catch (ignore) {}
 };
 
-const convertColourValueToString = (colour) => {
+export const convertColourValueToString = (colour) => {
   switch (colour) {
     case EMP:
       return 'emp';
@@ -288,7 +287,7 @@ const getInlineMoves = (marbles, directions) => {
       }
     }
 
-    moves.push(`INLINE ${getMarblesString(marbles)} ${direction}`);
+    moves.push(`INLINE ${getMarblesString(marbles)} ${direction}${sumito ? ' SUMITO' : ''}`);
   });
   return moves.length > 0 ? moves : null;
 };
@@ -346,7 +345,6 @@ export const generateOutput = (moves, startingColour) => {
     moves_string += moves[i] + '\n';
     new_states += new_state + '\n';
   }
-
   // slice removes last \n from strings
   return [new_states.slice(0, -1), moves_string.slice(0, -1)];
 };
@@ -358,8 +356,8 @@ const generateNewBoardAsString = (move_data, startingColour) => {
     marbles = move_data[1],
     direction = move_data[2];
   let marble_list = [];
-  const myColour = startingColour == 'w' ? WHT : BLK;
-  const notMyColour = startingColour == 'w' ? BLK : WHT;
+  const myColour = startingColour === 'w' ? WHT : BLK;
+  const notMyColour = startingColour === 'w' ? BLK : WHT;
 
   // parse marbles
   for (let i = 0; i < marbles.length / 2; i++) {
@@ -377,10 +375,10 @@ const generateNewBoardAsString = (move_data, startingColour) => {
   marble_list.forEach((item) => {
     // add new marble if not oob
     let change_result = changeStateMarble(current_state, item, coordinate_mod, myColour);
-    if (change_result != undefined) {
+    if (change_result !== undefined) {
       current_state = change_result[0];
     }
-    while (change_result != undefined && change_result[1] == notMyColour) {
+    while (change_result !== undefined && change_result[1] === notMyColour) {
       // sumito
       change_result = changeStateMarble(
         current_state,
@@ -388,7 +386,7 @@ const generateNewBoardAsString = (move_data, startingColour) => {
         coordinate_mod,
         notMyColour
       );
-      if (change_result != undefined) {
+      if (change_result !== undefined) {
         current_state = change_result[0];
       }
     }
@@ -403,8 +401,8 @@ const generateNewBoardAsString = (move_data, startingColour) => {
     a.charCodeAt(0) - b.charCodeAt(0);
   }); // by rows
   marble_array.sort((a, b) => {
-    if (a[2] == 'b' && b[2] == 'w') return -1;
-    if (a[2] == 'w' && b[2] == 'b') return 1;
+    if (a[2] === 'b' && b[2] === 'w') return -1;
+    if (a[2] === 'w' && b[2] === 'b') return 1;
     else return 0;
   }); // by colour
 
@@ -424,7 +422,7 @@ const changeStateMarble = (cur_state, marble, modifier, marble_col) => {
 };
 
 // get all the marbles on the board as an array of strings
-const getMarblesAsArray = (cur_state) => {
+export const getMarblesAsArray = (cur_state) => {
   let board_string_array = [];
   const board_index = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
   const row_index = {
@@ -441,7 +439,7 @@ const getMarblesAsArray = (cur_state) => {
   board_index.forEach((row) => {
     row_index[row].forEach((spot) => {
       let marble_string = getMarbleAsString(row + String(spot), cur_state);
-      if (marble_string[2] != 'e') {
+      if (marble_string[2] !== 'e') {
         board_string_array.push(marble_string);
       }
     });
@@ -456,4 +454,48 @@ const getMarbleAsString = (marble, cur_state) => {
   const marbleNum = parseInt(marble[1]);
   const marbleColour = convertColourValueToString(cur_state[marbleLetter][marbleNum]);
   return `${marbleUpper}${marbleNum}${marbleColour}`;
+};
+
+// generates a state object from a given move
+export const createStateFromMove = (start_state, move) => {
+  let new_state = JSON.parse(JSON.stringify(start_state)); // deep copy state
+
+  // get move data
+  let move_data = move.split(' ');
+  let marbles = move_data[1],
+    direction = move_data[2];
+  let marble_list = [];
+
+  // parse marbles
+  for (let i = 0; i < marbles.length / 2; i++) {
+    let new_marble = [marbles[i * 2].toLowerCase(), marbles[i * 2 + 1]];
+    marble_list.push(new_marble);
+  }
+  // get marble colour from a move
+  const myColour = new_state[marble_list[0][0]][marble_list[0][1]] === WHT ? WHT : BLK;
+  const notMyColour = myColour === WHT ? BLK : WHT;
+  // parse direction
+  let coordinate_mod = convertDirectionToCoordinateModifier(direction);
+
+  // genarate new state=
+  marble_list.forEach((item) => {
+    // remove old marble
+    new_state[item[0]][item[1]] = EMP;
+  });
+  marble_list.forEach((item) => {
+    // add new marble if not oob
+    let change_result = changeStateMarble(new_state, item, coordinate_mod, myColour);
+    if (change_result !== undefined) {
+      new_state = change_result[0];
+    }
+    while (change_result !== undefined && change_result[1] === notMyColour) {
+      // sumito
+      change_result = changeStateMarble(new_state, change_result[2], coordinate_mod, notMyColour);
+      if (change_result !== undefined) {
+        new_state = change_result[0];
+      }
+    }
+  });
+
+  return new_state;
 };

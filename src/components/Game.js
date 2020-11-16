@@ -2,11 +2,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
-  formationBreakAndCoherenceEvaluation,
-  getNumberOfMarbles,
-  numberOfMarblesEvaluation
-} from '../ai/evaluation_function';
-import {
   BLK,
   BOARD_LAYOUT_NAMES,
   BOARD_LAYOUTS,
@@ -165,10 +160,6 @@ export const Game = () => {
   const handleGameModeChange = (e) => {
     setGameMode(parseInt(e.target.value));
   };
-
-  React.useEffect(() => {
-    console.log(formationBreakAndCoherenceEvaluation(gameState, turn));
-  }, [gameState]);
 
   const onPlayClick = () => {
     setIsConfigModalShown(false);
