@@ -7,22 +7,23 @@ const neg_inf = Number.NEGATIVE_INFINITY;
 // positive infinity
 const pos_inf = Number.POSITIVE_INFINITY;
 // global variable for depth
-var depth = 5;
+const depth = 5;
 // global variable for best move
-var best_move;
+const best_move;
+// Colour of Max, aka the colour of our game playing agent.
+const max_colour;
+// Colour of Min, aka the colour of the opponent.
+const min_colour;
+// Transposition table to keep track of which states we have visited already.
+const transposition_table = new HashTable();
 
-var max_colour;
-var min_colour;
+const utility = spencer_heuristic;
 
-
-// -------
-// Alberto: result(state, action) needs to be replaced by a function that takes the state and a single action as input and returns the resulting state.
-// -------
 
 // Returns an action
 const Alpha_Beta_Search = (state, startingColour) => {
     max_colour = startingColour;
-    if (max_colour == "w") {
+    if (max_colour === "w") {
         min_colour = "b";
     } else {
         min_colour = "w";
@@ -33,7 +34,7 @@ const Alpha_Beta_Search = (state, startingColour) => {
 
 // Returns a utility value
 const max_value = (state, alpha, beta, d) => {
-    if (cutoff_test(state, depth)) return spencer_heuristic(state);
+    if (cutoff_test(state, d)) return utility(state);
     let v = neg_inf;
     let marble_coordinates = getMarblesAsArray(state);
     let actions = generateMoves(max_colour, marble_coordinates);
@@ -49,7 +50,7 @@ const max_value = (state, alpha, beta, d) => {
 
 // Returns a utility value
 const min_value = (state, alpha, beta, d) => {
-    if (cutoff_test(state, depth)) return spencer_heuristic(state);
+    if (cutoff_test(state, d)) return utility(state);
     let v = pos_inf;
     let marble_coordinates = getMarblesAsArray(state);
     let actions = generateMoves(min_colour, marble_coordinates);
