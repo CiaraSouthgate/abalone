@@ -35,7 +35,8 @@ import {
   createInitialState,
   generateMoves,
   getMarbleCoordinateInDirectionWithOffset,
-  getNextBoardConfiguration
+  getNextBoardConfiguration,
+  convertColourValueToString
 } from '../state_generation';
 
 const TILE_WIDTH = 60;
@@ -172,7 +173,8 @@ export const Game = () => {
     const moves = generateMoves(mapToColour(turn), coords);
     setLegalMoves(moves);
     if (turn === BLK) {
-      const move = Alpha_Beta_Search(gameState, turn);
+      let colour = convertColourValueToString(turn);
+      const move = Alpha_Beta_Search(gameState, colour);
       console.log(move);
     }
   }, [gameState]);
