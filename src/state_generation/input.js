@@ -44,8 +44,5 @@ export const parseInputFile = (callback) => {
 // Function to parse coordinates from an inputString of marble coordinates.
 const parseCoords = (inputString) => {
   // parse and return all coordinates
-  console.log(inputString);
-  const temp = inputString.split(',');
-  console.log(temp);
   return inputString.split(',');
 };
