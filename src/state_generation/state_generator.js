@@ -1,4 +1,4 @@
-import { BLK, BOARD_LAYOUTS, DIRECTION, EMP, WHT } from '../constants';
+import {BLK, BOARD_LAYOUTS, DIRECTION, EMP, WHT} from '../constants';
 
 const state = BOARD_LAYOUTS.BLANK;
 const marble1directions = ['W', 'SE', 'SW'];
@@ -286,7 +286,7 @@ const getInlineMoves = (marbles, directions) => {
       }
     }
 
-    moves.push(`INLINE ${getMarblesString(marbles)} ${direction}${sumito ? ' SUMITO' : ''}`);
+    moves.push(`INLINE ${getMarblesString(marbles)} ${direction}`);
   });
   return moves.length > 0 ? moves : null;
 };
