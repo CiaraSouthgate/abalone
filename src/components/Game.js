@@ -165,19 +165,23 @@ export const Game = () => {
   const [timeLimitInSeconds] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
+  const [firstTurn, setFirstTurn] = React.useState(true);
   const score = 0; // ???
 
   React.useEffect(() => {
-    const coords = convertGameStateToCordinateArray(gameState);
-    createInitialState(coords);
-    const moves = generateMoves(mapToColour(turn), coords);
-    setLegalMoves(moves);
-    if (turn === BLK) {
-      let colour = convertColourValueToString(turn);
-      const move = Alpha_Beta_Search(gameState, colour);
-      console.log(move);
-    }
-  }, [gameState]);
+      const coords = convertGameStateToCordinateArray(gameState);
+      createInitialState(coords);
+      const moves = generateMoves(mapToColour(turn), coords);
+      setLegalMoves(moves);
+    if (firstTurn && !isConfigModalShown) {
+      // select random move
+      setFirstTurn(false);
+    } else if (turn === BLK && !isConfigModalShown) {
+        let colour = convertColourValueToString(turn);
+        const move = Alpha_Beta_Search(gameState, colour);
+        console.log(move);
+      }
+    }, [gameState]);
 
   const handleInitBoardLayoutChange = (e) => {
     setInitBoardLayout(parseInt(e.target.value));
@@ -193,7 +197,7 @@ export const Game = () => {
       setGameState(BOARD_LAYOUTS.STANDARD);
     } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
       setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
-    } else {
+    } else if (initBoardLayout === BOARD_LAYOUT_NAMES.GERMAN_DAISY) {
       setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
     }
   };
