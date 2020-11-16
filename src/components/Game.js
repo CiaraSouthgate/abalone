@@ -25,6 +25,19 @@ import {
 } from '@material-ui/core';
 import { ButtonContainer } from './ButtonContainer';
 import { InputFile } from './InputFile';
+import {
+  convertGameStateToCordinateArray,
+  coordinatesToGameState,
+  getLegalDirectionsToMove,
+  getLegalMoveInfo,
+  mapToColour
+} from '../utils/movement';
+import {
+  createInitialState,
+  generateMoves,
+  generateOutput,
+  getNextBoardConfiguration
+} from '../state_generation';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -144,6 +157,7 @@ const ScoreDisplay = styled.th``;
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
+  const [legalMoves, setLegalMoves] = React.useState([]);
   const [turn, setTurn] = React.useState(BLK);
   const [playerColour] = React.useState(MARBLE_COLOURS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
@@ -152,6 +166,53 @@ export const Game = () => {
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
   const score = 0; // ???
+
+  React.useEffect(() => {
+    const coords = [
+      'A3b',
+      'B2b',
+      'B3b',
+      'C3b',
+      'C4b',
+      'G7b',
+      'G8b',
+      'H7b',
+      'H8b',
+      'H9b',
+      'I8b',
+      'I9b',
+      'A4w',
+      'A5w',
+      'B4w',
+      'B5w',
+      'B6w',
+      'C5w',
+      'C6w',
+      'G4w',
+      'G5w',
+      'H4w',
+      'H5w',
+      'H6w',
+      'I5w',
+      'I6w'
+    ];
+    const gs = coordinatesToGameState(coords);
+    setGameState(gs);
+  }, []);
+
+  React.useEffect(() => {
+    const coords = convertGameStateToCordinateArray(gameState);
+    console.log(coords);
+    createInitialState(coords);
+    const moves = generateMoves(mapToColour(turn), coords);
+    setLegalMoves(moves);
+    const temp = generateOutput(moves, mapToColour(turn));
+    console.log(temp);
+  }, [gameState]);
+
+  React.useEffect(() => {
+    console.log('legalMoves updated');
+  }, [legalMoves]);
 
   const handleInitBoardLayoutChange = (e) => {
     setInitBoardLayout(parseInt(e.target.value));
@@ -163,13 +224,13 @@ export const Game = () => {
 
   const onPlayClick = () => {
     setIsConfigModalShown(false);
-    if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
-      setGameState(BOARD_LAYOUTS.STANDARD);
-    } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
-      setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
-    } else {
-      setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
-    }
+    // if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
+    //   setGameState(BOARD_LAYOUTS.STANDARD);
+    // } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
+    //   setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
+    // } else {
+    //   setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
+    // }
   };
 
   const getPosition = (position, direction) => {
@@ -325,21 +386,18 @@ export const Game = () => {
       newselectedMarbles.add(`${row}${col}`);
       setselectedMarbles(newselectedMarbles);
     } else {
-      if (selectedMarbles.size === 0) {
-        return;
+      const moves = getLegalMoveInfo(legalMoves, selectedMarbles);
+      if (moves.length !== 0) {
+        console.log(moves);
+        const nextBoardConfig = getNextBoardConfiguration(
+          gameState,
+          moves[0].split(' '),
+          mapToColour(turn)
+        );
+        const newGameState = coordinatesToGameState(nextBoardConfig);
+        setGameState(newGameState);
+        setselectedMarbles(new Set());
       }
-      let dir = undefined;
-      selectedMarbles.forEach((val) => {
-        let temp = getDirection(val, `${row}${col}`);
-        if (temp !== undefined) {
-          dir = temp;
-        }
-      });
-      if (dir !== undefined) {
-        moveMarbles(Array.from(selectedMarbles), dir);
-      }
-      setselectedMarbles(new Set());
-      setTurn(turn === BLK ? WHT : BLK);
     }
   };
 

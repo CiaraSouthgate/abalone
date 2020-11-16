@@ -349,9 +349,8 @@ export const generateOutput = (moves, startingColour) => {
   return [new_states.slice(0, -1), moves_string.slice(0, -1)];
 };
 
-// generates a string representing a board from a move string
-const generateNewBoardAsString = (move_data, startingColour) => {
-  let current_state = JSON.parse(JSON.stringify(state)); // deep copy state
+export const getNextBoardConfiguration = (cur_state, move_data, startingColour) => {
+  let current_state = JSON.parse(JSON.stringify(cur_state)); // deep copy state
   let move_type = move_data[0],
     marbles = move_data[1],
     direction = move_data[2];
@@ -370,6 +369,8 @@ const generateNewBoardAsString = (move_data, startingColour) => {
   // move the marbles
   marble_list.forEach((item) => {
     // remove old marble
+    // console.log(item);
+    // console.log(current_state[item[0]][item[1]]);
     current_state[item[0]][item[1]] = EMP;
   });
   marble_list.forEach((item) => {
@@ -405,8 +406,13 @@ const generateNewBoardAsString = (move_data, startingColour) => {
     if (a[2] === 'w' && b[2] === 'b') return 1;
     else return 0;
   }); // by colour
+  return marble_array;
+};
 
-  return marble_array.join(',');
+// generates a string representing a board from a move string
+const generateNewBoardAsString = (move_data, startingColour) => {
+  const marbleArr = getNextBoardConfiguration(state, move_data, startingColour);
+  return marbleArr.join(',');
 };
 
 // changes the given state by editing a marble
