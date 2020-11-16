@@ -31,7 +31,12 @@ import {
   getLegalMoveInfo,
   mapToColour
 } from '../utils/movement';
-import { createInitialState, generateMoves, getNextBoardConfiguration } from '../state_generation';
+import {
+  createInitialState,
+  generateMoves,
+  getMarbleCoordinateInDirectionWithOffset,
+  getNextBoardConfiguration
+} from '../state_generation';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;

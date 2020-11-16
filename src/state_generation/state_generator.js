@@ -242,6 +242,14 @@ const countMarblesInDirection = (startingMarble, direction, colour) => {
   return 1;
 };
 
+export const getMarbleCoordinateInDirectionWithOffset = (startingMarble, direction, offset) => {
+  let tempMarbleCoordinate = startingMarble;
+  for (let i = 0; i < offset; i++) {
+    tempMarbleCoordinate = getNeighbourCoordinateWithDirection(tempMarbleCoordinate, direction);
+  }
+  return tempMarbleCoordinate;
+};
+
 // This function returns the string representation of each marble coordinate in a marble group.
 const getMarblesFromGroup = (marbleGroup) => {
   const marbles = [];
@@ -257,7 +265,6 @@ const getMarbleGroupMoves = (coordinates) => {
   let moves = [];
   coordinates.forEach((set) => {
     const marbles = getMarblesFromGroup(set);
-
     const [inline, sidestep] = setMultiMoveGroups(marbles[0], marbles[1]);
     const inlineMoves = getInlineMoves(marbles, inline);
     if (!!inlineMoves) {
@@ -294,6 +301,16 @@ const getInlineMoves = (marbles, directions) => {
       const neighbourCoordinate = getNeighbourCoordinateWithDirection(leadMarble, direction);
       const numOpposing = countMarblesInDirection(neighbourCoordinate, direction, neighbourColour);
       if (numOpposing >= marbles.length) {
+        return;
+      }
+
+      const temp = getMarbleCoordinateInDirectionWithOffset(
+        neighbourCoordinate,
+        direction,
+        numOpposing
+      );
+      const c = getColourFromMarbleString(temp);
+      if (c !== EMP) {
         return;
       }
     }
