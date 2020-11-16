@@ -254,30 +254,6 @@ export const Game = () => {
     }
   };
 
-  const moveMarbles = (positions, direction) => {
-    const adder = gameState[positions[0][0]][parseInt(positions[0][1])];
-    const newGameState = JSON.parse(JSON.stringify(gameState));
-
-    for (const position of positions) {
-      const row = position[0];
-      const col = parseInt(position[1]);
-      const newPosition = getPosition(position, direction);
-      if (newPosition) {
-        const newrow = newPosition[0];
-        const newcol = parseInt(newPosition[1]);
-
-        if (!selectedMarbles.has(`${newrow}${newcol}`) && gameState[newrow][newcol] === adder) {
-          console.log('not valid move');
-          return;
-        }
-
-        newGameState[newrow][newcol] += adder;
-        newGameState[row][col] -= adder;
-      }
-    }
-    setGameState(newGameState);
-  };
-
   const isNeighbor = (position1, position2) => {
     return getDirection(position1, position2) !== undefined;
   };
