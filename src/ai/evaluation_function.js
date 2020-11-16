@@ -16,9 +16,7 @@ export const spencer_heuristic = (state, colour) => {
         })
     })
     let opponentMarbleValue = aggressiveMoveEvaluation(numOpponentMarbles);
-    console.log(positioningValue);
-    console.log(opponentMarbleValue);
-    console.log(positioningValue + opponentMarbleValue);
+    return opponentMarbleValue + positioningValue;
 }
 
 const MAX_MARBLES = 14;
