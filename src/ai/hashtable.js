@@ -1,17 +1,20 @@
-function hashStringToInt(s, tableSize) {
+
+
+// Needs to take an array of marble strings and return an int.
+function hashStringArrayToInt(stringArray, tableSize) {
     let hash = 17;
-  
-    for (let i = 0; i < s.length; i++) {
-      hash = (13 * hash * s.charCodeAt(i)) % tableSize;
+    for (let j = 0; j < stringArray.length; j++) {
+        for (let i = 0; i < stringArray[j].length; i++) {
+            hash = (13 * hash * stringArray[j].charCodeAt(i)) % tableSize;
+          }
     }
-  
     return hash;
   }
   
   class HashTable {
     table = new Array(3333);
     numItems = 0;
-  
+
     resize = () => {
       const newTable = new Array(this.table.length * 2);
       this.table.forEach(item => {
@@ -36,8 +39,7 @@ function hashStringToInt(s, tableSize) {
         // resize
         this.resize();
       }
-  
-      const idx = hashStringToInt(key, this.table.length);
+      const idx = hashStringArrayToInt(key, this.table.length);
       if (this.table[idx]) {
         this.table[idx].push([key, value]);
       } else {
@@ -46,12 +48,10 @@ function hashStringToInt(s, tableSize) {
     };
   
     getItem = key => {
-      const idx = hashStringToInt(key, this.table.length);
-  
+      const idx = hashStringArrayToInt(key, this.table.length);
       if (!this.table[idx]) {
         return null;
       }
-  
       // O(n)
       return this.table[idx].find(x => x[0] === key)[1];
     };
