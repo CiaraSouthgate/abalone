@@ -11,6 +11,7 @@ function hashStringToInt(s, tableSize) {
   class HashTable {
     table = new Array(3333);
     numItems = 0;
+    MAX_SIZE = 30000;
   
     resize = () => {
       const newTable = new Array(this.table.length * 2);
@@ -32,7 +33,7 @@ function hashStringToInt(s, tableSize) {
     setItem = (key, value) => {
       this.numItems++;
       const loadFactor = this.numItems / this.table.length;
-      if (loadFactor > 0.8) {
+      if (loadFactor > 0.8 && this.table.length < this.MAX_SIZE) {
         // resize
         this.resize();
       }
