@@ -309,9 +309,11 @@ const getInlineMoves = (marbles, directions) => {
         direction,
         numOpposing
       );
-      const c = getColourFromMarbleString(temp);
-      if (c !== EMP) {
-        return;
+      if (temp) {
+        const c = getColourFromMarbleString(temp);
+        if (c !== EMP) {
+          return;
+        }
       }
     }
 
