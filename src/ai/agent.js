@@ -1,5 +1,6 @@
-import {ciaraHeuristic} from './ciara_eval';
-import {createStateFromMove, generateMoves, getMarblesAsArray} from '../state_generation';
+/* eslint-disable no-undef */
+import { ciaraHeuristic } from './ciara_eval';
+import { createStateFromMove, generateMoves, getMarblesAsArray } from '../state_generation';
 
 // negative infinity
 const NEG_INF = Number.NEGATIVE_INFINITY;
