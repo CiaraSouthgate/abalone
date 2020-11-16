@@ -472,8 +472,8 @@ const createStateFromMove = (start_state, move) => {
     marble_list.push(new_marble);
   }
   // get marble colour from a move
-  const myColour = new_state[marble_list[0][0]][marble_list[0][1]] == WHT ? WHT : BLK;
-  const notMyColour = myColour == WHT ? BLK : WHT;
+  const myColour = new_state[marble_list[0][0]][marble_list[0][1]] === WHT ? WHT : BLK;
+  const notMyColour = myColour === WHT ? BLK : WHT;
   // parse direction
   let coordinate_mod = convertDirectionToCoordinateModifier(direction);
 
@@ -486,7 +486,7 @@ const createStateFromMove = (start_state, move) => {
     // add new marble if not oob
     let change_result = changeStateMarble(new_state, item, coordinate_mod, myColour);
     if (change_result != undefined) { new_state = change_result[0]; }
-    while (change_result != undefined && change_result[1] == notMyColour) { // sumito
+    while (change_result != undefined && change_result[1] === notMyColour) { // sumito
       change_result = changeStateMarble(new_state, change_result[2], coordinate_mod, notMyColour);
       if (change_result != undefined) { new_state = change_result[0]; }
     }
