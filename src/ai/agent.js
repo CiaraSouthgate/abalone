@@ -7,13 +7,13 @@ const neg_inf = Number.NEGATIVE_INFINITY;
 // positive infinity
 const pos_inf = Number.POSITIVE_INFINITY;
 // global variable for depth
-const depth = 5;
+let depth = 5;
 // global variable for best move
-const best_move;
+let best_move;
 // Colour of Max, aka the colour of our game playing agent.
-const max_colour;
+let max_colour;
 // Colour of Min, aka the colour of the opponent.
-const min_colour;
+let min_colour;
 // Transposition table to keep track of which states we have visited already.
 const transposition_table = new HashTable();
 
