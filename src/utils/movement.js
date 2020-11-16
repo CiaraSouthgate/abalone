@@ -20,8 +20,6 @@ export const getLegalMoveInfo = (legalMoves, coordinates) => {
   for (let i = 0; i < legalMoves.length; i++) {
     const moveInfo = legalMoves[i].split(' ');
     const coordinate = moveInfo[1];
-    console.log(legalMoves[i]);
-
     const coordinatesString = coordArr.join('').toUpperCase();
     if (coordinatesString === coordinate) {
       legalDirections.push(legalMoves[i]);

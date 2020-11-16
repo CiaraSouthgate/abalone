@@ -13,7 +13,7 @@ import {
   WHT,
   DIRECTION
 } from '../constants';
-
+import { Alpha_Beta_Search } from '../ai/agent';
 import {
   Button,
   FormControlLabel,
@@ -28,16 +28,10 @@ import { InputFile } from './InputFile';
 import {
   convertGameStateToCordinateArray,
   coordinatesToGameState,
-  getLegalDirectionsToMove,
   getLegalMoveInfo,
   mapToColour
 } from '../utils/movement';
-import {
-  createInitialState,
-  generateMoves,
-  generateOutput,
-  getNextBoardConfiguration
-} from '../state_generation';
+import { createInitialState, generateMoves, getNextBoardConfiguration } from '../state_generation';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -167,52 +161,16 @@ export const Game = () => {
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
   const score = 0; // ???
 
-  // React.useEffect(() => {
-  //   const coords = [
-  //     'A3b',
-  //     'B2b',
-  //     'B3b',
-  //     'C3b',
-  //     'C4b',
-  //     'G7b',
-  //     'G8b',
-  //     'H7b',
-  //     'H8b',
-  //     'H9b',
-  //     'I8b',
-  //     'I9b',
-  //     'A4w',
-  //     'A5w',
-  //     'B4w',
-  //     'B5w',
-  //     'B6w',
-  //     'C5w',
-  //     'C6w',
-  //     'G4w',
-  //     'G5w',
-  //     'H4w',
-  //     'H5w',
-  //     'H6w',
-  //     'I5w',
-  //     'I6w'
-  //   ];
-  //   const gs = coordinatesToGameState(coords);
-  //   setGameState(gs);
-  // }, []);
-
   React.useEffect(() => {
     const coords = convertGameStateToCordinateArray(gameState);
-    console.log(coords);
     createInitialState(coords);
     const moves = generateMoves(mapToColour(turn), coords);
     setLegalMoves(moves);
-    const temp = generateOutput(moves, mapToColour(turn));
-    console.log(temp);
+    if (turn === BLK) {
+      const move = Alpha_Beta_Search(gameState, turn);
+      console.log(move);
+    }
   }, [gameState]);
-
-  React.useEffect(() => {
-    console.log('legalMoves updated');
-  }, [legalMoves]);
 
   const handleInitBoardLayoutChange = (e) => {
     setInitBoardLayout(parseInt(e.target.value));
@@ -358,12 +316,8 @@ export const Game = () => {
   };
 
   const onMarbleClick = (row, col) => {
-    if (gameState[row][col] !== EMP) {
+    if (gameState[row][col] === turn) {
       // Push opponent Marble logic
-      if (gameState[row][col] !== turn) {
-        // Calculate the number of selected Marble
-        return;
-      }
       if (selectedMarbles.size > 1) {
         setselectedMarbles(new Set());
         return;
@@ -389,21 +343,21 @@ export const Game = () => {
       const moves = getLegalMoveInfo(legalMoves, selectedMarbles);
       if (moves.length !== 0) {
         console.log(moves);
+
+        const dir = parseInt(prompt(moves.join(' / ')));
+
         const nextBoardConfig = getNextBoardConfiguration(
           gameState,
-          moves[0].split(' '),
+          moves[dir].split(' '),
           mapToColour(turn)
         );
         const newGameState = coordinatesToGameState(nextBoardConfig);
         setGameState(newGameState);
         setselectedMarbles(new Set());
+        setTurn(turn === BLK ? WHT : BLK);
       }
     }
   };
-
-  const onMarbleHover = (row, col) => {};
-
-  const getOpponentsNeighbors = (position, direction) => {};
 
   return (
     <Wrapper>
@@ -483,8 +437,7 @@ export const Game = () => {
                   key={`${k}${col}`}
                   for={gameState[k][col]}
                   selected={selectedMarbles.has(`${k}${col}`)}
-                  onClick={() => onMarbleClick(k, col)}
-                  onMouseEnter={() => onMarbleHover(k, col)}>
+                  onClick={() => onMarbleClick(k, col)}>
                   {`${k}${col}`}
                 </BoardTile>
               ))}
