@@ -22,7 +22,7 @@ var min_colour;
 // Returns an action
 const Alpha_Beta_Search = (state, startingColour) => {
     max_colour = startingColour;
-    if (max_colour == "w") {
+    if (max_colour === "w") {
         min_colour = "b";
     } else {
         min_colour = "w";
