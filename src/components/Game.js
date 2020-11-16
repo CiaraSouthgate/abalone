@@ -191,14 +191,19 @@ export const Game = () => {
     setGameMode(parseInt(e.target.value));
   };
 
+  const handleGameStateChange = (newGameState) =>  {
+    setGameState(newGameState);
+
+  }
+
   const onPlayClick = () => {
     setIsConfigModalShown(false);
     if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
-      setGameState(BOARD_LAYOUTS.STANDARD);
+      handleGameStateChange(BOARD_LAYOUTS.STANDARD);
     } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
-      setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
+      handleGameStateChange(BOARD_LAYOUTS.BELGIAN_DAISY);
     } else if (initBoardLayout === BOARD_LAYOUT_NAMES.GERMAN_DAISY) {
-      setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
+      handleGameStateChange(BOARD_LAYOUTS.GERMAN_DAISY);
     }
   };
 
@@ -332,12 +337,20 @@ export const Game = () => {
         console.log(moves);
 
         const dir = parseInt(prompt(moves.join(' / ')));
-
+        // if empty string then continue.
+        if (!dir) {
+          return;
+        }
+        try {
         const nextBoardConfig = getNextBoardConfiguration(
           gameState,
           moves[dir].split(' '),
           mapToColour(turn)
         );
+        } catch(err) {
+          console.log("not a valid option");
+          return;
+        }
         const newGameState = coordinatesToGameState(nextBoardConfig);
         setGameState(newGameState);
         setselectedMarbles(new Set());
