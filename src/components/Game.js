@@ -161,10 +161,6 @@ export const Game = () => {
     setGameMode(parseInt(e.target.value));
   };
 
-  React.useEffect(() => {
-    console.log(gameState);
-  }, [gameState]);
-
   const onPlayClick = () => {
     setIsConfigModalShown(false);
     if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
@@ -224,7 +220,6 @@ export const Game = () => {
     const rowDiff = pos1row.charCodeAt(0) - pos2row.charCodeAt(0);
     const colDiff = pos1col - pos2col;
 
-    console.log(rowDiff, colDiff);
     if (rowDiff === -1 && colDiff === 0) {
       return DIRECTION.NW;
     } else if (rowDiff === -1 && colDiff === -1) {
@@ -306,7 +301,6 @@ export const Game = () => {
       // Push opponent Marble logic
       if (gameState[row][col] !== turn) {
         // Calculate the number of selected Marble
-        console.log(Array.from(selectedMarbles).length);
         return;
       }
       if (selectedMarbles.size > 1) {
@@ -349,9 +343,7 @@ export const Game = () => {
     }
   };
 
-  const onMarbleHover = (row, col) => {
-    console.log(row, col);
-  };
+  const onMarbleHover = (row, col) => {};
 
   const getOpponentsNeighbors = (position, direction) => {};
 

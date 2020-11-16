@@ -21,5 +21,5 @@ let state = {
   }
 
 
-spencer_heuristic(state, 1);
+console.log(spencer_heuristic(state, 1));
 ReactDOM.render(<App />, document.getElementById('root'));

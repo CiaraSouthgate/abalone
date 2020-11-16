@@ -1,5 +1,8 @@
+
+const { HashTable } = require("./hashtable");
 import {ciaraHeuristic} from './ciara_eval';
 import {createStateFromMove, generateMoves, getMarblesAsArray} from '../state_generation';
+
 
 // negative infinity
 const NEG_INF = Number.NEGATIVE_INFINITY;
@@ -36,25 +39,32 @@ const order_nodes = (actions, state, colour) => {
 
 // Returns an action
 const Alpha_Beta_Search = (state, startingColour) => {
-  max_colour = startingColour;
-  min_colour = max_colour === 'w' ? 'b' : 'w';
-  let v = max_value(state, NEG_INF, POS_INF, DEPTH);
-  return best_move;
+    const marble_coordinates = getMarblesAsArray(state);
+    let best_previous_move = transposition_table.getItem(marble_coordinates);
+    if (best_previous_move){
+        return best_previous_move;
+    }
+    max_colour = startingColour;
+    min_colour = max_colour === 'w' ? 'b' : 'w';
+    let v = max_value(state, NEG_INF, POS_INF, DEPTH);
+    transposition_table.setItem(marble_coordinates, best_move);
+    return best_move;
 };
 
 // Returns a utility value
 const max_value = (state, alpha, beta, d) => {
-  if (cutoff_test(state, d)) return utility(state, max_colour);
-  let v = NEG_INF;
-  const marble_coordinates = getMarblesAsArray(state);
-  const actions = generateMoves(max_colour, marble_coordinates);
-  const nodes = order_nodes(actions, state, max_colour);
-  nodes.forEach((node) => {
-    v = Math.max(v, min_value(node.result, alpha, beta, d - 1));
-    if (v > beta) return v;
-    if (v > alpha) {
-      alpha = v;
-      best_move = node.action;
+    if (cutoff_test(state, d)) return utility(state, max_colour);
+
+    let v = NEG_INF;
+    const marble_coordinates = getMarblesAsArray(state);
+    const actions = generateMoves(max_colour, marble_coordinates);
+    const nodes = order_nodes(actions, state, max_colour);
+    nodes.forEach((node) => {
+      v = Math.max(v, min_value(node.result, alpha, beta, d - 1));
+      if (v > beta) return v;
+      if (v > alpha) {
+        alpha = v;
+        best_move = node.action;
     }
   });
   return v;

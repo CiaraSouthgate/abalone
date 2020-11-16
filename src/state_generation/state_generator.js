@@ -1,4 +1,5 @@
-import {BLK, BOARD_LAYOUTS, DIRECTION, EMP, WHT} from '../constants';
+/* eslint-disable no-undef */
+import { BLK, BOARD_LAYOUTS, DIRECTION, EMP, WHT } from '../constants';
 
 const state = BOARD_LAYOUTS.BLANK;
 const marble1directions = ['W', 'SE', 'SW'];
