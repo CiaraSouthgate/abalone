@@ -20,7 +20,7 @@ function hashStringArrayToInt(stringArray, tableSize) {
       this.table.forEach(item => {
         if (item) {
           item.forEach(([key, value]) => {
-            const idx = hashStringToInt(key, newTable.length);
+            const idx = hashStringArrayToInt(key, newTable.length);
             if (newTable[idx]) {
               newTable[idx].push([key, value]);
             } else {
