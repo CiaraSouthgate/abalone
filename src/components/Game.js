@@ -13,7 +13,7 @@ import {
   WHT,
   DIRECTION
 } from '../constants';
-import { Alpha_Beta_Search } from '../ai/agent';
+// import { Alpha_Beta_Search } from '../ai/agent';
 import {
   Button,
   FormControlLabel,
@@ -31,13 +31,13 @@ import {
   getLegalMoveInfo,
   mapToColour
 } from '../utils/movement';
-import {
-  createInitialState,
-  generateMoves,
-  getMarbleCoordinateInDirectionWithOffset,
-  getNextBoardConfiguration,
-  convertColourValueToString
-} from '../state_generation';
+// import {
+//   createInitialState,
+//   generateMoves,
+//   getMarbleCoordinateInDirectionWithOffset,
+//   getNextBoardConfiguration,
+//   convertColourValueToString
+// } from '../state_generation';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -198,19 +198,37 @@ export const Game = () => {
     if (!isConfigModalShown) {
 
       // State and Player colour
-      const coords = convertGameStateToCordinateArray(gameState);
-      createInitialState(coords);
-      // replace with api call for all moves.
-      const moves = generateMoves(mapToColour(turn), coords);
-      setLegalMoves(moves);
+      // const coords = convertGameStateToCordinateArray(gameState);
+      // createInitialState(coords);
+      // // replace with api call for all moves.
+      // const moves = generateMoves(mapToColour(turn), coords);
+      // setLegalMoves(moves);
+        const req = new XMLHttpRequest();
+        const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
+        req.open('GET', 'http://localhost:5000/allmoves' + queryString);
+        req.onreadystatechange = () => {
+          if (req.readyState === 4 && req.status === 200) {
+            setLegalMoves(JSON.parse(req.responseText));
+          }
+        };
+        req.send();
         if (firstTurn) {
           // ------------random move function goes here ----------
           setFirstTurn(false);
           console.log("random move generated")
         } else if (turn === AIColour) {
           // replace 
-          let colour = convertColourValueToString(AIColour);
-          const move = Alpha_Beta_Search(gameState, colour);
+          // let colour = convertColourValueToString(AIColour);
+          // const move = Alpha_Beta_Search(gameState, colour);
+          const req = new XMLHttpRequest();
+          const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
+          req.open('GET', 'http://localhost:5000/allmoves' + queryString);
+          req.onreadystatechange = () => {
+            if (req.readyState === 4 && req.status === 200) {
+              setLegalMoves(JSON.parse(req.responseText));
+            }
+          };
+          req.send();
           console.log(move);
         }
       }
