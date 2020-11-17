@@ -184,7 +184,7 @@ const getMarblesString = (marbles) => {
 const getMarblesListFromString = (marbleString, side) => {
   const marbles = [];
   for (let i = 0; i < marbleString.length / 2; i++) {
-    const row = marbleString[i * 2];
+    const row = marbleString[i * 2].toLowerCase();
     const col = parseInt(marbleString[i * 2 + 1]);
     marbles.push(new Marble(row, col, side));
   }
@@ -219,12 +219,18 @@ const getNeighbourWithDirection = (marble, direction) => {
   const modifier = utils.getCoordinateModifierFromDirection(direction);
   const row = String.fromCharCode(marble.row.charCodeAt(0) + modifier.row);
   const col = marble.col + modifier.col;
-  return new Marble(row, col, state[row][col]);
+  let side;
+  try {
+    side = state[row][col];
+  } catch (ignored) {}
+  // console.log('row:', row, 'col:', col);
+  return new Marble(row, col, side);
 };
 
 const generateOutput = (moves, side, startState) => {
   let outString = '';
   const states = getStatesFromMoves(moves, side, startState);
+  console.log('states', states);
   states.forEach((state) => {
     Object.entries(state).forEach(([rowIdx, row]) => {
       Object.entries(row).forEach(([colIdx, cell]) => {
@@ -238,6 +244,7 @@ const generateOutput = (moves, side, startState) => {
       outString = outString.slice(0, -1) + '\n';
     });
   });
+  console.log('outstring', outString);
   return outString;
 };
 
@@ -289,7 +296,11 @@ const moveMarbleGroup = (marbles, direction, startState) => {
     newState[nextMarble.row][nextMarble.col] = leadMarble.side;
   }
 
-  newState[tailMarble.row][tailMarble.col] = EMP;
+  try {
+    newState[tailMarble.row][tailMarble.col] = EMP;
+  } catch (error) {
+    console.log(marbles);
+  }
   return newState;
 };
 
@@ -299,7 +310,9 @@ module.exports = {
     callback(createStateFromMove(state, move, side));
   },
   getStatesString: (state, colour, callback) => {
+    console.log(state);
     const moves = generateMoves(state, colour);
+    console.log(moves);
     callback(generateOutput(moves, colour, state));
   },
   getAllMoves: (state, colour, callback) => {
