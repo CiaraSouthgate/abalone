@@ -62,7 +62,7 @@ app.get('/state', (req, res) => {
   state = JSON.parse(state);
   side = parseInt(side);
 
-  stateGen.createStateFromMove(state, move, side, (state) => {
+  stateGen.getState(state, move, side, (state) => {
     res.status(200).send(JSON.stringify(state));
   });
 });
