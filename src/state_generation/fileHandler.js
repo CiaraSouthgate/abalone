@@ -29,7 +29,7 @@ export const parseInputFile = (callback) => {
     // do callback with finished data
     const req = new XMLHttpRequest();
     const queryString = `?state=${JSON.stringify(startState)}&colour=${startingColour}`;
-    req.open('GET', 'localhost:5000/boardString' + queryString);
+    req.open('GET', 'http://localhost:5000/boardString' + queryString);
     req.onreadystatechange = () => {
       if (req.readyState === 4 && req.status === 200) {
         callback(req.responseText);
