@@ -397,6 +397,7 @@ export const Game = () => {
           return;
         }
         try {
+          // If the user enter in like 124 when there are only 2 moves, catch the error and let them try again.
           let move;
           try {
             move = moves[dir].split(' ');
@@ -405,6 +406,17 @@ export const Game = () => {
             console.log("invalid input");
             return;
           }
+
+          const req = new XMLHttpRequest();
+          const queryString = `?state=${JSON.stringify(gameState)}&move=${moves[dir]}&side=${turn}`;
+          req.open('GET', 'http://localhost:5000/state' + queryString);
+          req.onreadystatechange = () => {
+            if (req.readyState === 4 && req.status === 200) {
+              console.log((JSON.parse(req.responseText)));
+              setGameState(JSON.parse(req.responseText));
+            }
+          };
+          req.send();
 
         // ---------------------------------------------------
         // const nextBoardConfig = getNextBoardConfiguration(
@@ -415,7 +427,11 @@ export const Game = () => {
         // const newGameState = coordinatesToGameState(nextBoardConfig);
         // -------------------------------------------------------------
 
-        setGameState(newGameState);
+        // ------------
+        // This will be a request, and this function will be the callback, instead of newGameState, it will be the response.
+  
+        // ------------
+
         setselectedMarbles(new Set());
         setTurn(turn === BLK ? WHT : BLK);
         addHistoryEntry({
