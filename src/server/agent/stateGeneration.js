@@ -289,19 +289,29 @@ const moveMarbleGroup = (marbles, direction, moveType, startState) => {
       tailMarble = marbles[marbles.length - 1];
     }
 
+    const moveRow = [...marbles];
     let nextMarble = getNeighbourWithDirection(leadMarble, direction);
+    moveRow.push(nextMarble);
+    let opponentSide;
     while (nextMarble.side !== EMP && nextMarble.side !== undefined) {
+      opponentSide = nextMarble.side;
       nextMarble = getNeighbourWithDirection(nextMarble, direction);
+      moveRow.push(nextMarble);
     }
     if (nextMarble.side === EMP) {
-      newState[nextMarble.row][nextMarble.col] = leadMarble.side;
+      newState[nextMarble.row][nextMarble.col] =
+        opponentSide == null ? leadMarble.side : opponentSide;
     }
 
-    try {
-      newState[tailMarble.row][tailMarble.col] = EMP;
-    } catch (error) {
-      console.log(marbles);
+    for (let i = moveRow.length - 1; i >= 0; i--) {
+      const moveMarble = moveRow[i];
+      if (i === 0) {
+        newState[moveMarble.row][moveMarble.col] = EMP;
+        return;
+      }
+      newState[moveMarble.row][moveMarble.col] = moveRow[i - 1].side;
     }
+
     return newState;
   } else {
     let tmpState = newState;
