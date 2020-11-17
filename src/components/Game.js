@@ -162,7 +162,8 @@ export const Game = () => {
   const [AIColour, setAIColour] = React.useState(BLK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
-  const [timeLimitInSeconds] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [timeLimitInSecondsWhite] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [timeLimitInSecondsBlack] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
   const [firstTurn, setFirstTurn] = React.useState(true);
@@ -414,7 +415,7 @@ export const Game = () => {
                 <FormControlLabel value={WHT} control={<Radio />} label="White"/>
               </RadioGroup>
             </ConfigRow>
-            <FormLabel component="legend">Extra Settings</FormLabel>
+            <FormLabel component="legend">Movement Settings</FormLabel>
             <ConfigRow style={{ justifyContent: 'space-between' }}>
               <TextField
                 label="Move Limit"
@@ -422,11 +423,20 @@ export const Game = () => {
                 size="small"
                 defaultValue={moveLimit}
               />
-              <TextField
-                label="Time Limit (in seconds)"
+            </ConfigRow>
+            <FormLabel component="legend">Timing (In Seconds)</FormLabel>
+            <ConfigRow>
+            <TextField
+                label="Time Limit (White Player)"
                 variant="filled"
                 size="small"
-                defaultValue={timeLimitInSeconds}
+                defaultValue={timeLimitInSecondsBlack}
+              />
+              <TextField
+                label="Time Limit (Black Player)"
+                variant="filled"
+                size="small"
+                defaultValue={timeLimitInSecondsWhite}
               />
             </ConfigRow>
             <ConfigRow>
