@@ -7,11 +7,11 @@ export const InputFile = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    parseInputFile((data) => {
+    parseInputFile((testName, data) => {
       // Download output file for states
-      downloadTextfile(data[0], 'TestN.board');
+      downloadTextfile(data[0], `${testName}.board`);
       // Download output file for moves
-      downloadTextfile(data[1], 'TestN.move');
+      downloadTextfile(data[1], `${testName}.move`);
     });
   };
 

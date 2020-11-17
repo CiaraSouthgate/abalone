@@ -28,8 +28,8 @@ const getMarbleMoves = (side) => {
         const marble = new Marble(rowIdx, parseInt(colIdx), side);
         const neighbours = utils.getNeighbours(marble, state);
         neighbours.forEach((neighbour) => {
-          if (marble.compareTo(neighbour) <= 0) {
-            if (neighbour.side === side) {
+          if (neighbour.side === side) {
+            if (marble.compareTo(neighbour) <= 0) {
               // this is a valid pair
               const pair = [marble, neighbour];
               const direction = getDirection(marble, neighbour);
@@ -44,11 +44,11 @@ const getMarbleMoves = (side) => {
                 const trioMoves = getGroupMoves(trio, direction);
                 if (!!trioMoves) moves = moves.concat(trioMoves);
               }
-            } else if (neighbour.side === EMP) {
-              // space is empty; this is a valid move
-              const direction = getDirection(marble, neighbour);
-              moves.push(`SINGLE ${getMarblesString([marble])} ${direction}`);
             }
+          } else if (neighbour.side === EMP) {
+            // space is empty; this is a valid move
+            const direction = getDirection(marble, neighbour);
+            moves.push(`SINGLE ${getMarblesString([marble])} ${direction}`);
           }
         });
       }
@@ -181,11 +181,12 @@ const getMarblesString = (marbles) => {
   }, '');
 };
 
-const getMarblesListFromString = (marbleString, side) => {
+const getMarblesListFromString = (marbleString, state) => {
   const marbles = [];
   for (let i = 0; i < marbleString.length / 2; i++) {
     const row = marbleString[i * 2].toLowerCase();
     const col = parseInt(marbleString[i * 2 + 1]);
+    const side = state[row][col];
     marbles.push(new Marble(row, col, side));
   }
   return marbles;
@@ -223,42 +224,53 @@ const getNeighbourWithDirection = (marble, direction) => {
   try {
     side = state[row][col];
   } catch (ignored) {}
-  // console.log('row:', row, 'col:', col);
   return new Marble(row, col, side);
 };
 
 const generateOutput = (moves, side, startState) => {
-  let outString = '';
   const states = getStatesFromMoves(moves, side, startState);
-  console.log('states', states);
+  const stateStrings = [];
   states.forEach((state) => {
+    const cellStrings = [];
     Object.entries(state).forEach(([rowIdx, row]) => {
       Object.entries(row).forEach(([colIdx, cell]) => {
         let cellStr = rowIdx.toUpperCase() + colIdx;
         if (cell === WHT) {
-          outString += cellStr + 'w,';
+          cellStrings.push(cellStr + 'w');
         } else if (cell === BLK) {
-          outString += cellStr + 'b,';
+          cellStrings.push(cellStr + 'b');
         }
       });
-      outString = outString.slice(0, -1) + '\n';
+      cellStrings.sort((a, b) => {
+        if (a[2] === b[2]) {
+          if (a[0] === b[0]) {
+            if (a[1] === a[1]) {
+              return 0;
+            }
+            return a[1] < b[1] ? -1 : 1;
+          }
+          return a[0] < b[0] ? -1 : 1;
+        }
+        return a[2] < b[2] ? -1 : 1;
+      });
     });
+    stateStrings.push(cellStrings.join(','));
   });
-  console.log('outstring', outString);
-  return outString;
+  return [stateStrings.join('\n'), moves.join('\n')];
 };
 
 const getStatesFromMoves = (moves, side, startState) => {
   const states = [];
   moves.forEach((move) => {
-    moves.push(createStateFromMove(startState, move));
+    const state = createStateFromMove(startState, move);
+    states.push(state);
   });
   return states;
 };
 
-const createStateFromMove = (startState, move, side) => {
+const createStateFromMove = (startState, move) => {
   const [moveType, marbleString, direction] = move.split(' ');
-  const marbles = getMarblesListFromString(marbleString, side);
+  const marbles = getMarblesListFromString(marbleString, startState);
   if (moveType === 'SINGLE') {
     return moveSingleMarble(...marbles, direction, startState);
   } else {
@@ -267,7 +279,7 @@ const createStateFromMove = (startState, move, side) => {
 };
 
 const moveSingleMarble = (marble, direction, startState) => {
-  const newState = JSON.parse(JSON.stringify(startState));
+  const newState = utils.deepCopy(startState);
   const modifier = utils.getCoordinateModifierFromDirection(direction);
   const newRow = String.fromCharCode(marble.row.charCodeAt(0) + modifier.row);
   const newCol = marble.col + modifier.col;
@@ -277,7 +289,7 @@ const moveSingleMarble = (marble, direction, startState) => {
 };
 
 const moveMarbleGroup = (marbles, direction, moveType, startState) => {
-  const newState = JSON.parse(JSON.stringify(startState));
+  const newState = utils.deepCopy(startState);
   if (moveType === 'INLINE') {
     let leadMarble;
     let tailMarble;
@@ -290,21 +302,22 @@ const moveMarbleGroup = (marbles, direction, moveType, startState) => {
     }
 
     let nextMarble = getNeighbourWithDirection(leadMarble, direction);
-    let opponentMarble = [];
-    while (nextMarble.side !== EMP && nextMarble.side !== undefined) {
-      opponentMarble.push(nextMarble);
-      nextMarble = getNeighbourWithDirection(nextMarble, direction);
-    }
 
     if (nextMarble.side === EMP) {
-      if (opponentMarble.length > 0) {
-        newState[nextMarble.row][nextMarble.col] = opponentMarble[0].side;
-      } else {
-        newState[nextMarble.row][nextMarble.col] = leadMarble.side;
+      newState[nextMarble.row][nextMarble.col] = leadMarble.side;
+      newState[tailMarble.row][tailMarble.col] = EMP;
+    } else {
+      const opponentSide = nextMarble.side;
+      const opponentStart = utils.deepCopy(nextMarble);
+      while (nextMarble.side === opponentSide) {
+        nextMarble = getNeighbourWithDirection(nextMarble, direction);
       }
+      if (nextMarble.side === EMP) {
+        newState[nextMarble.row][nextMarble.col] = opponentSide;
+      }
+      newState[opponentStart.row][opponentStart.col] = leadMarble.side;
+      newState[tailMarble.row][tailMarble.col] = EMP;
     }
-    newState[opponentMarble[0].row][opponentMarble[0].col] = leadMarble.side;
-    newState[tailMarble.row][tailMarble.col] = EMP;
 
     return newState;
   } else {
@@ -323,9 +336,7 @@ module.exports = {
     callback(createStateFromMove(state, move, side));
   },
   getStatesString: (state, colour, callback) => {
-    console.log(state);
     const moves = generateMoves(state, colour);
-    console.log(moves);
     callback(generateOutput(moves, colour, state));
   },
   getAllMoves: (state, colour, callback) => {

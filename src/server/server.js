@@ -80,8 +80,8 @@ app.get('/allmoves', (req, res) => {
 
 app.get('/boardString', (req, res) => {
   parseMoveRequest(req, res, (state, colour) => {
-    stateGen.getStatesString(state, colour, (string) => {
-      res.status(200).send(string);
+    stateGen.getStatesString(state, colour, (result) => {
+      res.status(200).send(JSON.stringify(result));
     });
   });
 });

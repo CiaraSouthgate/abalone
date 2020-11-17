@@ -9,19 +9,13 @@ class Marble {
   }
 
   compareTo(other) {
-    if (this.row < other.row) {
-      return -1;
-    } else if (this.row > other.row) {
-      return 1;
+    if (this.row === other.row) {
+      if (this.col === other.col) {
+        return 0;
+      }
+      return this.col < other.col ? -1 : 1;
     }
-
-    if (this.col < other.col) {
-      return -1;
-    } else if (this.col > other.col) {
-      return 1;
-    }
-
-    return 0;
+    return this.row < other.row ? -1 : 1;
   }
 }
 
@@ -68,5 +62,9 @@ module.exports = {
       case DIRECTION.SW:
         return { row: -1, col: -1 };
     }
+  },
+
+  deepCopy: (object) => {
+    return JSON.parse(JSON.stringify(object));
   }
 };
