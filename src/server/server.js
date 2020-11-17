@@ -13,6 +13,7 @@ app.use((req, res, next) => {
 
 const parseMoveRequest = (req, res, callback) => {
   const query = url.parse(req.url, true).query;
+  console.log(query);
 
   let { state, colour } = query;
 
@@ -71,8 +72,6 @@ app.get('/allmoves', (req, res) => {
     });
   });
 });
-
-app.get();
 
 app.get('/boardString', (req, res) => {
   parseMoveRequest(req, res, (state, colour) => {
