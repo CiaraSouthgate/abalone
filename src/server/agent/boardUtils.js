@@ -68,22 +68,5 @@ module.exports = {
       case DIRECTION.SW:
         return { row: -1, col: -1 };
     }
-  },
-
-  getDirectionFromCoordinateModifier: (modifier) => {
-    switch (modifier) {
-      case { row: -1, col: 0 }:
-        return DIRECTION.NW;
-      case { row: -1, col: -1 }:
-        return DIRECTION.NE;
-      case { row: 0, col: -1 }:
-        return DIRECTION.E;
-      case { row: 0, col: 1 }:
-        return DIRECTION.W;
-      case { row: 1, col: 1 }:
-        return DIRECTION.SW;
-      case { row: 1, col: 0 }:
-        return DIRECTION.SE;
-    }
   }
 };

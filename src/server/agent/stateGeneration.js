@@ -25,14 +25,14 @@ const getMarbleMoves = (side) => {
   Object.entries(state).forEach(([rowIdx, row]) => {
     Object.entries(row).forEach(([colIdx, cell]) => {
       if (cell === side) {
-        const marble = new Marble(rowIdx, colIdx, side);
+        const marble = new Marble(rowIdx, parseInt(colIdx), side);
         const neighbours = utils.getNeighbours(marble, state);
         neighbours.forEach((neighbour) => {
           if (marble.compareTo(neighbour) <= 0) {
             if (neighbour.side === side) {
               // this is a valid pair
               const pair = [marble, neighbour];
-              const direction = getDirection(...pair);
+              const direction = getDirection(marble, neighbour);
               // get moves for this pair
               const pairMoves = getGroupMoves(pair, direction);
               if (!!pairMoves) moves = moves.concat(pairMoves);
@@ -65,7 +65,9 @@ const getMarbleMoves = (side) => {
  */
 const getGroupMoves = (marbles, direction) => {
   let moves = [];
-  const [inline, sidestep] = setMultiMoveGroups(direction);
+  const multiMoveGroups = setMultiMoveGroups(direction);
+  const inline = multiMoveGroups[0];
+  const sidestep = multiMoveGroups[1];
   const inlineMoves = getInlineMoves(marbles, inline);
   if (!!inlineMoves) {
     moves = moves.concat(inlineMoves);
@@ -199,10 +201,12 @@ const getDirection = (pos1, pos2) => {
   const rowDiff = pos1.row.charCodeAt(0) - pos2.row.charCodeAt(0);
   const colDiff = pos1.col - pos2.col;
 
-  return utils.getDirectionFromCoordinateModifier({
-    row: rowDiff,
-    col: colDiff
-  });
+  if (rowDiff === -1 && colDiff === 0) return DIRECTION.NW;
+  if (rowDiff === -1 && colDiff === -1) return DIRECTION.NE;
+  if (rowDiff === 0 && colDiff === -1) return DIRECTION.E;
+  if (rowDiff === 0 && colDiff === 1) return DIRECTION.W;
+  if (rowDiff === 1 && colDiff === 1) return DIRECTION.SW;
+  if (rowDiff === 1 && colDiff === 0) return DIRECTION.SE;
 };
 
 /**
@@ -213,8 +217,8 @@ const getDirection = (pos1, pos2) => {
  */
 const getNeighbourWithDirection = (marble, direction) => {
   const modifier = utils.getCoordinateModifierFromDirection(direction);
-  const row = String.fromCharCode(marble.row.charCodeAt(0) + modifier[0]);
-  const col = marble.col + modifier[1];
+  const row = String.fromCharCode(marble.row.charCodeAt(0) + modifier.row);
+  const col = marble.col + modifier.col;
   return new Marble(row, col, state[row][col]);
 };
 
