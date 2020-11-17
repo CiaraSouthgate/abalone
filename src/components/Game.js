@@ -182,6 +182,11 @@ export const Game = () => {
   const [AIColour, setAIColour] = React.useState(BLK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
+  const [historyEntries, setHistoryEntries] = React.useState([]);
+  // Total calculation time for AI in seconds
+  const [totalTime] = React.useState(0);
+  const [timeTakenForLastMove, setTimeTakenForLastMove] = React.useState(0);
+  const [numTurns, setNumTurns] = React.useState(1);
   const [timeLimitInSecondsWhite] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [timeLimitInSecondsBlack] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
@@ -191,8 +196,11 @@ export const Game = () => {
 
   React.useEffect(() => {
     if (!isConfigModalShown) {
+
+      // State and Player colour
       const coords = convertGameStateToCordinateArray(gameState);
       createInitialState(coords);
+      // replace with api call for all moves.
       const moves = generateMoves(mapToColour(turn), coords);
       setLegalMoves(moves);
         if (firstTurn) {
@@ -200,6 +208,7 @@ export const Game = () => {
           setFirstTurn(false);
           console.log("random move generated")
         } else if (turn === AIColour) {
+          // replace 
           let colour = convertColourValueToString(AIColour);
           const move = Alpha_Beta_Search(gameState, colour);
           console.log(move);
@@ -379,13 +388,40 @@ export const Game = () => {
         setGameState(newGameState);
         setselectedMarbles(new Set());
         setTurn(turn === BLK ? WHT : BLK);
+        addHistoryEntry({
+          numTurn: numTurns,
+          playerColour: turn,
+          move: moves[dir],
+          timeTaken: timeTakenForLastMove
+        });
+        setNumTurns(numTurns + 1);
+        console.log(historyEntries);
         } catch(err) {
           console.log("not a valid option");
+          console.log(err);
           return;
         }
       }
     }
   };
+
+  const historyEntryRender = () => 
+    historyEntries.map((entry) => 
+      <tr key={entry.numTurn}>
+        <td>{entry.numTurn}</td>
+        <td>{entry.playerColour === BLK ? "Black" : "White"}</td>
+        <td>{entry.move}</td>
+        <td>{entry.playerColour !== AIColour ? 0 : entry.timeTaken}</td>
+      </tr>
+    );
+
+    const addHistoryEntry = (newEntry) => {
+      if (historyEntries.length === 0) {
+        setHistoryEntries([newEntry]);
+      } else {
+        setHistoryEntries([...historyEntries, newEntry]);
+      }
+    }
 
   return (
     <Wrapper>
@@ -488,16 +524,39 @@ export const Game = () => {
           <th>Move</th>
           <th>Time</th>
         </thead>
-        <tbody>
-        <tr>
-          <td>1</td>
-          <td>Player 1</td>
-          <td>C4-&gt;E4</td>
-          <td>0:20</td>
-        </tr>
-        </tbody>
+          <tbody>
+            {historyEntryRender()}
+          </tbody>
         </table>
       </History>
     </Wrapper>
   );
 };
+
+
+// const HistoryComponent = () => {
+
+//   let state = [
+//     {numTurn: 1, playerColour: "Black", move: "INLINE B3C3 SW", timeTaken: 10},
+//   ];
+
+//   const historyEntryRender = () => 
+//     state.map((entry) => 
+//       <tr key={entry}>
+//         <td>{entry.numTurn}</td>
+//         <td>{entry.playerColour}</td>
+//         <td>{entry.move}</td>
+//         <td>{entry.timeTaken}</td>
+//       </tr>
+//     );
+
+//     const addHistoryEntry = (newEntry) => {
+//       state = [...state, newEntry];
+//     }
+
+//   return (
+//     <tbody>
+//       {historyEntryRender()}
+//     </tbody>
+//   );
+// }
