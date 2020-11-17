@@ -159,7 +159,7 @@ export const Game = () => {
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
   const [legalMoves, setLegalMoves] = React.useState([]);
   const [turn, setTurn] = React.useState(BLK);
-  const [AIColour, setAIColour] = React.useState(MARBLE_COLOURS.BLACK);
+  const [AIColour, setAIColour] = React.useState(BLK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [timeLimitInSeconds] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
@@ -176,8 +176,8 @@ export const Game = () => {
     if (firstTurn && !isConfigModalShown) {
       // select random move
       setFirstTurn(false);
-    } else if (turn === BLK && !isConfigModalShown) {
-        let colour = convertColourValueToString(turn);
+    } else if (turn === AIColour && !isConfigModalShown) {
+        let colour = convertColourValueToString(AIColour);
         const move = Alpha_Beta_Search(gameState, colour);
         console.log(move);
       }
@@ -407,8 +407,8 @@ export const Game = () => {
             <FormLabel component="legend">AI Marble Colour</FormLabel>
             <ConfigRow>
               <RadioGroup row value={AIColour} onChange={handleAIColourChange}>
-                <FormControlLabel value={MARBLE_COLOURS.BLACK} control={<Radio />} label="Black"/>
-                <FormControlLabel value={MARBLE_COLOURS.WHITE} control={<Radio />} label="White"/>
+                <FormControlLabel value={BLK} control={<Radio />} label="Black"/>
+                <FormControlLabel value={WHT} control={<Radio />} label="White"/>
               </RadioGroup>
             </ConfigRow>
             <FormLabel component="legend">Extra Settings</FormLabel>
