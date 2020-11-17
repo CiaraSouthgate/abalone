@@ -194,6 +194,15 @@ export const Game = () => {
   const [firstTurn, setFirstTurn] = React.useState(true);
   const score = 0; // ???
 
+  const chooseRandomMove = (move_list) => {
+    let rand = getRandomInt(move_list.length);
+    return move_list[rand];
+    }
+
+  const getRandomInt = (max) => {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
   React.useEffect(() => {
     if (!isConfigModalShown) {
 
@@ -215,7 +224,8 @@ export const Game = () => {
         if (firstTurn) {
           // ------------random move function goes here ----------
           setFirstTurn(false);
-          console.log("random move generated")
+          let random_move = chooseRandomMove(legalMoves);
+          console.log("random move: " + random_move);
         } else if (turn === AIColour) {
           // replace 
           // let colour = convertColourValueToString(AIColour);
