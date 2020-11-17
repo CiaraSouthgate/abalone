@@ -222,14 +222,13 @@ export const Game = () => {
           // const move = Alpha_Beta_Search(gameState, colour);
           const req = new XMLHttpRequest();
           const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
-          req.open('GET', 'http://localhost:5000/bestmoves' + queryString);
+          req.open('GET', 'http://localhost:5000/bestmove' + queryString);
           req.onreadystatechange = () => {
             if (req.readyState === 4 && req.status === 200) {
               console.log((JSON.parse(req.responseText)));
             }
           };
           req.send();
-          console.log(move);
         }
       }
     }, [gameState]);
