@@ -222,10 +222,10 @@ export const Game = () => {
           // const move = Alpha_Beta_Search(gameState, colour);
           const req = new XMLHttpRequest();
           const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
-          req.open('GET', 'http://localhost:5000/allmoves' + queryString);
+          req.open('GET', 'http://localhost:5000/bestmoves' + queryString);
           req.onreadystatechange = () => {
             if (req.readyState === 4 && req.status === 200) {
-              setLegalMoves(JSON.parse(req.responseText));
+              console.log((JSON.parse(req.responseText)));
             }
           };
           req.send();
@@ -397,12 +397,24 @@ export const Game = () => {
           return;
         }
         try {
-        const nextBoardConfig = getNextBoardConfiguration(
-          gameState,
-          moves[dir].split(' '),
-          mapToColour(turn)
-        );
-        const newGameState = coordinatesToGameState(nextBoardConfig);
+          let move;
+          try {
+            move = moves[dir].split(' ');
+          } catch(err) {
+            console.log(err)
+            console.log("invalid input");
+            return;
+          }
+
+        // ---------------------------------------------------
+        // const nextBoardConfig = getNextBoardConfiguration(
+        //   gameState,
+        //   moves[dir].split(' '),
+        //   mapToColour(turn)
+        // );
+        // const newGameState = coordinatesToGameState(nextBoardConfig);
+        // -------------------------------------------------------------
+
         setGameState(newGameState);
         setselectedMarbles(new Set());
         setTurn(turn === BLK ? WHT : BLK);
@@ -422,6 +434,7 @@ export const Game = () => {
       }
     }
   };
+
 
   const historyEntryRender = () => 
     historyEntries.map((entry) => 
