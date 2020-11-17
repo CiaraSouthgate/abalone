@@ -262,7 +262,7 @@ const createStateFromMove = (startState, move, side) => {
   if (moveType === 'SINGLE') {
     return moveSingleMarble(...marbles, direction, startState);
   } else {
-    return moveMarbleGroup(marbles, direction, startState);
+    return moveMarbleGroup(marbles, direction, moveType, startState);
   }
 };
 
@@ -276,32 +276,40 @@ const moveSingleMarble = (marble, direction, startState) => {
   return newState;
 };
 
-const moveMarbleGroup = (marbles, direction, startState) => {
+const moveMarbleGroup = (marbles, direction, moveType, startState) => {
   const newState = JSON.parse(JSON.stringify(startState));
-  let leadMarble;
-  let tailMarble;
-  if (direction === getDirection(marbles[0], marbles[1])) {
-    leadMarble = marbles[marbles.length - 1];
-    tailMarble = marbles[0];
+  if (moveType === 'INLINE') {
+    let leadMarble;
+    let tailMarble;
+    if (direction === getDirection(marbles[0], marbles[1])) {
+      leadMarble = marbles[marbles.length - 1];
+      tailMarble = marbles[0];
+    } else {
+      leadMarble = marbles[0];
+      tailMarble = marbles[marbles.length - 1];
+    }
+
+    let nextMarble = getNeighbourWithDirection(leadMarble, direction);
+    while (nextMarble.side !== EMP && nextMarble.side !== undefined) {
+      nextMarble = getNeighbourWithDirection(nextMarble, direction);
+    }
+    if (nextMarble.side === EMP) {
+      newState[nextMarble.row][nextMarble.col] = leadMarble.side;
+    }
+
+    try {
+      newState[tailMarble.row][tailMarble.col] = EMP;
+    } catch (error) {
+      console.log(marbles);
+    }
+    return newState;
   } else {
-    leadMarble = marbles[0];
-    tailMarble = marbles[marbles.length - 1];
+    let tmpState = newState;
+    marbles.forEach((marble) => {
+      tmpState = moveSingleMarble(marble, direction, tmpState);
+    });
+    return tmpState;
   }
-
-  let nextMarble = getNeighbourWithDirection(leadMarble, direction);
-  while (nextMarble.side !== EMP && nextMarble.side !== undefined) {
-    nextMarble = getNeighbourWithDirection(nextMarble, direction);
-  }
-  if (nextMarble.side === EMP) {
-    newState[nextMarble.row][nextMarble.col] = leadMarble.side;
-  }
-
-  try {
-    newState[tailMarble.row][tailMarble.col] = EMP;
-  } catch (error) {
-    console.log(marbles);
-  }
-  return newState;
 };
 
 module.exports = {

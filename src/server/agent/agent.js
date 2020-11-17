@@ -66,6 +66,7 @@ const maxValue = (state, alpha, beta, d) => {
       alpha = v;
       bestMove = node.action;
       bestMoveResult = node.result;
+      console.log('updating best move:', bestMove);
     }
   });
   return v;
