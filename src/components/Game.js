@@ -156,7 +156,7 @@ const ScoreDisplay = styled.th``;
 
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
-  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
+  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.BLANK);
   const [legalMoves, setLegalMoves] = React.useState([]);
   const [turn, setTurn] = React.useState(BLK);
   const [AIColour, setAIColour] = React.useState(BLK);
@@ -169,17 +169,20 @@ export const Game = () => {
   const score = 0; // ???
 
   React.useEffect(() => {
+    if (!isConfigModalShown) {
       const coords = convertGameStateToCordinateArray(gameState);
       createInitialState(coords);
       const moves = generateMoves(mapToColour(turn), coords);
       setLegalMoves(moves);
-    if (firstTurn && !isConfigModalShown) {
-      // select random move
-      setFirstTurn(false);
-    } else if (turn === AIColour && !isConfigModalShown) {
-        let colour = convertColourValueToString(AIColour);
-        const move = Alpha_Beta_Search(gameState, colour);
-        console.log(move);
+        if (firstTurn) {
+          // ------------random move function goes here ----------
+          setFirstTurn(false);
+          console.log("random move generated")
+        } else if (turn === AIColour) {
+          let colour = convertColourValueToString(AIColour);
+          const move = Alpha_Beta_Search(gameState, colour);
+          console.log(move);
+        }
       }
     }, [gameState]);
 
