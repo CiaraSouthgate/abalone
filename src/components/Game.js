@@ -10,9 +10,9 @@ import {
   DIRECTION,
   EMP,
   GAME_MODE,
-  MARBLE_COLOURS,
   WHT
 } from "../constants";
+import { Alpha_Beta_Search } from "../ai/agent";
 import { Button, FormControlLabel, FormLabel, Modal, Radio, RadioGroup, TextField } from "@material-ui/core";
 import { ButtonContainer } from "./ButtonContainer";
 import { InputFile } from "./InputFile";
@@ -22,6 +22,12 @@ import {
   getLegalMoveInfo,
   mapToColour
 } from "../utils/movement";
+import {
+  convertColourValueToString,
+  createInitialState,
+  generateMoves,
+  getNextBoardConfiguration
+} from "../state_generation";
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -119,9 +125,18 @@ const ConfigRow = styled.div`
   margin: 10px 0;
 `;
 
-const Scoreboard = styled.div`
-  position: absolute;
-  right: 20px;
+const History = styled.div`
+  position: fixed;
+  right: 50px;
+  border: solid 1px;
+  height: 300px;
+  width: 300px;
+  overflow-x: hidden;
+  text-align: center;
+  overflow-y: auto;
+  table {
+    width: 100%;
+  }
 
   table,
   th,
@@ -132,33 +147,60 @@ const Scoreboard = styled.div`
   td {
     border-bottom: 1px solid black;
     padding: 5px;
-    text-align: left;
+    text-align: center;
   }
 `;
 
-const ScoreDisplay = styled.th``;
+const HistoryDisplay = styled.div`
+  font-weight: bold;
+  border-bottom: 1px solid;
+  padding: 5px;
+`;
+
+const TotalTime = styled.div`
+  font-weight: bold;
+  border-bottom: 1px solid;
+  padding 5px;
+`;
 
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
-  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
+  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.BLANK);
   const [legalMoves, setLegalMoves] = React.useState([]);
   const [turn, setTurn] = React.useState(BLK);
-  const [playerColour] = React.useState(MARBLE_COLOURS.BLACK);
+  const [AIColour, setAIColour] = React.useState(BLK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
-  const [timeLimitInSeconds] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [historyEntries, setHistoryEntries] = React.useState([]);
+  // Total calculation time for AI in seconds
+  const [totalTime] = React.useState(0);
+  const [timeTakenForLastMove, setTimeTakenForLastMove] = React.useState(0);
+  const [numTurns, setNumTurns] = React.useState(1);
+  const [timeLimitInSecondsWhite] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [timeLimitInSecondsBlack] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
+  const [firstTurn, setFirstTurn] = React.useState(true);
   const score = 0; // ???
 
   React.useEffect(() => {
-    const coords = convertGameStateToCordinateArray(gameState);
-    createInitialState(coords);
-    const moves = generateMoves(mapToColour(turn), coords);
-    setLegalMoves(moves);
-    if (turn === BLK) {
-      const move = Alpha_Beta_Search(gameState, turn);
-      console.log(move);
+    if (!isConfigModalShown) {
+      // State and Player colour
+      const coords = convertGameStateToCordinateArray(gameState);
+      createInitialState(coords);
+      // replace with api call for all moves.
+      const moves = generateMoves(mapToColour(turn), coords);
+      setLegalMoves(moves);
+      if (firstTurn) {
+        // ------------random move function goes here ----------
+        setFirstTurn(false);
+        console.log('random move generated');
+      } else if (turn === AIColour) {
+        // replace
+        let colour = convertColourValueToString(AIColour);
+        const move = Alpha_Beta_Search(gameState, colour);
+        console.log(move);
+      }
     }
   }, [gameState]);
 
@@ -168,6 +210,14 @@ export const Game = () => {
 
   const handleGameModeChange = (e) => {
     setGameMode(parseInt(e.target.value));
+  };
+
+  const handleGameStateChange = (newGameState) => {
+    setGameState(newGameState);
+  };
+
+  const handleAIColourChange = (e) => {
+    setAIColour(parseInt(e.target.value));
   };
 
   const onPlayClick = () => {
