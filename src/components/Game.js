@@ -81,24 +81,24 @@ const BoardTile = styled.div`
     cursor: pointer;
   }
   color: ${(props) => {
-    if (props.for === BLK) {
-      return 'white';
-    } else {
-      return 'black';
-    }
-  }};
+  if (props.for === BLK) {
+    return "white";
+  } else {
+    return "black";
+  }
+}};
   background-color: ${(props) => {
-    if (props.selected) {
-      return 'red';
-    }
-    if (props.for === EMP) {
-      return '#00000050';
-    } else if (props.for === BLK) {
-      return 'black';
-    } else {
-      return 'white';
-    }
-  }};
+  if (props.selected) {
+    return "red";
+  }
+  if (props.for === EMP) {
+    return "#00000050";
+  } else if (props.for === BLK) {
+    return "black";
+  } else {
+    return "white";
+  }
+}};
 `;
 
 const ConfigModal = styled(Modal)`
@@ -194,7 +194,7 @@ export const Game = () => {
       if (firstTurn) {
         // ------------random move function goes here ----------
         setFirstTurn(false);
-        console.log('random move generated');
+        console.log("random move generated");
       } else if (turn === AIColour) {
         // replace
         let colour = convertColourValueToString(AIColour);
@@ -360,11 +360,11 @@ export const Game = () => {
       if (moves.length !== 0) {
         console.log(moves);
 
-        const dir = parseInt(prompt(moves.join(' / ')));
+        const dir = parseInt(prompt(moves.join(" / ")));
 
         const nextBoardConfig = getNextBoardConfiguration(
           gameState,
-          moves[dir].split(' '),
+          moves[dir].split(" "),
           mapToColour(turn)
         );
         const newGameState = coordinatesToGameState(nextBoardConfig);
@@ -379,7 +379,8 @@ export const Game = () => {
     <Wrapper>
       <ConfigModal
         open={isConfigModalShown}
-        onClose={() => {}}
+        onClose={() => {
+        }}
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description">
         <Paper>
@@ -417,7 +418,7 @@ export const Game = () => {
               </RadioGroup>
             </ConfigRow>
             <FormLabel component="legend">Extra Settings</FormLabel>
-            <ConfigRow style={{ justifyContent: 'space-between' }}>
+            <ConfigRow style={{ justifyContent: "space-between" }}>
               <TextField
                 label="Move Limit"
                 variant="filled"
