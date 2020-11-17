@@ -1,42 +1,27 @@
 /* eslint-disable no-undef */
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 import {
   BLK,
   BOARD_LAYOUT_NAMES,
   BOARD_LAYOUTS,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_SECONDS,
+  DIRECTION,
   EMP,
   GAME_MODE,
   MARBLE_COLOURS,
-  WHT,
-  DIRECTION
-} from '../constants';
-import { Alpha_Beta_Search } from '../ai/agent';
-import {
-  Button,
-  FormControlLabel,
-  FormLabel,
-  Modal,
-  Radio,
-  RadioGroup,
-  TextField
-} from '@material-ui/core';
-import { ButtonContainer } from './ButtonContainer';
-import { InputFile } from './InputFile';
+  WHT
+} from "../constants";
+import { Button, FormControlLabel, FormLabel, Modal, Radio, RadioGroup, TextField } from "@material-ui/core";
+import { ButtonContainer } from "./ButtonContainer";
+import { InputFile } from "./InputFile";
 import {
   convertGameStateToCordinateArray,
   coordinatesToGameState,
   getLegalMoveInfo,
   mapToColour
-} from '../utils/movement';
-import {
-  createInitialState,
-  generateMoves,
-  getMarbleCoordinateInDirectionWithOffset,
-  getNextBoardConfiguration
-} from '../state_generation';
+} from "../utils/movement";
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
