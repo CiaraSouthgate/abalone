@@ -31,15 +31,36 @@ const parseMoveRequest = (req, res, callback) => {
   callback(state, colour);
 };
 
-app.get('/bestmoves', (req, res) => {
+app.get('/bestmove', (req, res) => {
   parseMoveRequest(req, res, (state, colour) => {
     const startTime = new Date().getTime();
 
     agent.getMove(state, colour, (bestMove) => {
       const calcTime = new Date().getTime() - startTime;
-      const resString = JSON.stringify({ move: bestMove, time: calcTime });
+      const resString = JSON.stringify({
+        move: bestMove.move,
+        result: bestMove.result,
+        time: calcTime
+      });
       res.status(200).send(resString);
     });
+  });
+});
+
+app.get('/state', (req, res) => {
+  const query = url.parse(req.url, true).query;
+  const { state, move, side } = query;
+  if (move == null || state == null || side == null) {
+    let errorString = 'Invalid request.';
+    if (move == null) errorString += ' Move is required.';
+    if (state == null) errorString += ' State is required.';
+    if (side == null) errorString += ' Side is required.';
+    res.status(400).send(errorString);
+    return;
+  }
+
+  stateGen.createStateFromMove(state, move, side, (state) => {
+    res.status(200).send(JSON.stringify(state));
   });
 });
 
@@ -50,6 +71,8 @@ app.get('/allmoves', (req, res) => {
     });
   });
 });
+
+app.get();
 
 app.get('/boardString', (req, res) => {
   parseMoveRequest(req, res, (state, colour) => {
