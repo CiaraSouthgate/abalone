@@ -314,6 +314,7 @@ const moveMarbleGroup = (marbles, direction, moveType, startState) => {
       }
       if (nextMarble.side === EMP) {
         newState[nextMarble.row][nextMarble.col] = opponentSide;
+        console.log("don't eat marble!"); //I have no idea why this prevents the marble being eaten, but it does.
       }
       newState[opponentStart.row][opponentStart.col] = leadMarble.side;
       newState[tailMarble.row][tailMarble.col] = EMP;

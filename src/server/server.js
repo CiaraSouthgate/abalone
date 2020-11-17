@@ -38,7 +38,6 @@ app.get('/bestmove', (req, res) => {
 
     agent.getMove(state, colour, (bestMove) => {
       const calcTime = new Date().getTime() - startTime;
-      console.log(calcTime);
       const resString = JSON.stringify({
         move: bestMove.move,
         result: bestMove.result,
