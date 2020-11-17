@@ -1,6 +1,6 @@
 import React from 'react';
-import { parseInputFile, downloadTextfile } from '../state_generation';
 import { Button } from '@material-ui/core';
+import { downloadTextfile, parseInputFile } from '../state_generation';
 
 export const InputFile = () => {
   const inputRef = React.createRef();
