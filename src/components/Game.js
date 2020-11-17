@@ -159,7 +159,7 @@ export const Game = () => {
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
   const [legalMoves, setLegalMoves] = React.useState([]);
   const [turn, setTurn] = React.useState(BLK);
-  const [playerColour] = React.useState(MARBLE_COLOURS.BLACK);
+  const [AIColour, setAIColour] = React.useState(MARBLE_COLOURS.BLACK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [timeLimitInSeconds] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
@@ -193,8 +193,11 @@ export const Game = () => {
 
   const handleGameStateChange = (newGameState) =>  {
     setGameState(newGameState);
+  };
 
-  }
+  const handleAIColourChange = (e) => {
+    setAIColour(parseInt(e.target.value));
+  };
 
   const onPlayClick = () => {
     setIsConfigModalShown(false);
@@ -315,7 +318,7 @@ export const Game = () => {
         return;
       }
       if (selectedMarbles.has(`${row}${col}`)) {
-        setselectedMarbles(new Set());
+        setselectedMarbles(new Set());  
         return;
       }
       const newselectedMarbles = new Set(selectedMarbles);
@@ -390,7 +393,7 @@ export const Game = () => {
                 />
               </RadioGroup>
             </ConfigRow>
-            <FormLabel component="legend">Game Mode</FormLabel>
+            {/* <FormLabel component="legend">Game Mode</FormLabel>
             <ConfigRow>
               <RadioGroup row value={gameMode} onChange={handleGameModeChange}>
                 <FormControlLabel value={GAME_MODE.VSHUMAN} control={<Radio />} label="vs. Human" />
@@ -399,6 +402,13 @@ export const Game = () => {
                   control={<Radio />}
                   label="vs. Computer"
                 />
+              </RadioGroup>
+            </ConfigRow> */}
+            <FormLabel component="legend">AI Marble Colour</FormLabel>
+            <ConfigRow>
+              <RadioGroup row value={AIColour} onChange={handleAIColourChange}>
+                <FormControlLabel value={MARBLE_COLOURS.BLACK} control={<Radio />} label="Black"/>
+                <FormControlLabel value={MARBLE_COLOURS.WHITE} control={<Radio />} label="White"/>
               </RadioGroup>
             </ConfigRow>
             <FormLabel component="legend">Extra Settings</FormLabel>
