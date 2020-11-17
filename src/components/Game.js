@@ -397,17 +397,6 @@ export const Game = () => {
                 />
               </RadioGroup>
             </ConfigRow>
-            {/* <FormLabel component="legend">Game Mode</FormLabel>
-            <ConfigRow>
-              <RadioGroup row value={gameMode} onChange={handleGameModeChange}>
-                <FormControlLabel value={GAME_MODE.VSHUMAN} control={<Radio />} label="vs. Human" />
-                <FormControlLabel
-                  value={GAME_MODE.VSCOMPUTER}
-                  control={<Radio />}
-                  label="vs. Computer"
-                />
-              </RadioGroup>
-            </ConfigRow> */}
             <FormLabel component="legend">AI Marble Colour</FormLabel>
             <ConfigRow>
               <RadioGroup row value={AIColour} onChange={handleAIColourChange}>
@@ -430,13 +419,13 @@ export const Game = () => {
                 label="Time Limit (White Player)"
                 variant="filled"
                 size="small"
-                defaultValue={timeLimitInSecondsBlack}
+                defaultValue={timeLimitInSecondsWhite}
               />
               <TextField
                 label="Time Limit (Black Player)"
                 variant="filled"
                 size="small"
-                defaultValue={timeLimitInSecondsWhite}
+                defaultValue={timeLimitInSecondsBlack}
               />
             </ConfigRow>
             <ConfigRow>
