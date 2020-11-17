@@ -295,7 +295,9 @@ const moveMarbleGroup = (marbles, direction, startState) => {
 
 module.exports = {
   generateMoves: generateMoves,
-  createStateFromMove: createStateFromMove,
+  createStateFromMove: (state, move, side, callback) => {
+    callback(createStateFromMove(state, move, side));
+  },
   getStatesString: (state, colour, callback) => {
     const moves = generateMoves(state, colour);
     callback(generateOutput(moves, colour, state));
