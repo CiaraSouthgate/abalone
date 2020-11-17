@@ -135,9 +135,18 @@ const ConfigRow = styled.div`
   margin: 10px 0;
 `;
 
-const Scoreboard = styled.div`
-  position: absolute;
-  right: 20px;
+const History = styled.div`
+  position: fixed;
+  right: 50px;
+  border: solid 1px;
+  height: 300px;
+  width: 300px;
+  overflow-x: hidden; 
+  text-align: center;
+  overflow-y: auto;
+  table {
+    width: 100%;
+  }
 
   table,
   th,
@@ -148,11 +157,22 @@ const Scoreboard = styled.div`
   td {
     border-bottom: 1px solid black;
     padding: 5px;
-    text-align: left;
+    text-align: center;
   }
 `;
 
-const ScoreDisplay = styled.th``;
+const HistoryDisplay = styled.div`
+  font-weight: bold;
+  border-bottom: 1px solid;
+  padding: 5px;
+`;
+
+
+const TotalTime = styled.div`
+  font-weight: bold;
+  border-bottom: 1px solid;
+  padding 5px;
+`;
 
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
@@ -458,15 +478,40 @@ export const Game = () => {
           ))}
         </Board>
       </BoardContainer>
-      <Scoreboard>
-        <tr>
-          <ScoreDisplay>Score: {score}</ScoreDisplay>
-        </tr>
-        <tr>
-          <th>Turn #</th>
+      <History>
+      <HistoryDisplay>History</HistoryDisplay>
+              <TotalTime><span>Total Time ({AIColour === 1 ? "Black" : "White"}):</span></TotalTime>
+        <table>
+        <thead>
+          <th>Turn</th>
           <th>Player</th>
           <th>Move</th>
           <th>Time</th>
+        </thead>
+        <tbody>
+        <tr>
+          <td>1</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>0:20</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>0:40</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>1:00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>1:20</td>
         </tr>
         <tr>
           <td>1</td>
@@ -492,7 +537,129 @@ export const Game = () => {
           <td>C4-&gt;E4</td>
           <td>1:20</td>
         </tr>
-      </Scoreboard>
+        <tr>
+          <td>1</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>0:20</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>0:40</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>1:00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>1:20</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>0:20</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>0:40</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>1:00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>1:20</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>0:20</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>0:40</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>1:00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>1:20</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>0:20</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>0:40</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>1:00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>1:20</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>0:20</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>0:40</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Player 1</td>
+          <td>C4-&gt;E4</td>
+          <td>1:00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Player 2</td>
+          <td>C4-&gt;E4</td>
+          <td>1:20</td>
+        </tr>
+        </tbody>
+        </table>
+      </History>
     </Wrapper>
   );
 };
