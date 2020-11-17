@@ -32,11 +32,13 @@ const parseMoveRequest = (req, res, callback) => {
 };
 
 app.get('/bestmove', (req, res) => {
+  console.log('received move request');
   parseMoveRequest(req, res, (state, colour) => {
     const startTime = new Date().getTime();
 
     agent.getMove(state, colour, (bestMove) => {
       const calcTime = new Date().getTime() - startTime;
+      console.log(calcTime);
       const resString = JSON.stringify({
         move: bestMove.move,
         result: bestMove.result,
@@ -48,6 +50,7 @@ app.get('/bestmove', (req, res) => {
 });
 
 app.get('/state', (req, res) => {
+  console.log('received state request');
   const query = url.parse(req.url, true).query;
   let { state, move, side } = query;
   if (move == null || state == null || side == null) {
