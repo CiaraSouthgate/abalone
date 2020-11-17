@@ -49,7 +49,7 @@ app.get('/bestmove', (req, res) => {
 
 app.get('/state', (req, res) => {
   const query = url.parse(req.url, true).query;
-  const { state, move, side } = query;
+  let { state, move, side } = query;
   if (move == null || state == null || side == null) {
     let errorString = 'Invalid request.';
     if (move == null) errorString += ' Move is required.';
@@ -58,6 +58,9 @@ app.get('/state', (req, res) => {
     res.status(400).send(errorString);
     return;
   }
+
+  state = JSON.parse(state);
+  side = parseInt(side);
 
   stateGen.createStateFromMove(state, move, side, (state) => {
     res.status(200).send(JSON.stringify(state));
