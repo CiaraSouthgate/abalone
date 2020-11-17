@@ -35,7 +35,8 @@ import {
   createInitialState,
   generateMoves,
   getMarbleCoordinateInDirectionWithOffset,
-  getNextBoardConfiguration
+  getNextBoardConfiguration,
+  convertColourValueToString
 } from '../state_generation';
 
 const TILE_WIDTH = 60;
@@ -134,9 +135,18 @@ const ConfigRow = styled.div`
   margin: 10px 0;
 `;
 
-const Scoreboard = styled.div`
-  position: absolute;
-  right: 20px;
+const History = styled.div`
+  position: fixed;
+  right: 50px;
+  border: solid 1px;
+  height: 300px;
+  width: 300px;
+  overflow-x: hidden; 
+  text-align: center;
+  overflow-y: auto;
+  table {
+    width: 100%;
+  }
 
   table,
   th,
@@ -147,35 +157,64 @@ const Scoreboard = styled.div`
   td {
     border-bottom: 1px solid black;
     padding: 5px;
-    text-align: left;
+    text-align: center;
   }
 `;
 
-const ScoreDisplay = styled.th``;
+const HistoryDisplay = styled.div`
+  font-weight: bold;
+  border-bottom: 1px solid;
+  padding: 5px;
+`;
+
+
+const TotalTime = styled.div`
+  font-weight: bold;
+  border-bottom: 1px solid;
+  padding 5px;
+`;
 
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
-  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.GERMAN_DAISY);
+  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.BLANK);
   const [legalMoves, setLegalMoves] = React.useState([]);
   const [turn, setTurn] = React.useState(BLK);
-  const [playerColour] = React.useState(MARBLE_COLOURS.BLACK);
+  const [AIColour, setAIColour] = React.useState(BLK);
   const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
-  const [timeLimitInSeconds] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [historyEntries, setHistoryEntries] = React.useState([]);
+  // Total calculation time for AI in seconds
+  const [totalTime] = React.useState(0);
+  const [timeTakenForLastMove, setTimeTakenForLastMove] = React.useState(0);
+  const [numTurns, setNumTurns] = React.useState(1);
+  const [timeLimitInSecondsWhite] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [timeLimitInSecondsBlack] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
+  const [firstTurn, setFirstTurn] = React.useState(true);
   const score = 0; // ???
 
   React.useEffect(() => {
-    const coords = convertGameStateToCordinateArray(gameState);
-    createInitialState(coords);
-    const moves = generateMoves(mapToColour(turn), coords);
-    setLegalMoves(moves);
-    if (turn === BLK) {
-      const move = Alpha_Beta_Search(gameState, turn);
-      console.log(move);
-    }
-  }, [gameState]);
+    if (!isConfigModalShown) {
+
+      // State and Player colour
+      const coords = convertGameStateToCordinateArray(gameState);
+      createInitialState(coords);
+      // replace with api call for all moves.
+      const moves = generateMoves(mapToColour(turn), coords);
+      setLegalMoves(moves);
+        if (firstTurn) {
+          // ------------random move function goes here ----------
+          setFirstTurn(false);
+          console.log("random move generated")
+        } else if (turn === AIColour) {
+          // replace 
+          let colour = convertColourValueToString(AIColour);
+          const move = Alpha_Beta_Search(gameState, colour);
+          console.log(move);
+        }
+      }
+    }, [gameState]);
 
   const handleInitBoardLayoutChange = (e) => {
     setInitBoardLayout(parseInt(e.target.value));
@@ -185,14 +224,22 @@ export const Game = () => {
     setGameMode(parseInt(e.target.value));
   };
 
+  const handleGameStateChange = (newGameState) =>  {
+    setGameState(newGameState);
+  };
+
+  const handleAIColourChange = (e) => {
+    setAIColour(parseInt(e.target.value));
+  };
+
   const onPlayClick = () => {
     setIsConfigModalShown(false);
     if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
-      setGameState(BOARD_LAYOUTS.STANDARD);
+      handleGameStateChange(BOARD_LAYOUTS.STANDARD);
     } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
-      setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
-    } else {
-      setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
+      handleGameStateChange(BOARD_LAYOUTS.BELGIAN_DAISY);
+    } else if (initBoardLayout === BOARD_LAYOUT_NAMES.GERMAN_DAISY) {
+      handleGameStateChange(BOARD_LAYOUTS.GERMAN_DAISY);
     }
   };
 
@@ -304,7 +351,7 @@ export const Game = () => {
         return;
       }
       if (selectedMarbles.has(`${row}${col}`)) {
-        setselectedMarbles(new Set());
+        setselectedMarbles(new Set());  
         return;
       }
       const newselectedMarbles = new Set(selectedMarbles);
@@ -325,8 +372,13 @@ export const Game = () => {
       if (moves.length !== 0) {
         console.log(moves);
 
-        const dir = parseInt(prompt(moves.join(' / ')));
-
+        const dir = parseInt(prompt(moves.join(' / ')) -1);
+        // if empty string then continue.
+        if (isNaN(dir)) {
+          console.log("user cancelled");
+          return;
+        }
+        try {
         const nextBoardConfig = getNextBoardConfiguration(
           gameState,
           moves[dir].split(' '),
@@ -336,9 +388,40 @@ export const Game = () => {
         setGameState(newGameState);
         setselectedMarbles(new Set());
         setTurn(turn === BLK ? WHT : BLK);
+        addHistoryEntry({
+          numTurn: numTurns,
+          playerColour: turn,
+          move: moves[dir],
+          timeTaken: timeTakenForLastMove
+        });
+        setNumTurns(numTurns + 1);
+        console.log(historyEntries);
+        } catch(err) {
+          console.log("not a valid option");
+          console.log(err);
+          return;
+        }
       }
     }
   };
+
+  const historyEntryRender = () => 
+    historyEntries.map((entry) => 
+      <tr key={entry.numTurn}>
+        <td>{entry.numTurn}</td>
+        <td>{entry.playerColour === BLK ? "Black" : "White"}</td>
+        <td>{entry.move}</td>
+        <td>{entry.playerColour !== AIColour ? 0 : entry.timeTaken}</td>
+      </tr>
+    );
+
+    const addHistoryEntry = (newEntry) => {
+      if (historyEntries.length === 0) {
+        setHistoryEntries([newEntry]);
+      } else {
+        setHistoryEntries([...historyEntries, newEntry]);
+      }
+    }
 
   return (
     <Wrapper>
@@ -370,18 +453,14 @@ export const Game = () => {
                 />
               </RadioGroup>
             </ConfigRow>
-            <FormLabel component="legend">Game Mode</FormLabel>
+            <FormLabel component="legend">AI Marble Colour</FormLabel>
             <ConfigRow>
-              <RadioGroup row value={gameMode} onChange={handleGameModeChange}>
-                <FormControlLabel value={GAME_MODE.VSHUMAN} control={<Radio />} label="vs. Human" />
-                <FormControlLabel
-                  value={GAME_MODE.VSCOMPUTER}
-                  control={<Radio />}
-                  label="vs. Computer"
-                />
+              <RadioGroup row value={AIColour} onChange={handleAIColourChange}>
+                <FormControlLabel value={BLK} control={<Radio />} label="Black"/>
+                <FormControlLabel value={WHT} control={<Radio />} label="White"/>
               </RadioGroup>
             </ConfigRow>
-            <FormLabel component="legend">Extra Settings</FormLabel>
+            <FormLabel component="legend">Movement Settings</FormLabel>
             <ConfigRow style={{ justifyContent: 'space-between' }}>
               <TextField
                 label="Move Limit"
@@ -389,11 +468,20 @@ export const Game = () => {
                 size="small"
                 defaultValue={moveLimit}
               />
-              <TextField
-                label="Time Limit (in seconds)"
+            </ConfigRow>
+            <FormLabel component="legend">Timing (In Seconds)</FormLabel>
+            <ConfigRow>
+            <TextField
+                label="Time Limit (White Player)"
                 variant="filled"
                 size="small"
-                defaultValue={timeLimitInSeconds}
+                defaultValue={timeLimitInSecondsWhite}
+              />
+              <TextField
+                label="Time Limit (Black Player)"
+                variant="filled"
+                size="small"
+                defaultValue={timeLimitInSecondsBlack}
               />
             </ConfigRow>
             <ConfigRow>
@@ -426,41 +514,49 @@ export const Game = () => {
           ))}
         </Board>
       </BoardContainer>
-      <Scoreboard>
-        <tr>
-          <ScoreDisplay>Score: {score}</ScoreDisplay>
-        </tr>
-        <tr>
-          <th>Turn #</th>
+      <History>
+      <HistoryDisplay>History</HistoryDisplay>
+              <TotalTime><span>Total Time ({AIColour === 1 ? "Black" : "White"}):</span></TotalTime>
+        <table>
+        <thead>
+          <th>Turn</th>
           <th>Player</th>
           <th>Move</th>
           <th>Time</th>
-        </tr>
-        <tr>
-          <td>1</td>
-          <td>Player 1</td>
-          <td>C4-&gt;E4</td>
-          <td>0:20</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Player 2</td>
-          <td>C4-&gt;E4</td>
-          <td>0:40</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Player 1</td>
-          <td>C4-&gt;E4</td>
-          <td>1:00</td>
-        </tr>
-        <tr>
-          <td>4</td>
-          <td>Player 2</td>
-          <td>C4-&gt;E4</td>
-          <td>1:20</td>
-        </tr>
-      </Scoreboard>
+        </thead>
+          <tbody>
+            {historyEntryRender()}
+          </tbody>
+        </table>
+      </History>
     </Wrapper>
   );
 };
+
+
+// const HistoryComponent = () => {
+
+//   let state = [
+//     {numTurn: 1, playerColour: "Black", move: "INLINE B3C3 SW", timeTaken: 10},
+//   ];
+
+//   const historyEntryRender = () => 
+//     state.map((entry) => 
+//       <tr key={entry}>
+//         <td>{entry.numTurn}</td>
+//         <td>{entry.playerColour}</td>
+//         <td>{entry.move}</td>
+//         <td>{entry.timeTaken}</td>
+//       </tr>
+//     );
+
+//     const addHistoryEntry = (newEntry) => {
+//       state = [...state, newEntry];
+//     }
+
+//   return (
+//     <tbody>
+//       {historyEntryRender()}
+//     </tbody>
+//   );
+// }

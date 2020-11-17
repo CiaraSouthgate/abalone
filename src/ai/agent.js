@@ -7,7 +7,7 @@ const NEG_INF = Number.NEGATIVE_INFINITY;
 // positive infinity
 const POS_INF = Number.POSITIVE_INFINITY;
 // global variable for depth
-const DEPTH = 5;
+const DEPTH = 1;
 // global variable for best move
 let best_move;
 // Colour of Max, aka the colour of our game playing agent.
@@ -38,14 +38,14 @@ const order_nodes = (actions, state, colour) => {
 // Returns an action
 export const Alpha_Beta_Search = (state, startingColour) => {
   const marble_coordinates = getMarblesAsArray(state);
-  let best_previous_move = transposition_table.getItem(marble_coordinates);
-  if (best_previous_move) {
-    return best_previous_move;
-  }
+  // let best_previous_move = transposition_table.getItem(marble_coordinates);
+  // if (best_previous_move) {
+  //   return best_previous_move;
+  // }
   max_colour = startingColour;
   min_colour = max_colour === 'w' ? 'b' : 'w';
   let v = max_value(state, NEG_INF, POS_INF, DEPTH);
-  transposition_table.setItem(marble_coordinates, best_move);
+  // transposition_table.setItem(marble_coordinates, best_move);
   return best_move;
 };
 

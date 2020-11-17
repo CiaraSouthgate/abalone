@@ -2,10 +2,13 @@ import { createInitialState, generateMoves, generateOutput } from './state_gener
 
 // handles input of text file to our state generator
 export const parseInputFile = (callback) => {
+  
   // get input tag
   let input = document.getElementById('input');
+
   // get file
   let file = input.files[0];
+
   // create reader
   let reader = new FileReader();
 

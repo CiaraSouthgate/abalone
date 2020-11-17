@@ -53,8 +53,19 @@ const getCoordinatesUsingColour = (startingColour, marbleCoords) => {
   return coordinates;
 };
 
+
+const setStringArrayToLowerCase = (coords) => {
+  for (let i = 0; i < coords.length; i++) {
+    coords[i] = coords[i].toLowerCase();
+  }
+  return coords;
+}
+
 // This function generates a set for duo and trio neighbouring marbles
 export const generateMoves = (startingColour, marbleCoords) => {
+
+  marbleCoords = setStringArrayToLowerCase(marbleCoords);
+
   // get coordinates of only the marbles we will be moving
   const single_marbles = getCoordinatesUsingColour(startingColour, marbleCoords);
   // generate a list of duoing neighbour marbles
