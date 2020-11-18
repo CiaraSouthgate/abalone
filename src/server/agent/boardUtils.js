@@ -9,19 +9,13 @@ class Marble {
   }
 
   compareTo(other) {
-    if (this.row < other.row) {
-      return -1;
-    } else if (this.row > other.row) {
-      return 1;
+    if (this.row === other.row) {
+      if (this.col === other.col) {
+        return 0;
+      }
+      return this.col < other.col ? -1 : 1;
     }
-
-    if (this.col < other.col) {
-      return -1;
-    } else if (this.col > other.col) {
-      return 1;
-    }
-
-    return 0;
+    return this.row < other.row ? -1 : 1;
   }
 }
 
@@ -70,20 +64,7 @@ module.exports = {
     }
   },
 
-  getDirectionFromCoordinateModifier: (modifier) => {
-    switch (modifier) {
-      case { row: -1, col: 0 }:
-        return DIRECTION.NW;
-      case { row: -1, col: -1 }:
-        return DIRECTION.NE;
-      case { row: 0, col: -1 }:
-        return DIRECTION.E;
-      case { row: 0, col: 1 }:
-        return DIRECTION.W;
-      case { row: 1, col: 1 }:
-        return DIRECTION.SW;
-      case { row: 1, col: 0 }:
-        return DIRECTION.SE;
-    }
+  deepCopy: (object) => {
+    return JSON.parse(JSON.stringify(object));
   }
 };

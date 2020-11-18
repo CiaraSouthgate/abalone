@@ -212,3 +212,9 @@ const ciaraHeuristic = (state, player) => {
 
   return distanceScore + neighbourScore + (MAX_MARBLES - numOpponent) - (MAX_MARBLES - numFriendly);
 };
+
+module.exports = {
+  jihyoHeuristic: jihyoHeuristic,
+  spencer_heuristic: spencer_heuristic,
+  ciaraHeuristic: ciaraHeuristic
+};

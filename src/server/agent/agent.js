@@ -12,9 +12,11 @@ const NEG_INF = Number.NEGATIVE_INFINITY;
 // positive infinity
 const POS_INF = Number.POSITIVE_INFINITY;
 // global variable for depth
-const DEPTH = 5;
+const DEPTH = 2;
 // global variable for best move
 let bestMove;
+// global variable for state after best move
+let bestMoveResult;
 // Colour of Max, aka the colour of our game playing agent.
 let maxSide;
 // Colour of Min, aka the colour of the opponent.
@@ -47,7 +49,7 @@ const alphaBetaSearch = (state, aiSide) => {
   maxSide = aiSide;
   minSide = maxSide === WHT ? BLK : WHT;
   let v = maxValue(state, NEG_INF, POS_INF, DEPTH);
-  return bestMove;
+  return { move: bestMove, result: bestMoveResult };
 };
 
 // Returns a utility value
@@ -63,6 +65,8 @@ const maxValue = (state, alpha, beta, d) => {
     if (v > alpha) {
       alpha = v;
       bestMove = node.action;
+      bestMoveResult = node.result;
+      console.log('updating best move:', bestMove);
     }
   });
   return v;

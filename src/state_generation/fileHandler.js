@@ -1,5 +1,4 @@
 // handles input of text file to our state generator
-
 import { BLK, BOARD_LAYOUTS, WHT } from '../constants';
 
 export const parseInputFile = (callback) => {
@@ -7,6 +6,8 @@ export const parseInputFile = (callback) => {
   const input = document.getElementById('input');
   // get file
   const file = input.files[0];
+  const fileName = file.name;
+  const testName = fileName.substring(0, fileName.lastIndexOf('.'));
   // create reader
   const reader = new FileReader();
 
@@ -32,7 +33,7 @@ export const parseInputFile = (callback) => {
     req.open('GET', 'http://localhost:5000/boardString' + queryString);
     req.onreadystatechange = () => {
       if (req.readyState === 4 && req.status === 200) {
-        callback(req.responseText);
+        callback(testName, JSON.parse(req.responseText));
       }
     };
     req.send();

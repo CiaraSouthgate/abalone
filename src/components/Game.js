@@ -13,7 +13,7 @@ import {
   WHT,
   DIRECTION
 } from '../constants';
-import { Alpha_Beta_Search } from '../ai/agent';
+// import { Alpha_Beta_Search } from '../ai/agent';
 import {
   Button,
   FormControlLabel,
@@ -31,13 +31,13 @@ import {
   getLegalMoveInfo,
   mapToColour
 } from '../utils/movement';
-import {
-  createInitialState,
-  generateMoves,
-  getMarbleCoordinateInDirectionWithOffset,
-  getNextBoardConfiguration,
-  convertColourValueToString
-} from '../state_generation';
+// import {
+//   createInitialState,
+//   generateMoves,
+//   getMarbleCoordinateInDirectionWithOffset,
+//   getNextBoardConfiguration,
+//   convertColourValueToString
+// } from '../state_generation';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -194,24 +194,51 @@ export const Game = () => {
   const [firstTurn, setFirstTurn] = React.useState(true);
   const score = 0; // ???
 
+  const chooseRandomMove = (move_list) => {
+    let rand = getRandomInt(move_list.length);
+    return move_list[rand];
+    }
+
+  const getRandomInt = (max) => {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
   React.useEffect(() => {
     if (!isConfigModalShown) {
 
       // State and Player colour
-      const coords = convertGameStateToCordinateArray(gameState);
-      createInitialState(coords);
-      // replace with api call for all moves.
-      const moves = generateMoves(mapToColour(turn), coords);
-      setLegalMoves(moves);
+      // const coords = convertGameStateToCordinateArray(gameState);
+      // createInitialState(coords);
+      // // replace with api call for all moves.
+      // const moves = generateMoves(mapToColour(turn), coords);
+      // setLegalMoves(moves);
+        const req = new XMLHttpRequest();
+        const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
+        req.open('GET', 'http://localhost:5000/allmoves' + queryString);
+        req.onreadystatechange = () => {
+          if (req.readyState === 4 && req.status === 200) {
+            setLegalMoves(JSON.parse(req.responseText));
+          }
+        };
+        req.send();
         if (firstTurn) {
           // ------------random move function goes here ----------
           setFirstTurn(false);
-          console.log("random move generated")
+          let random_move = chooseRandomMove(legalMoves);
+          console.log("random move: " + random_move);
         } else if (turn === AIColour) {
           // replace 
-          let colour = convertColourValueToString(AIColour);
-          const move = Alpha_Beta_Search(gameState, colour);
-          console.log(move);
+          // let colour = convertColourValueToString(AIColour);
+          // const move = Alpha_Beta_Search(gameState, colour);
+          const req = new XMLHttpRequest();
+          const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
+          req.open('GET', 'http://localhost:5000/bestmove' + queryString);
+          req.onreadystatechange = () => {
+            if (req.readyState === 4 && req.status === 200) {
+              console.log((JSON.parse(req.responseText)));
+            }
+          };
+          req.send();
         }
       }
     }, [gameState]);
@@ -379,13 +406,41 @@ export const Game = () => {
           return;
         }
         try {
-        const nextBoardConfig = getNextBoardConfiguration(
-          gameState,
-          moves[dir].split(' '),
-          mapToColour(turn)
-        );
-        const newGameState = coordinatesToGameState(nextBoardConfig);
-        setGameState(newGameState);
+          // If the user enter in like 124 when there are only 2 moves, catch the error and let them try again.
+          let move;
+          try {
+            move = moves[dir].split(' ');
+          } catch(err) {
+            console.log(err)
+            console.log("invalid input");
+            return;
+          }
+
+          const req = new XMLHttpRequest();
+          const queryString = `?state=${JSON.stringify(gameState)}&move=${moves[dir]}&side=${turn}`;
+          req.open('GET', 'http://localhost:5000/state' + queryString);
+          req.onreadystatechange = () => {
+            if (req.readyState === 4 && req.status === 200) {
+              console.log((JSON.parse(req.responseText)));
+              setGameState(JSON.parse(req.responseText));
+            }
+          };
+          req.send();
+
+        // ---------------------------------------------------
+        // const nextBoardConfig = getNextBoardConfiguration(
+        //   gameState,
+        //   moves[dir].split(' '),
+        //   mapToColour(turn)
+        // );
+        // const newGameState = coordinatesToGameState(nextBoardConfig);
+        // -------------------------------------------------------------
+
+        // ------------
+        // This will be a request, and this function will be the callback, instead of newGameState, it will be the response.
+  
+        // ------------
+
         setselectedMarbles(new Set());
         setTurn(turn === BLK ? WHT : BLK);
         addHistoryEntry({
@@ -404,6 +459,7 @@ export const Game = () => {
       }
     }
   };
+
 
   const historyEntryRender = () => 
     historyEntries.map((entry) => 
