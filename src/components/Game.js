@@ -184,7 +184,7 @@ export const Game = () => {
   const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
   const [historyEntries, setHistoryEntries] = React.useState([]);
   // Total calculation time for AI in seconds
-  const [totalTime] = React.useState(0);
+  const [totalTime, setTotalTime] = React.useState(0);
   const [timeTakenForLastMove, setTimeTakenForLastMove] = React.useState(0);
   const [numTurns, setNumTurns] = React.useState(1);
   const [timeLimitInSecondsWhite] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
@@ -227,7 +227,10 @@ export const Game = () => {
           req.open('GET', 'http://localhost:5000/bestmove' + queryString);
           req.onreadystatechange = () => {
             if (req.readyState === 4 && req.status === 200) {
-              console.log((JSON.parse(req.responseText)));
+              let response = JSON.parse(req.responseText);
+              console.log(response.move)
+              setTotalTime((response.time/1000) + totalTime)
+              setTimeTakenForLastMove(response.time / 1000);
             }
           };
           req.send();
@@ -439,7 +442,7 @@ export const Game = () => {
           numTurn: numTurns,
           playerColour: turn,
           move: moves[dir],
-          timeTaken: timeTakenForLastMove
+          timeTaken: turn === AIColour ? timeTakenForLastMove : 0
         });
         setNumTurns(numTurns + 1);
         console.log(historyEntries);
@@ -564,7 +567,7 @@ export const Game = () => {
       </BoardContainer>
       <History>
       <HistoryDisplay>History</HistoryDisplay>
-              <TotalTime><span>Total Time ({AIColour === 1 ? "Black" : "White"}):</span></TotalTime>
+              <TotalTime><span>Total Time ({AIColour === 1 ? "Black" : "White"}): {totalTime}</span></TotalTime>
         <table>
         <thead>
           <th>Turn</th>
