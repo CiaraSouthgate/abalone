@@ -206,13 +206,6 @@ export const Game = () => {
 
   React.useEffect(() => {
     if (!isConfigModalShown) {
-
-      // State and Player colour
-      // const coords = convertGameStateToCordinateArray(gameState);
-      // createInitialState(coords);
-      // // replace with api call for all moves.
-      // const moves = generateMoves(mapToColour(turn), coords);
-      // setLegalMoves(moves);
         const req = new XMLHttpRequest();
         const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
         let moves;
@@ -228,12 +221,7 @@ export const Game = () => {
           }
         };
         req.send();
-        if (firstTurn) {
-
-        } else if (turn === AIColour) {
-          // replace 
-          // let colour = convertColourValueToString(AIColour);
-          // const move = Alpha_Beta_Search(gameState, colour);
+        if (turn === AIColour && !firstTurn) {
           const req = new XMLHttpRequest();
           const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
           req.open('GET', 'http://localhost:5000/bestmove' + queryString);
