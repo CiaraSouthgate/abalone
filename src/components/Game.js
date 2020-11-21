@@ -203,6 +203,7 @@ export const Game = () => {
     return Math.floor(Math.random() * Math.floor(max));
   }
 
+
   React.useEffect(() => {
     if (!isConfigModalShown) {
 
@@ -214,18 +215,21 @@ export const Game = () => {
       // setLegalMoves(moves);
         const req = new XMLHttpRequest();
         const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
+        let moves;
         req.open('GET', 'http://localhost:5000/allmoves' + queryString);
         req.onreadystatechange = () => {
           if (req.readyState === 4 && req.status === 200) {
             setLegalMoves(JSON.parse(req.responseText));
+            if (firstTurn) {
+              let random_move = chooseRandomMove(JSON.parse(req.responseText));
+              console.log("random move: " + random_move);    
+              setFirstTurn(false);
+            }
           }
         };
         req.send();
         if (firstTurn) {
-          // ------------random move function goes here ----------
-          setFirstTurn(false);
-          let random_move = chooseRandomMove(legalMoves);
-          console.log("random move: " + random_move);
+
         } else if (turn === AIColour) {
           // replace 
           // let colour = convertColourValueToString(AIColour);
