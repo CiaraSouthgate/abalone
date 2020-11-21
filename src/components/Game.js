@@ -392,8 +392,6 @@ export const Game = () => {
     } else {
       const moves = getLegalMoveInfo(legalMoves, selectedMarbles);
       if (moves.length !== 0) {
-        console.log(moves);
-
         const dir = parseInt(prompt(moves.join(' / ')) -1);
         // if empty string then continue.
         if (isNaN(dir)) {
@@ -416,36 +414,19 @@ export const Game = () => {
           req.open('GET', 'http://localhost:5000/state' + queryString);
           req.onreadystatechange = () => {
             if (req.readyState === 4 && req.status === 200) {
-              console.log((JSON.parse(req.responseText)));
               setGameState(JSON.parse(req.responseText));
             }
           };
           req.send();
-
-        // ---------------------------------------------------
-        // const nextBoardConfig = getNextBoardConfiguration(
-        //   gameState,
-        //   moves[dir].split(' '),
-        //   mapToColour(turn)
-        // );
-        // const newGameState = coordinatesToGameState(nextBoardConfig);
-        // -------------------------------------------------------------
-
-        // ------------
-        // This will be a request, and this function will be the callback, instead of newGameState, it will be the response.
-  
-        // ------------
-
-        setselectedMarbles(new Set());
-        setTurn(turn === BLK ? WHT : BLK);
-        addHistoryEntry({
+          setselectedMarbles(new Set());
+          setTurn(turn === BLK ? WHT : BLK);
+          addHistoryEntry({
           numTurn: numTurns,
           playerColour: turn,
           move: moves[dir],
           timeTaken: turn === AIColour ? timeTakenForLastMove : 0
-        });
-        setNumTurns(numTurns + 1);
-        console.log(historyEntries);
+          });
+          setNumTurns(numTurns + 1);
         } catch(err) {
           console.log("not a valid option");
           console.log(err);
