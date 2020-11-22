@@ -38,6 +38,12 @@ import {
 //   getNextBoardConfiguration,
 //   convertColourValueToString
 // } from '../state_generation';
+import PauseIcon from '@material-ui/icons/Pause';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import StopIcon from '@material-ui/icons/Stop';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import UndoIcon from '@material-ui/icons/Undo';
+import { ButtonGroup, IconButton } from '@material-ui/core';
 
 const TILE_WIDTH = 60;
 const TILE_HEIGHT = 60;
@@ -192,7 +198,33 @@ export const Game = () => {
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
   const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
   const [firstTurn, setFirstTurn] = React.useState(true);
-  const score = 0; // ???
+  // previous gamestate so that we can use the undo button
+  const [previousState, setPreviousState] = React.useState();
+  // or
+  // let previousState = {
+  //   turn: undefined,
+  //   legalMoves: undefined,
+  //   gamestate: undefined,
+  //   historyEntries: undefined,
+  //   firstTurn: undefined,
+  //   numTurns: undefined,
+  //   timeTakenForLastMove: undefined,
+  //   totalTime: totalTime,
+  // };
+  // let previousState = {};
+
+  
+
+  const restorePreviousState = () => {
+    setTurn(previousState.turn);
+    setLegalMoves(previousState.legalMoves);
+    setGameState(previousState.gamestate);
+    setHistoryEntries(previousState.historyEntries);
+    setFirstTurn(previousState.firstTurn);
+    setNumTurns(previousState.numTurns);
+    setTimeTakenForLastMove(previousState.timeTakenForLastMove);
+    setTotalTime(previousState.totalTime);
+  }
 
   const chooseRandomMove = (move_list) => {
     let rand = getRandomInt(move_list.length);
@@ -229,7 +261,7 @@ export const Game = () => {
             if (req.readyState === 4 && req.status === 200) {
               let response = JSON.parse(req.responseText);
               console.log(response.move)
-              setTotalTime((response.time/1000) + totalTime)
+              // setTotalTime((response.time/1000) + totalTime)
               setTimeTakenForLastMove(response.time / 1000);
             }
           };
@@ -408,16 +440,29 @@ export const Game = () => {
             console.log("invalid input");
             return;
           }
-
           const req = new XMLHttpRequest();
           const queryString = `?state=${JSON.stringify(gameState)}&move=${moves[dir]}&side=${turn}`;
           req.open('GET', 'http://localhost:5000/state' + queryString);
           req.onreadystatechange = () => {
             if (req.readyState === 4 && req.status === 200) {
               setGameState(JSON.parse(req.responseText));
+              setPreviousState({
+                turn: turn,
+                legalMoves: legalMoves,
+                gamestate: gameState,
+                historyEntries: historyEntries,
+                firstTurn: firstTurn,
+                numTurns: numTurns,
+                timeTakenForLastMove: timeTakenForLastMove,
+                totalTime: totalTime,
+                });
             }
           };
           req.send();
+          // Set total time taken for AI
+          if (turn === AIColour){
+            setTotalTime((timeTakenForLastMove) + totalTime)
+          }
           setselectedMarbles(new Set());
           setTurn(turn === BLK ? WHT : BLK);
           addHistoryEntry({
@@ -528,7 +573,24 @@ export const Game = () => {
           </ConfigBody>
         </Paper>
       </ConfigModal>
-      <ButtonContainer />
+      {/* <ButtonContainer /> */}
+      <ButtonGroup>
+      <IconButton>
+        <PlayArrowIcon />
+      </IconButton>
+      <IconButton>
+        <StopIcon />
+      </IconButton>
+      <IconButton>
+        <AutorenewIcon />
+      </IconButton>
+      <IconButton>
+        <PauseIcon />
+      </IconButton>
+      <IconButton>
+        <UndoIcon onClick={restorePreviousState}/>
+      </IconButton>
+    </ButtonGroup>
       <BoardContainer>
         <Board>
           {Object.keys(gameState).map((k) => (
@@ -564,31 +626,3 @@ export const Game = () => {
     </Wrapper>
   );
 };
-
-
-// const HistoryComponent = () => {
-
-//   let state = [
-//     {numTurn: 1, playerColour: "Black", move: "INLINE B3C3 SW", timeTaken: 10},
-//   ];
-
-//   const historyEntryRender = () => 
-//     state.map((entry) => 
-//       <tr key={entry}>
-//         <td>{entry.numTurn}</td>
-//         <td>{entry.playerColour}</td>
-//         <td>{entry.move}</td>
-//         <td>{entry.timeTaken}</td>
-//       </tr>
-//     );
-
-//     const addHistoryEntry = (newEntry) => {
-//       state = [...state, newEntry];
-//     }
-
-//   return (
-//     <tbody>
-//       {historyEntryRender()}
-//     </tbody>
-//   );
-// }
