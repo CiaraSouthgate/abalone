@@ -84,7 +84,6 @@ const BoardTile = styled.div`
 
 export const Game = () => {
   const [gameState, setGameState] = useState(BOARD_LAYOUTS.BLANK);
-  const [turn, setTurn] = useState(BLK);
   const [legalMoves, setLegalMoves] = useState([]);
   const [AIColour, setAIColour] = useState(BLK);
   const [humanColour, setHumanColour] = useState(WHT);
@@ -98,18 +97,18 @@ export const Game = () => {
   const [aiTimeLimit, setAITimeLimit] = useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [configModalOpen, setConfigModalOpen] = useState(true);
   const [selectedMarbles, setSelectedMarbles] = useState(new Set());
-  const [firstTurn, setFirstTurn] = useState(true);
   // previous gamestate so that we can use the undo button
   const [previousState, setPreviousState] = useState();
   const [whiteScore, setWhiteScore] = useState(0);
   const [blackScore, setBlackScore] = useState(0);
+  const [turn, setTurn] = useState(BLK);
+  const [firstTurn, setFirstTurn] = useState(true);
 
   const restorePreviousState = () => {
     setTurn(previousState.turn);
     setLegalMoves(previousState.legalMoves);
     setGameState(previousState.gamestate);
     setHistoryEntries(previousState.historyEntries);
-    setFirstTurn(previousState.firstTurn);
     setNumTurns(previousState.numTurns);
     setTimeTakenForLastMove(previousState.timeTakenForLastMove);
     setTotalTime(previousState.totalTime);
@@ -120,12 +119,7 @@ export const Game = () => {
   };
 
   const switchTurn = () => {
-    if (firstTurn) {
-      setFirstTurn(false);
-    }
-    const newTurn = turn === BLK ? WHT : BLK;
-    setTurn(newTurn);
-    return newTurn;
+    setTurn(turn === BLK ? WHT : BLK);
   };
 
   const chooseRandomMove = (move_list) => {
@@ -138,9 +132,9 @@ export const Game = () => {
     return Math.floor(Math.random() * Math.floor(max));
   };
 
-  const getAllMoves = (side, callback) => {
+  const getAllMoves = (callback) => {
     const req = new XMLHttpRequest();
-    const queryString = `?state=${JSON.stringify(gameState)}&colour=${side}`;
+    const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
     req.open('GET', 'http://localhost:5000/allmoves' + queryString);
     req.onreadystatechange = () => {
       if (req.readyState === 4 && req.status === 200) {
@@ -198,8 +192,9 @@ export const Game = () => {
   };
 
   const makeRandomMove = () => {
-    getAllMoves(AIColour, (moves) => {
+    getAllMoves((moves) => {
       const move = chooseRandomMove(moves);
+      setFirstTurn(false);
       updateStateFromMove(move);
       addHistoryEntry({
         numTurn: numTurns,
@@ -240,12 +235,18 @@ export const Game = () => {
         } else {
           makeBestMove();
         }
-        getAllMoves(switchTurn(), (moves) => {
-          setLegalMoves(moves);
-        });
+        switchTurn();
       }
     }
   }, [gameState]);
+
+  useEffect(() => {
+    if (turn !== AIColour) {
+      getAllMoves((moves) => {
+        setLegalMoves(moves);
+      });
+    }
+  }, [turn]);
 
   const getPosition = (position, direction) => {
     const row = position[0];
@@ -385,8 +386,7 @@ export const Game = () => {
         try {
           // If the user enter in like 124 when there are only 2 moves, catch the error and let them try again.
           try {
-            const move = moves[choice].split(' ');
-            updateStateFromMove(move);
+            updateStateFromMove(moves[choice]);
           } catch (err) {
             console.log(err);
             console.log('invalid input');
