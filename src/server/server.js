@@ -33,18 +33,31 @@ const parseMoveRequest = (req, res, callback) => {
 
 app.get('/bestmove', (req, res) => {
   console.log('received move request');
-  parseMoveRequest(req, res, (state, colour) => {
-    const startTime = new Date().getTime();
+  const query = url.parse(req.url, true).query;
 
-    agent.getMove(state, colour, (bestMove) => {
-      const calcTime = new Date().getTime() - startTime;
-      const resString = JSON.stringify({
-        move: bestMove.move,
-        result: bestMove.result,
-        time: calcTime
-      });
-      res.status(200).send(resString);
+  let { state, colour, timeLimit } = query;
+
+  if (state == null || colour == null) {
+    let errorString = 'Invalid request.';
+    res.status(400);
+    if (state == null) errorString += ' State is required.';
+    if (colour == null) errorString += ' Colour is required.';
+    res.send(errorString);
+    return;
+  }
+
+  state = JSON.parse(state);
+  colour = parseInt(colour);
+  const startTime = new Date().getTime();
+
+  agent.getMove(state, colour, startTime + timeLimit, (bestMove) => {
+    const calcTime = new Date().getTime() - startTime;
+    const resString = JSON.stringify({
+      move: bestMove.move,
+      result: bestMove.result,
+      time: calcTime
     });
+    res.status(200).send(resString);
   });
 });
 
@@ -52,11 +65,11 @@ app.get('/state', (req, res) => {
   console.log('received state request');
   const query = url.parse(req.url, true).query;
   let { state, move, side } = query;
-  if (move == null || state == null || side == null) {
+  if (!move || !state || !side) {
     let errorString = 'Invalid request.';
-    if (move == null) errorString += ' Move is required.';
-    if (state == null) errorString += ' State is required.';
-    if (side == null) errorString += ' Side is required.';
+    if (!move) errorString += ' Move is required.';
+    if (!state) errorString += ' State is required.';
+    if (!side) errorString += ' Side is required.';
     res.status(400).send(errorString);
     return;
   }
@@ -70,6 +83,7 @@ app.get('/state', (req, res) => {
 });
 
 app.get('/allmoves', (req, res) => {
+  console.log('received all moves request');
   parseMoveRequest(req, res, (state, colour) => {
     stateGen.getAllMoves(state, colour, (moves) => {
       res.status(200).send(JSON.stringify(moves));

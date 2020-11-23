@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import {
   BLK,
@@ -7,11 +7,10 @@ import {
   BOARD_LAYOUTS,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_SECONDS,
+  DIRECTION,
   EMP,
   GAME_MODE,
-  MARBLE_COLOURS,
-  WHT,
-  DIRECTION
+  WHT
 } from '../constants';
 // import { Alpha_Beta_Search } from '../ai/agent';
 import {
@@ -55,7 +54,15 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  flex-direction: row;
+`;
+
+const BoardWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: column;
+  margin-right: 2em;
 `;
 
 const BoardContainer = styled.div`
@@ -143,12 +150,10 @@ const ConfigRow = styled.div`
 `;
 
 const History = styled.div`
-  position: fixed;
-  right: 50px;
   border: solid 1px;
   height: 300px;
   width: 300px;
-  overflow-x: hidden; 
+  overflow-x: hidden;
   text-align: center;
   overflow-y: auto;
   table {
@@ -173,7 +178,6 @@ const HistoryDisplay = styled.div`
   border-bottom: 1px solid;
   padding: 5px;
 `;
-
 
 const TotalTime = styled.div`
   font-weight: bold;
@@ -213,10 +217,10 @@ export const Game = () => {
   const [totalTime, setTotalTime] = React.useState(0);
   const [timeTakenForLastMove, setTimeTakenForLastMove] = React.useState(0);
   const [numTurns, setNumTurns] = React.useState(1);
-  const [timeLimitInSecondsWhite] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
-  const [timeLimitInSecondsBlack] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [humanTimeLimit, setHumanTimeLimit] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [aiTimeLimit, setAITimeLimit] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
-  const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
+  const [selectedMarbles, setSelectedMarbles] = React.useState(new Set());
   const [firstTurn, setFirstTurn] = React.useState(true);
   // previous gamestate so that we can use the undo button
   const [previousState, setPreviousState] = React.useState();
@@ -235,7 +239,7 @@ export const Game = () => {
   // };
   // let previousState = {};
 
-  
+
 
   const restorePreviousState = () => {
     setTurn(previousState.turn);
@@ -248,63 +252,78 @@ export const Game = () => {
     setTotalTime(previousState.totalTime);
   }
 
-  const chooseRandomMove = (move_list) => {
-    let rand = getRandomInt(move_list.length);
-    return move_list[rand];
-    }
-
-  const getRandomInt = (max) => {
-    return Math.floor(Math.random() * Math.floor(max));
-  }
-
-
-  React.useEffect(() => {
-    if (!isConfigModalShown) {
-        const req = new XMLHttpRequest();
-        const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
-        let moves;
-        req.open('GET', 'http://localhost:5000/allmoves' + queryString);
-        req.onreadystatechange = () => {
-          if (req.readyState === 4 && req.status === 200) {
-            setLegalMoves(JSON.parse(req.responseText));
-            if (firstTurn) {
-              let random_move = chooseRandomMove(JSON.parse(req.responseText));
-              console.log("random move: " + random_move);    
-              setFirstTurn(false);
-            }
-          }
-        };
-        req.send();
-        if (turn === AIColour && !firstTurn) {
-          const req = new XMLHttpRequest();
-          const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
-          req.open('GET', 'http://localhost:5000/bestmove' + queryString);
-          req.onreadystatechange = () => {
-            if (req.readyState === 4 && req.status === 200) {
-              let response = JSON.parse(req.responseText);
-              console.log(response.move)
-              setTimeTakenForLastMove(response.time / 1000);
-            }
-          };
-          req.send();
-        }
-      }
-    }, [gameState]);
-
   const handleInitBoardLayoutChange = (e) => {
     setInitBoardLayout(parseInt(e.target.value));
   };
 
-  const handleGameModeChange = (e) => {
-    setGameMode(parseInt(e.target.value));
-  };
-
-  const handleGameStateChange = (newGameState) =>  {
+  const handleGameStateChange = (newGameState) => {
     setGameState(newGameState);
   };
 
   const handleAIColourChange = (e) => {
     setAIColour(parseInt(e.target.value));
+  };
+
+  const handleHumanTimeLimitChange = (e) => {
+    setHumanTimeLimit(parseInt(e.target.value));
+  };
+
+  const handleAITimeLimitChange = (e) => {
+    setAITimeLimit(parseInt(e.target.value));
+  };
+
+  const switchTurn = () => {
+    if (firstTurn) {
+      setFirstTurn(false);
+    }
+    setTurn(turn === BLK ? WHT : BLK);
+  };
+
+  const chooseRandomMove = (move_list) => {
+    if (move_list.length === 0) console.log('no moves');
+    let rand = getRandomInt(move_list.length);
+    return move_list[rand];
+  };
+
+  const getRandomInt = (max) => {
+    return Math.floor(Math.random() * Math.floor(max));
+  };
+
+  const getAllMoves = (callback) => {
+    const req = new XMLHttpRequest();
+    const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
+    req.open('GET', 'http://localhost:5000/allmoves' + queryString);
+    req.onreadystatechange = () => {
+      if (req.readyState === 4 && req.status === 200) {
+        callback(JSON.parse(req.responseText));
+      }
+    };
+    req.send();
+  };
+
+  const updateStateFromMove = (move) => {
+    const req = new XMLHttpRequest();
+    const queryString = `?state=${JSON.stringify(gameState)}&move=${move}&side=${turn}`;
+    req.open('GET', 'http://localhost:5000/state' + queryString);
+    req.onreadystatechange = () => {
+      if (req.readyState === 4 && req.status === 200) {
+        setGameState(JSON.parse(req.responseText));
+      } else if (req.status === 400) {
+        console.log(req.responseText);
+      }
+    };
+    req.send();
+
+  const handleInitBoardLayoutChange = (e) => {
+    setInitBoardLayout(parseInt(e.target.value));
+  };
+
+  const makeRandomMove = () => {
+    getAllMoves((moves) => {
+      const move = chooseRandomMove(moves);
+      console.log(move);
+      updateStateFromMove(move);
+    });
   };
 
   const onPlayClick = () => {
@@ -317,6 +336,16 @@ export const Game = () => {
       handleGameStateChange(BOARD_LAYOUTS.GERMAN_DAISY);
     }
   };
+
+  useEffect(() => {
+    if (!isConfigModalShown) {
+      if (firstTurn && turn === AIColour) {
+        makeRandomMove();
+        // setFirstTurn(false);
+        // setTurn();
+      }
+    }
+  }, [gameState]);
 
   const getPosition = (position, direction) => {
     const row = position[0];
@@ -422,43 +451,45 @@ export const Game = () => {
     if (gameState[row][col] === turn) {
       // Push opponent Marble logic
       if (selectedMarbles.size > 1) {
-        setselectedMarbles(new Set());
+        setSelectedMarbles(new Set());
         return;
       }
       if (selectedMarbles.has(`${row}${col}`)) {
-        setselectedMarbles(new Set());  
+        setSelectedMarbles(new Set());
         return;
       }
-      const newselectedMarbles = new Set(selectedMarbles);
+      const newSelectedMarbles = new Set(selectedMarbles);
       if (selectedMarbles.size === 1) {
         const selectedMarble = Array.from(selectedMarbles)[0];
         const posBetween = getMarblePositionBetween(selectedMarble, `${row}${col}`);
-        if (posBetween !== null && isFriendly(selectedMarble, posBetween)) {
-          newselectedMarbles.add(posBetween);
+        if (posBetween != null && isFriendly(selectedMarble, posBetween)) {
+          newSelectedMarbles.add(posBetween);
         } else if (!isNeighbor(Array.from(selectedMarbles)[0], `${row}${col}`)) {
-          setselectedMarbles(new Set([`${row}${col}`]));
+          setSelectedMarbles(new Set([`${row}${col}`]));
           return;
         }
       }
-      newselectedMarbles.add(`${row}${col}`);
-      setselectedMarbles(newselectedMarbles);
+      newSelectedMarbles.add(`${row}${col}`);
+      setSelectedMarbles(newSelectedMarbles);
     } else {
       const moves = getLegalMoveInfo(legalMoves, selectedMarbles);
       if (moves.length !== 0) {
-        const dir = parseInt(prompt(moves.join(' / ')) -1);
+        console.log(moves);
+
+        const choice = parseInt(prompt(moves.join(' / '))) - 1;
         // if empty string then continue.
-        if (isNaN(dir)) {
-          console.log("user cancelled");
+        if (isNaN(choice)) {
+          console.log('user cancelled');
           return;
         }
         try {
           // If the user enter in like 124 when there are only 2 moves, catch the error and let them try again.
-          let move;
           try {
-            move = moves[dir].split(' ');
-          } catch(err) {
-            console.log(err)
-            console.log("invalid input");
+            const move = moves[choice].split(' ');
+            updateStateFromMove(move);
+          } catch (err) {
+            console.log(err);
+            console.log('invalid input');
             return;
           }
           const req = new XMLHttpRequest();
@@ -487,7 +518,7 @@ export const Game = () => {
           if (turn === AIColour){
             setTotalTime((timeTakenForLastMove) + totalTime)
           }
-          setselectedMarbles(new Set());
+          setSelectedMarbles(new Set());
           setTurn(turn === BLK ? WHT : BLK);
           addHistoryEntry({
           numTurn: numTurns,
@@ -499,30 +530,28 @@ export const Game = () => {
         } catch(err) {
           console.log("not a valid option");
           console.log(err);
-          return;
         }
       }
     }
   };
 
-
-  const historyEntryRender = () => 
-    historyEntries.map((entry) => 
+  const historyEntryRender = () =>
+    historyEntries.map((entry) => (
       <tr key={entry.numTurn}>
         <td>{entry.numTurn}</td>
-        <td>{entry.playerColour === BLK ? "Black" : "White"}</td>
+        <td>{entry.playerColour === BLK ? 'Black' : 'White'}</td>
         <td>{entry.move}</td>
         <td>{entry.playerColour !== AIColour ? 0 : entry.timeTaken}</td>
       </tr>
-    );
+    ));
 
-    const addHistoryEntry = (newEntry) => {
-      if (historyEntries.length === 0) {
-        setHistoryEntries([newEntry]);
-      } else {
-        setHistoryEntries([...historyEntries, newEntry]);
-      }
+  const addHistoryEntry = (newEntry) => {
+    if (historyEntries.length === 0) {
+      setHistoryEntries([newEntry]);
+    } else {
+      setHistoryEntries([...historyEntries, newEntry]);
     }
+  };
 
   return (
     <Wrapper>
@@ -557,8 +586,8 @@ export const Game = () => {
             <FormLabel component="legend">AI Marble Colour</FormLabel>
             <ConfigRow>
               <RadioGroup row value={AIColour} onChange={handleAIColourChange}>
-                <FormControlLabel value={BLK} control={<Radio />} label="Black"/>
-                <FormControlLabel value={WHT} control={<Radio />} label="White"/>
+                <FormControlLabel value={BLK} control={<Radio />} label="Black" />
+                <FormControlLabel value={WHT} control={<Radio />} label="White" />
               </RadioGroup>
             </ConfigRow>
             <FormLabel component="legend">Movement Settings</FormLabel>
@@ -572,17 +601,21 @@ export const Game = () => {
             </ConfigRow>
             <FormLabel component="legend">Timing (In Seconds)</FormLabel>
             <ConfigRow>
-            <TextField
-                label="Time Limit (White Player)"
+              <TextField
+                label="Time Limit (Human)"
+                type="number"
                 variant="filled"
                 size="small"
-                defaultValue={timeLimitInSecondsWhite}
+                defaultValue={humanTimeLimit}
+                onChange={handleHumanTimeLimitChange}
               />
               <TextField
-                label="Time Limit (Black Player)"
+                label="Time Limit (AI)"
+                type="number"
                 variant="filled"
                 size="small"
-                defaultValue={timeLimitInSecondsBlack}
+                defaultValue={aiTimeLimit}
+                onChange={handleAITimeLimitChange}
               />
             </ConfigRow>
             <ConfigRow>
@@ -597,7 +630,7 @@ export const Game = () => {
           </ConfigBody>
         </Paper>
       </ConfigModal>
-      {/* <ButtonContainer /> */}
+      <BoardWrapper>
       <ButtonGroup>
       <IconButton>
         <PlayArrowIcon />
@@ -615,36 +648,35 @@ export const Game = () => {
         <UndoIcon onClick={restorePreviousState}/>
       </IconButton>
     </ButtonGroup>
-      <BoardContainer>
-        <Board>
-          {Object.keys(gameState).map((k) => (
-            <BoardRow key={k}>
-              {Object.keys(gameState[k]).map((col) => (
-                <BoardTile
-                  key={`${k}${col}`}
-                  for={gameState[k][col]}
-                  selected={selectedMarbles.has(`${k}${col}`)}
-                  onClick={() => onMarbleClick(k, col)}>
-                  {`${k}${col}`}
-                </BoardTile>
-              ))}
-            </BoardRow>
-          ))}
-        </Board>
-      </BoardContainer>
+        <BoardContainer>
+          <Board>
+            {Object.keys(gameState).map((k) => (
+              <BoardRow key={k}>
+                {Object.keys(gameState[k]).map((col) => (
+                  <BoardTile
+                    key={`${k}${col}`}
+                    for={gameState[k][col]}
+                    selected={selectedMarbles.has(`${k}${col}`)}
+                    onClick={() => onMarbleClick(k, col)}>
+                    {`${k}${col}`}
+                  </BoardTile>
+                ))}
+              </BoardRow>
+            ))}
+          </Board>
+        </BoardContainer>
+      </BoardWrapper>
       <History>
       <HistoryDisplay>History</HistoryDisplay>
               <TotalTime><span>Total Time ({AIColour === 1 ? "Black" : "White"}): {totalTime}</span></TotalTime>
         <table>
-        <thead>
-          <th>Turn</th>
-          <th>Player</th>
-          <th>Move</th>
-          <th>Time</th>
-        </thead>
-          <tbody>
-            {historyEntryRender()}
-          </tbody>
+          <thead>
+            <th>Turn</th>
+            <th>Player</th>
+            <th>Move</th>
+            <th>Time</th>
+          </thead>
+          <tbody>{historyEntryRender()}</tbody>
         </table>
       </History>
       <ScoreContainer>
@@ -663,3 +695,30 @@ export const Game = () => {
     </Wrapper>
   );
 };
+
+// const HistoryComponent = () => {
+
+//   let state = [
+//     {numTurn: 1, playerColour: "Black", move: "INLINE B3C3 SW", timeTaken: 10},
+//   ];
+
+//   const historyEntryRender = () =>
+//     state.map((entry) =>
+//       <tr key={entry}>
+//         <td>{entry.numTurn}</td>
+//         <td>{entry.playerColour}</td>
+//         <td>{entry.move}</td>
+//         <td>{entry.timeTaken}</td>
+//       </tr>
+//     );
+
+//     const addHistoryEntry = (newEntry) => {
+//       state = [...state, newEntry];
+//     }
+
+//   return (
+//     <tbody>
+//       {historyEntryRender()}
+//     </tbody>
+//   );
+// }

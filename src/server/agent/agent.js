@@ -7,6 +7,7 @@ const generateMoves = stateGen.generateMoves;
 const BLK = constants.BLK;
 const WHT = constants.WHT;
 
+const HALF_SECOND = 500;
 // negative infinity
 const NEG_INF = Number.NEGATIVE_INFINITY;
 // positive infinity
@@ -17,6 +18,8 @@ const DEPTH = 2;
 let bestMove;
 // global variable for state after best move
 let bestMoveResult;
+// global variable for time result must be returned by (in MS since epoch)
+let returnBy;
 // Colour of Max, aka the colour of our game playing agent.
 let maxSide;
 // Colour of Min, aka the colour of the opponent.
@@ -45,7 +48,8 @@ const orderNodes = (actions, state, side) => {
 };
 
 // Returns an action
-const alphaBetaSearch = (state, aiSide) => {
+const alphaBetaSearch = (state, aiSide, endTime) => {
+  returnBy = endTime;
   maxSide = aiSide;
   minSide = maxSide === WHT ? BLK : WHT;
   let v = maxValue(state, NEG_INF, POS_INF, DEPTH);
@@ -88,11 +92,11 @@ const min_value = (state, alpha, beta, d) => {
 
 // Returns true when depth is zero and if the state is a terminal state. but for now only returns true when the depth is zero or less.
 const cutoff_test = (state, depth) => {
-  return depth <= 0;
+  return returnBy - new Date().getTime() <= HALF_SECOND && depth <= 0;
 };
 
 module.exports = {
-  getMove: (state, colour, callback) => {
-    callback(alphaBetaSearch(state, colour));
+  getMove: (state, colour, endTime, callback) => {
+    callback(alphaBetaSearch(state, colour, endTime));
   }
 };
