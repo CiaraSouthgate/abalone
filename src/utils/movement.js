@@ -1,4 +1,4 @@
-import { BLK, BOARD_LAYOUTS, DIRECTION, EMP, WHT } from '../constants';
+import { BLK, EMP, WHT } from '../constants';
 
 export const convertGameStateToCordinateArray = (state) => {
   const coordinates = [];
@@ -20,32 +20,21 @@ export const getPlayerScores = (state) => {
   let blackScore;
   Object.keys(state).forEach((row) => {
     Object.keys(state[row]).forEach((column) => {
-      if(state[row][column] === WHT) {
+      if (state[row][column] === WHT) {
         numWhite++;
       } else if (state[row][column] === BLK) {
         numBlack++;
       }
     });
   });
-  whiteScore = (14 - numBlack);
-  blackScore = (14 - numWhite);
+  whiteScore = 14 - numBlack;
+  blackScore = 14 - numWhite;
   return [whiteScore, blackScore];
-}
+};
 
-export const getLegalMoveInfo = (legalMoves, coordinates) => {
-  const coordArr = Array.from(coordinates);
-  coordArr.sort();
-  const legalDirections = [];
-
-  for (let i = 0; i < legalMoves.length; i++) {
-    const moveInfo = legalMoves[i].split(' ');
-    const coordinate = moveInfo[1];
-    const coordinatesString = coordArr.join('').toUpperCase();
-    if (coordinatesString === coordinate) {
-      legalDirections.push(legalMoves[i]);
-    }
-  }
-  return legalDirections;
+export const getLegalMoveInfo = (legalMoves, marbles) => {
+  const marbleString = Array.from(marbles).sort().join('').toUpperCase();
+  return legalMoves.filter((move) => move.split(' ')[1] === marbleString);
 };
 
 export const coordinatesToGameState = (coordinates) => {

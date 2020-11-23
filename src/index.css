@@ -15,3 +15,70 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+table {
+  width: 100%;
+}
+
+table, th, td {
+  border-collapse: collapse;
+}
+th, td {
+  border-bottom: 1px solid black;
+  padding: 5px;
+  text-align: center;
+}
+
+.infoContainer {
+  border: solid 1px;
+  width: 100%;
+  max-width: 300px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.history {
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.infoTitle {
+  padding: 5px;
+  border-bottom: solid 1px;
+  font-weight: bold;
+}
+
+.totalTime {
+  font-weight: bold;
+  border-bottom: 1px solid;
+  padding: 5px;
+}
+
+.configPaper {
+  display: inline-block;
+  padding: 10px 20px;
+  align-self: center;
+  justify-self: center;
+}
+
+.configModal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rowWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: row;
+}
+
+.colWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-right: 2em;
+}
