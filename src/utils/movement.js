@@ -12,6 +12,26 @@ export const convertGameStateToCordinateArray = (state) => {
   return coordinates;
 };
 
+// Return an array, with white then black player score.
+export const getPlayerScores = (state) => {
+  let numWhite = 0;
+  let numBlack = 0;
+  let whiteScore;
+  let blackScore;
+  Object.keys(state).forEach((row) => {
+    Object.keys(state[row]).forEach((column) => {
+      if(state[row][column] === WHT) {
+        numWhite++;
+      } else if (state[row][column] === BLK) {
+        numBlack++;
+      }
+    });
+  });
+  whiteScore = (14 - numBlack);
+  blackScore = (14 - numWhite);
+  return [whiteScore, blackScore];
+}
+
 export const getLegalMoveInfo = (legalMoves, coordinates) => {
   const coordArr = Array.from(coordinates);
   coordArr.sort();

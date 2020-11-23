@@ -29,7 +29,8 @@ import {
   convertGameStateToCordinateArray,
   coordinatesToGameState,
   getLegalMoveInfo,
-  mapToColour
+  mapToColour,
+  getPlayerScores
 } from '../utils/movement';
 // import {
 //   createInitialState,
@@ -180,6 +181,25 @@ const TotalTime = styled.div`
   padding 5px;
 `;
 
+const ScoreContainer = styled.div`
+  position: fixed;
+  border: solid 1px;
+  width: 300px;
+  height: 100px;
+  left: 50px;
+  font-weight: bold;
+  text-align: center;
+`;
+
+const ScoreTitle = styled.div`
+  padding: 5px;
+  border-bottom: solid 1px;
+`
+
+const ScoreTable = styled.table`
+  width: 100%;
+`;
+
 export const Game = () => {
   const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
   const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.BLANK);
@@ -200,6 +220,8 @@ export const Game = () => {
   const [firstTurn, setFirstTurn] = React.useState(true);
   // previous gamestate so that we can use the undo button
   const [previousState, setPreviousState] = React.useState();
+  const [whiteScore, setWhiteScore] = React.useState(0);
+  const [blackScore, setBlackScore] = React.useState(0);
   // or
   // let previousState = {
   //   turn: undefined,
@@ -261,7 +283,6 @@ export const Game = () => {
             if (req.readyState === 4 && req.status === 200) {
               let response = JSON.parse(req.responseText);
               console.log(response.move)
-              // setTotalTime((response.time/1000) + totalTime)
               setTimeTakenForLastMove(response.time / 1000);
             }
           };
@@ -456,6 +477,9 @@ export const Game = () => {
                 timeTakenForLastMove: timeTakenForLastMove,
                 totalTime: totalTime,
                 });
+              let scores = getPlayerScores(JSON.parse(req.responseText));
+              setBlackScore(scores[1]);
+              setWhiteScore(scores[0]);
             }
           };
           req.send();
@@ -623,6 +647,19 @@ export const Game = () => {
           </tbody>
         </table>
       </History>
+      <ScoreContainer>
+        <ScoreTitle>Score</ScoreTitle>
+        <ScoreTable>
+                <tr>
+                  <td>White</td>
+                  <td>Black</td>
+                </tr>
+                <tr>
+                <td>{whiteScore}</td>
+                <td>{blackScore}</td>
+                </tr>
+        </ScoreTable>
+      </ScoreContainer>
     </Wrapper>
   );
 };
