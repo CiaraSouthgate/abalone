@@ -1,5 +1,6 @@
 * {
   outline: none;
+  box-sizing: border-box;
 }
 
 body {
@@ -80,5 +81,58 @@ th, td {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  margin-right: 2em;
+  margin: 0 1em;
+}
+
+.progress {
+  width: 100%;
+}
+
+.arrow {
+  position: absolute !important;
+
+}
+
+.NE {
+  top: 0;
+  right: 0;
+  transform: rotate(-45deg);
+}
+
+.E {
+  top: 50%;
+  right: 0;
+  transform: translate(0, -50%);
+}
+
+.SE {
+  bottom: 0;
+  right: 0;
+  transform: rotate(45deg);
+}
+
+.SW {
+  bottom: 0;
+  left: 0;
+  transform: rotate(-45deg);
+}
+
+.W {
+  top: 50%;
+  left: 0;
+  transform: translate(0, -50%);
+}
+
+.NW {
+  top: 0;
+  left: 0;
+  transform: rotate(45deg);
+}
+
+.gone {
+  display: none !important;
+}
+
+.hidden {
+  visibility: hidden;
 }

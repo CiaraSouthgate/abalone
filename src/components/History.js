@@ -20,12 +20,12 @@ export const History = ({ aiColour, totalTime, historyEntries }) => {
           </tr>
         </thead>
         <tbody>
-          {historyEntries.map((entry) => (
-            <tr key={entry.numTurn}>
+          {historyEntries.map((entry, i) => (
+            <tr key={i}>
               <td>{entry.numTurn}</td>
               <td>{entry.playerColour === BLK ? 'Black' : 'White'}</td>
               <td>{entry.move}</td>
-              <td>{entry.playerColour !== aiColour ? 0 : entry.timeTaken}</td>
+              <td>{entry.timeTaken}</td>
             </tr>
           ))}
         </tbody>

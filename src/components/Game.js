@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import {
   BLK,
@@ -7,36 +7,35 @@ import {
   BOARD_LAYOUTS,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_SECONDS,
-  DIRECTION,
+  DIRECTIONS_OBJECT,
   EMP,
   WHT
 } from '../constants';
 import { Box } from '@material-ui/core';
-import { getLegalMoveInfo, getPlayerScores } from '../utils/movement';
+import {
+  getLegalMoveInfo,
+  getMarblePositionBetween,
+  getPlayerScores,
+  isNeighbor
+} from '../utils/movement';
 import { History } from './History';
 import { Score } from './Score';
 import { ButtonContainer } from './ButtonContainer';
 import { ConfigModal } from './ConfigModal';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import { MoveArrows } from './MoveArrows';
 
-const TILE_WIDTH = 60;
-const TILE_HEIGHT = 60;
 const MARGIN_SIZE = 1;
-
-const BoardContainer = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`;
 
 const Board = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: red;
-  padding: 1rem;
+  padding: 1rem 3rem;
   border-radius: 8px;
   background-color: burlywood;
+  position: relative;
 `;
 
 const BoardRow = styled.div`
@@ -45,13 +44,10 @@ const BoardRow = styled.div`
 `;
 
 const BoardTile = styled.div`
-  /* width: ${TILE_WIDTH}px;
-  height: ${TILE_HEIGHT}px; */
   user-select: none;
   width: 4vw;
   height: 4vw;
   border-radius: 50%;
-  /* border: 0.1vw solid black; */
   margin: 0px ${MARGIN_SIZE}px;
   display: flex;
   justify-content: center;
@@ -68,25 +64,38 @@ const BoardTile = styled.div`
       return 'black';
     }
   }};
-  background-color: ${(props) => {
+  border: ${(props) => {
     if (props.selected) {
-      return 'red';
+      return '2px solid teal';
     }
+    return '1px solid #00000010';
+  }};
+  background-color: ${(props) => {
     if (props.for === EMP) {
-      return '#00000050';
+      return '#00000010';
     } else if (props.for === BLK) {
-      return 'black';
+      return (
+        'background: rgb(98,98,98);' +
+        'background: radial-gradient(circle, rgba(98,98,98,1) 0%, ' +
+        'rgba(60,60,64,1) 30%, rgba(0,0,0,1) 100%);'
+      );
     } else {
-      return 'white';
+      return (
+        'background: rgb(255,255,255);' +
+        'background: radial-gradient(circle, rgba(255,255,255,1) 0%, ' +
+        'rgba(183,183,201,1) 90%, rgba(195,195,195,1) 100%);'
+      );
     }
   }};
 `;
 
 export const Game = () => {
+  const [configModalOpen, setConfigModalOpen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [gameState, setGameState] = useState(BOARD_LAYOUTS.BLANK);
   const [legalMoves, setLegalMoves] = useState([]);
-  const [AIColour, setAIColour] = useState(BLK);
-  const [humanColour, setHumanColour] = useState(WHT);
+  const [AIColour, setAIColour] = useState(null);
+  const [humanColour, setHumanColour] = useState(null);
   const [moveLimit, setMoveLimit] = useState(DEFAULT_MOVE_LIMIT);
   const [historyEntries, setHistoryEntries] = useState([]);
   // Total calculation time for AI in seconds
@@ -95,14 +104,61 @@ export const Game = () => {
   const [numTurns, setNumTurns] = useState(1);
   const [humanTimeLimit, setHumanTimeLimit] = useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
   const [aiTimeLimit, setAITimeLimit] = useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
-  const [configModalOpen, setConfigModalOpen] = useState(true);
   const [selectedMarbles, setSelectedMarbles] = useState(new Set());
   // previous gamestate so that we can use the undo button
   const [previousState, setPreviousState] = useState();
   const [whiteScore, setWhiteScore] = useState(0);
   const [blackScore, setBlackScore] = useState(0);
-  const [turn, setTurn] = useState(BLK);
+  const [turn, setTurn] = useState(null);
   const [firstTurn, setFirstTurn] = useState(true);
+  const [legalDirections, setLegalDirections] = useState(DIRECTIONS_OBJECT);
+  const [humanMoveStart, setHumanMoveStart] = useState(null);
+
+  const previousValues = useRef({ turn, gameState });
+
+  useEffect(() => {
+    if (previousValues.current.turn !== turn && previousValues.current.gameState !== gameState) {
+      if (!configModalOpen) {
+        if (turn === AIColour) {
+          if (firstTurn) {
+            makeRandomMove();
+          } else {
+            makeBestMove();
+          }
+        } else {
+          const now = new Date().getTime();
+          setHumanMoveStart(now);
+          getAllMoves((moves) => {
+            setLegalMoves(moves);
+          });
+        }
+      }
+      previousValues.current = { turn, gameState };
+    }
+  }, [gameState, turn]);
+
+  const onPlayClick = (layout, aiColour, moveLimit, humanTime, aiTime) => {
+    switch (layout) {
+      case BOARD_LAYOUT_NAMES.STANDARD:
+        setGameState(BOARD_LAYOUTS.STANDARD);
+        break;
+      case BOARD_LAYOUT_NAMES.GERMAN_DAISY:
+        setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
+        break;
+      case BOARD_LAYOUT_NAMES.BELGIAN_DAISY:
+        setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
+        break;
+      default:
+        break;
+    }
+    setConfigModalOpen(false);
+    setAIColour(aiColour);
+    setHumanColour(aiColour === BLK ? WHT : BLK);
+    setMoveLimit(moveLimit);
+    setHumanTimeLimit(humanTime);
+    setAITimeLimit(aiTime);
+    setTurn(BLK);
+  };
 
   const restorePreviousState = () => {
     setTurn(previousState.turn);
@@ -114,11 +170,11 @@ export const Game = () => {
     setTotalTime(previousState.totalTime);
   };
 
-  const handleGameStateChange = (newGameState) => {
-    setGameState(newGameState);
-  };
-
   const switchTurn = () => {
+    const scores = getPlayerScores(gameState);
+    setBlackScore(scores.BLK);
+    setWhiteScore(scores.WHT);
+    setFirstTurn(false);
     setTurn(turn === BLK ? WHT : BLK);
   };
 
@@ -175,18 +231,23 @@ export const Game = () => {
         callback(JSON.parse(req.responseText));
       }
     };
+    req.send();
   };
 
   const makeBestMove = () => {
+    setIsLoading(true);
     getBestMove((response) => {
+      setIsLoading(false);
       const { move, result, time } = response;
-      setTimeTakenForLastMove(time / 1000);
+      const timeInSec = time / 1000;
+      setTimeTakenForLastMove(timeInSec);
       setGameState(result);
+      switchTurn();
       addHistoryEntry({
         numTurn: numTurns,
         playerColour: AIColour,
         move: move,
-        timeTaken: timeTakenForLastMove
+        timeTaken: timeInSec
       });
     });
   };
@@ -194,8 +255,8 @@ export const Game = () => {
   const makeRandomMove = () => {
     getAllMoves((moves) => {
       const move = chooseRandomMove(moves);
-      setFirstTurn(false);
       updateStateFromMove(move);
+      switchTurn();
       addHistoryEntry({
         numTurn: numTurns,
         playerColour: AIColour,
@@ -205,158 +266,33 @@ export const Game = () => {
     });
   };
 
-  const onPlayClick = (layout, aiColour, moveLimit, humanTime, aiTime) => {
-    switch (layout) {
-      case BOARD_LAYOUT_NAMES.STANDARD:
-        handleGameStateChange(BOARD_LAYOUTS.STANDARD);
-        break;
-      case BOARD_LAYOUT_NAMES.GERMAN_DAISY:
-        handleGameStateChange(BOARD_LAYOUTS.GERMAN_DAISY);
-        break;
-      case BOARD_LAYOUT_NAMES.BELGIAN_DAISY:
-        handleGameStateChange(BOARD_LAYOUTS.BELGIAN_DAISY);
-        break;
-      default:
-        break;
-    }
-    setConfigModalOpen(false);
-    setAIColour(aiColour);
-    setHumanColour(aiColour === BLK ? WHT : BLK);
-    setMoveLimit(moveLimit);
-    setHumanTimeLimit(humanTime);
-    setAITimeLimit(aiTime);
+  const clearMoveDirections = () => {
+    return {
+      NE: { active: false, move: null },
+      E: { active: false, move: null },
+      SE: { active: false, move: null },
+      SW: { active: false, move: null },
+      W: { active: false, move: null },
+      NW: { active: false, move: null }
+    };
   };
 
-  useEffect(() => {
-    if (!configModalOpen) {
-      if (turn === AIColour) {
-        if (firstTurn) {
-          makeRandomMove();
-        } else {
-          makeBestMove();
-        }
-        switchTurn();
-      }
-    }
-  }, [gameState]);
-
-  useEffect(() => {
-    if (turn !== AIColour) {
-      getAllMoves((moves) => {
-        setLegalMoves(moves);
-      });
-    }
-  }, [turn]);
-
-  const getPosition = (position, direction) => {
-    const row = position[0];
-    const col = parseInt(position[1]);
-
-    let newrow = row;
-    let newcol = col;
-    const ascii = row.charCodeAt(0);
-    let newascii = ascii;
-
-    switch (direction) {
-      case DIRECTION.E:
-        newcol = col + 1;
-        break;
-      case DIRECTION.W:
-        newcol = col - 1;
-        break;
-      case DIRECTION.NE:
-        newascii = ascii + 1;
-        newcol = col + 1;
-        break;
-      case DIRECTION.NW:
-        newascii = ascii + 1;
-        break;
-      case DIRECTION.SE:
-        newascii = ascii - 1;
-        break;
-      case DIRECTION.SW:
-        newascii = ascii - 1;
-        newcol = col - 1;
-        break;
-    }
-    newrow = String.fromCharCode(newascii);
-    if (newascii > 96 && newascii < 107 && gameState[newrow][newcol] !== undefined) {
-      return `${newrow}${newcol}`;
-    } else {
-      return null;
-    }
-  };
-
-  const getDirection = (position1, position2) => {
-    const pos1row = position1[0];
-    const pos1col = parseInt(position1[1]);
-    const pos2row = position2[0];
-    const pos2col = parseInt(position2[1]);
-
-    const rowDiff = pos1row.charCodeAt(0) - pos2row.charCodeAt(0);
-    const colDiff = pos1col - pos2col;
-
-    if (rowDiff === -1 && colDiff === 0) {
-      return DIRECTION.NW;
-    } else if (rowDiff === -1 && colDiff === -1) {
-      return DIRECTION.NE;
-    } else if (rowDiff === 0 && colDiff === -1) {
-      return DIRECTION.E;
-    } else if (rowDiff === 0 && colDiff === 1) {
-      return DIRECTION.W;
-    } else if (rowDiff === 1 && colDiff === 1) {
-      return DIRECTION.SW;
-    } else if (rowDiff === 1 && colDiff === 0) {
-      return DIRECTION.SE;
-    }
-  };
-
-  const isNeighbor = (position1, position2) => {
-    return getDirection(position1, position2) !== undefined;
-  };
-
-  const isFriendly = (position1, position2) => {
-    return (
-      gameState[position1[0]][parseInt(position1[1])] ===
-      gameState[position2[0]][parseInt(position2[1])]
-    );
-  };
-
-  const getMarblePositionBetween = (position1, position2) => {
-    const pos1row = position1[0].charCodeAt(0);
-    const pos1col = parseInt(position1[1]);
-    const pos2row = position2[0].charCodeAt(0);
-    const pos2col = parseInt(position2[1]);
-
-    if (Math.abs(pos1row - pos2row) === 2) {
-      if (pos1col > pos2col && pos1col - pos2col === 2) {
-        return `${String.fromCharCode(pos1row - 1)}${pos1col - 1}`;
-      } else if (pos1col < pos2col && pos2col - pos1col === 2) {
-        return `${String.fromCharCode(pos2row - 1)}${pos2col - 1}`;
-      } else if (pos1col === pos2col && pos1row > pos2row) {
-        return `${String.fromCharCode(pos1row - 1)}${pos1col}`;
-      } else if (pos1col === pos2col && pos2row > pos1row) {
-        return `${String.fromCharCode(pos2row - 1)}${pos1col}`;
-      }
-    } else if (pos1row === pos2row) {
-      if (pos1col > pos2col && pos1col - pos2col === 2) {
-        return `${position1[0]}${pos1col - 1}`;
-      } else if (pos1col < pos2col && pos2col - pos1col === 2) {
-        return `${position1[0]}${pos2col - 1}`;
-      }
-    }
-    return null;
+  const getDirectionsFromMoves = (moves) => {
+    const directions = clearMoveDirections();
+    moves.forEach((move) => {
+      const direction = move.split(' ')[2];
+      directions[direction].active = true;
+      directions[direction].move = move;
+    });
+    setLegalDirections(directions);
   };
 
   const onMarbleClick = (row, col) => {
     if (gameState[row][col] === turn) {
-      // Push opponent Marble logic
-      if (selectedMarbles.size > 1) {
+      //deselect if clicking on same or if trying to add more than allowed to group
+      if (selectedMarbles.size > 1 || selectedMarbles.has(`${row}${col}`)) {
         setSelectedMarbles(new Set());
-        return;
-      }
-      if (selectedMarbles.has(`${row}${col}`)) {
-        setSelectedMarbles(new Set());
+        setLegalDirections(clearMoveDirections());
         return;
       }
       const newSelectedMarbles = new Set(selectedMarbles);
@@ -372,49 +308,42 @@ export const Game = () => {
       }
       newSelectedMarbles.add(`${row}${col}`);
       setSelectedMarbles(newSelectedMarbles);
-    } else {
-      const moves = getLegalMoveInfo(legalMoves, selectedMarbles);
+      const moves = getLegalMoveInfo(legalMoves, newSelectedMarbles);
       if (moves.length !== 0) {
-        console.log(moves);
-
-        const choice = parseInt(prompt(moves.join(' / '))) - 1;
-        // if empty string then continue.
-        if (isNaN(choice)) {
-          console.log('user cancelled');
-          return;
-        }
-        try {
-          // If the user enter in like 124 when there are only 2 moves, catch the error and let them try again.
-          try {
-            updateStateFromMove(moves[choice]);
-          } catch (err) {
-            console.log(err);
-            console.log('invalid input');
-            return;
-          }
-          setSelectedMarbles(new Set());
-          addHistoryEntry({
-            numTurn: numTurns,
-            playerColour: turn,
-            move: moves[choice],
-            timeTaken: turn === AIColour ? timeTakenForLastMove : 0
-          });
-          switchTurn();
-          setNumTurns(numTurns + 1);
-        } catch (err) {
-          console.log('not a valid option');
-          console.log(err);
-        }
+        getDirectionsFromMoves(moves);
       }
     }
+  };
+
+  const isFriendly = (position1, position2) => {
+    return (
+      gameState[position1[0]][parseInt(position1[1])] ===
+      gameState[position2[0]][parseInt(position2[1])]
+    );
   };
 
   const addHistoryEntry = (newEntry) => {
     if (historyEntries.length === 0) {
       setHistoryEntries([newEntry]);
     } else {
-      setHistoryEntries([...historyEntries, newEntry]);
+      const existingEntries = historyEntries;
+      setHistoryEntries([newEntry, ...existingEntries]);
     }
+  };
+
+  const handleMoveArrowClick = (direction) => {
+    const move = legalDirections[direction].move;
+    updateStateFromMove(move);
+    switchTurn();
+    setSelectedMarbles(new Set());
+    setLegalDirections(clearMoveDirections());
+    addHistoryEntry({
+      numTurn: numTurns,
+      playerColour: turn,
+      move: move,
+      timeTaken: (new Date().getTime() - humanMoveStart) / 1000
+    });
+    setNumTurns(numTurns + 1);
   };
 
   return (
@@ -422,8 +351,9 @@ export const Game = () => {
       <ConfigModal isOpen={configModalOpen} onSubmit={onPlayClick} />
       <Box className="colWrapper">
         <ButtonContainer onUndoClicked={restorePreviousState} />
-        <BoardContainer>
+        <Box className="colWrapper">
           <Board>
+            <MoveArrows activeDirections={legalDirections} onArrowClick={handleMoveArrowClick} />
             {Object.keys(gameState).map((k) => (
               <BoardRow key={k}>
                 {Object.keys(gameState[k]).map((col) => (
@@ -438,10 +368,11 @@ export const Game = () => {
               </BoardRow>
             ))}
           </Board>
-        </BoardContainer>
+        </Box>
       </Box>
       <Box className="colWrapper">
         <Score blackScore={blackScore} whiteScore={whiteScore} />
+        <LinearProgress className={`progress ${!isLoading && 'hidden'}`} />
         <History aiColor={AIColour} totalTime={totalTime} historyEntries={historyEntries} />
       </Box>
     </Box>

@@ -35,7 +35,7 @@ export const ConfigModal = ({ isOpen, onSubmit }) => {
   };
 
   const onAIColourChanged = (e) => {
-    setAIColour(e.target.value);
+    setAIColour(parseInt(e.target.value));
   };
 
   const onMoveLimitChanged = (e) => {

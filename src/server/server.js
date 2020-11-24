@@ -50,7 +50,7 @@ app.get('/bestmove', (req, res) => {
   colour = parseInt(colour);
   const startTime = new Date().getTime();
 
-  agent.getMove(state, colour, startTime + timeLimit, (bestMove) => {
+  agent.getMove(state, colour, startTime + timeLimit * 1000, (bestMove) => {
     const calcTime = new Date().getTime() - startTime;
     const resString = JSON.stringify({
       move: bestMove.move,

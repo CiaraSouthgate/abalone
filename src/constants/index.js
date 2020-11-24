@@ -68,3 +68,12 @@ export const BOARD_LAYOUTS = {
     a: { 1: EMP, 2: EMP, 3: EMP, 4: EMP, 5: EMP }
   }
 };
+
+export const DIRECTIONS_OBJECT = {
+  NE: { active: false, move: null },
+  E: { active: false, move: null },
+  SE: { active: false, move: null },
+  SW: { active: false, move: null },
+  W: { active: false, move: null },
+  NW: { active: false, move: null }
+};
