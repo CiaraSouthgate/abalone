@@ -55,44 +55,10 @@ const alphaBetaSearch = (state, aiSide, endTime) => {
   maxSide = aiSide;
   minSide = maxSide === WHT ? BLK : WHT;
   let v = alphabeta(state, DEPTH, NEG_INF, POS_INF, true);
-  // let v = maxValue(state, NEG_INF, POS_INF, DEPTH);
   return { move: bestMove, result: bestMoveResult };
 };
 
-// // Returns a utility value
-// const maxValue = (state, alpha, beta, d) => {
-//   if (cutoff_test(state, d)) return utility(state, maxSide);
-
-//   let v = NEG_INF;
-//   const actions = generateMoves(state, maxSide);
-//   const nodes = orderNodes(actions, state, maxSide);
-//   nodes.forEach((node) => {
-//     v = Math.max(v, min_value(node.result, alpha, beta, d - 1));
-//     if (v > beta) return v;
-//     alpha = Math.max(v, alpha);
-//     bestMove = node.action;
-//     bestMoveResult = node.result;
-//     console.log('updating best move:', bestMove);
-//     if (beta <= alpha) break;
-//   });
-//   return v;
-// };
-
-// // Returns a utility value
-// const min_value = (state, alpha, beta, d) => {
-//   if (cutoff_test(state, d)) return utility(state, minSide);
-//   let v = POS_INF;
-//   const actions = generateMoves(state, minSide);
-//   const nodes = orderNodes(actions, state, minSide);
-//   nodes.forEach((node) => {
-//     v = Math.min(v, maxValue(node.result, alpha, beta, d - 1));
-//     if (v <= alpha) return v;
-//     beta = Math.min(beta, v);
-//   });
-//   return v;
-// };
-
-
+// Main alphabeta algorithm function
 const alphabeta = (state, depth, alpha, beta, isMax) => {
   if (cutoff_test(state, depth)) {
     if (isMax) {
@@ -131,7 +97,6 @@ const alphabeta = (state, depth, alpha, beta, isMax) => {
     return value;
   }
 }
-
 
 
 // Returns true when depth is zero and if the state is a terminal state. but for now only returns true when the depth is zero or less.
