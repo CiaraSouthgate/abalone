@@ -85,8 +85,8 @@ const alphabeta = (state, depth, alpha, beta, isMax) => {
     return value;
   } else {
     value = POS_INF;
-    const actions = generateMoves(state, maxSide);
-    const nodes = orderNodes(actions, state, maxSide);
+    const actions = generateMoves(state, minSide);
+    const nodes = orderNodes(actions, state, minSide);
     for (let i = 0; i < nodes.length; i++) {
       value = Math.min(value, alphabeta(nodes[i].result, depth - 1, alpha, beta, true));
       beta = Math.min(beta, value);
