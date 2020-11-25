@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import {
   BLK,
@@ -7,72 +7,35 @@ import {
   BOARD_LAYOUTS,
   DEFAULT_MOVE_LIMIT,
   DEFAULT_TIME_LIMIT_IN_SECONDS,
+  DIRECTIONS_OBJECT,
   EMP,
-  GAME_MODE,
-  MARBLE_COLOURS,
-  WHT,
-  DIRECTION
+  WHT
 } from '../constants';
-// import { Alpha_Beta_Search } from '../ai/agent';
+import { Box } from '@material-ui/core';
 import {
-  Button,
-  FormControlLabel,
-  FormLabel,
-  Modal,
-  Radio,
-  RadioGroup,
-  TextField
-} from '@material-ui/core';
-import { ButtonContainer } from './ButtonContainer';
-import { InputFile } from './InputFile';
-import {
-  convertGameStateToCordinateArray,
-  coordinatesToGameState,
   getLegalMoveInfo,
-  mapToColour,
-  getPlayerScores
+  getMarblePositionBetween,
+  getPlayerScores,
+  isNeighbor
 } from '../utils/movement';
-// import {
-//   createInitialState,
-//   generateMoves,
-//   getMarbleCoordinateInDirectionWithOffset,
-//   getNextBoardConfiguration,
-//   convertColourValueToString
-// } from '../state_generation';
-import PauseIcon from '@material-ui/icons/Pause';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import StopIcon from '@material-ui/icons/Stop';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import UndoIcon from '@material-ui/icons/Undo';
-import { ButtonGroup, IconButton } from '@material-ui/core';
+import { History } from './History';
+import { Score } from './Score';
+import { ButtonContainer } from './ButtonContainer';
+import { ConfigModal } from './ConfigModal';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import { MoveArrows } from './MoveArrows';
 
-const TILE_WIDTH = 60;
-const TILE_HEIGHT = 60;
 const MARGIN_SIZE = 1;
-
-const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  flex-direction: column;
-`;
-
-const BoardContainer = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`;
 
 const Board = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: red;
-  padding: 1rem;
+  padding: 1rem 3rem;
   border-radius: 8px;
   background-color: burlywood;
+  position: relative;
 `;
 
 const BoardRow = styled.div`
@@ -81,13 +44,10 @@ const BoardRow = styled.div`
 `;
 
 const BoardTile = styled.div`
-  /* width: ${TILE_WIDTH}px;
-  height: ${TILE_HEIGHT}px; */
   user-select: none;
   width: 4vw;
   height: 4vw;
   border-radius: 50%;
-  /* border: 0.1vw solid black; */
   margin: 0px ${MARGIN_SIZE}px;
   display: flex;
   justify-content: center;
@@ -104,285 +64,255 @@ const BoardTile = styled.div`
       return 'black';
     }
   }};
-  background-color: ${(props) => {
+  border: ${(props) => {
     if (props.selected) {
-      return 'red';
+      return '2px solid teal';
     }
+    return '1px solid #00000010';
+  }};
+  background-color: ${(props) => {
     if (props.for === EMP) {
-      return '#00000050';
+      return '#00000010';
     } else if (props.for === BLK) {
-      return 'black';
+      return (
+        'background: rgb(98,98,98);' +
+        'background: radial-gradient(circle, rgba(98,98,98,1) 0%, ' +
+        'rgba(60,60,64,1) 30%, rgba(0,0,0,1) 100%);'
+      );
     } else {
-      return 'white';
+      return (
+        'background: rgb(255,255,255);' +
+        'background: radial-gradient(circle, rgba(255,255,255,1) 0%, ' +
+        'rgba(183,183,201,1) 90%, rgba(195,195,195,1) 100%);'
+      );
     }
   }};
 `;
 
-const ConfigModal = styled(Modal)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const Paper = styled.div`
-  background-color: white;
-  box-shadow: 6px 5px 17px 5px rgba(0, 0, 0, 0.21);
-  padding: 20px;
-`;
-
-const ConfigTitle = styled.h2``;
-
-const ConfigBody = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const ConfigRow = styled.div`
-  display: flex;
-  margin: 10px 0;
-`;
-
-const History = styled.div`
-  position: fixed;
-  right: 50px;
-  border: solid 1px;
-  height: 300px;
-  width: 300px;
-  overflow-x: hidden; 
-  text-align: center;
-  overflow-y: auto;
-  table {
-    width: 100%;
-  }
-
-  table,
-  th,
-  td {
-    border-collapse: collapse;
-  }
-  th,
-  td {
-    border-bottom: 1px solid black;
-    padding: 5px;
-    text-align: center;
-  }
-`;
-
-const HistoryDisplay = styled.div`
-  font-weight: bold;
-  border-bottom: 1px solid;
-  padding: 5px;
-`;
-
-
-const TotalTime = styled.div`
-  font-weight: bold;
-  border-bottom: 1px solid;
-  padding 5px;
-`;
-
-const ScoreContainer = styled.div`
-  position: fixed;
-  border: solid 1px;
-  width: 300px;
-  height: 100px;
-  left: 50px;
-  font-weight: bold;
-  text-align: center;
-`;
-
-const ScoreTitle = styled.div`
-  padding: 5px;
-  border-bottom: solid 1px;
-`
-
-const ScoreTable = styled.table`
-  width: 100%;
-`;
-
 export const Game = () => {
-  const [initBoardLayout, setInitBoardLayout] = React.useState(BOARD_LAYOUT_NAMES.GERMAN_DAISY);
-  const [gameState, setGameState] = React.useState(BOARD_LAYOUTS.BLANK);
-  const [legalMoves, setLegalMoves] = React.useState([]);
-  const [turn, setTurn] = React.useState(BLK);
-  const [AIColour, setAIColour] = React.useState(BLK);
-  const [gameMode, setGameMode] = React.useState(GAME_MODE.VSCOMPUTER);
-  const [moveLimit] = React.useState(DEFAULT_MOVE_LIMIT);
-  const [historyEntries, setHistoryEntries] = React.useState([]);
+  const [configModalOpen, setConfigModalOpen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [gameState, setGameState] = useState(BOARD_LAYOUTS.BLANK);
+  const [legalMoves, setLegalMoves] = useState([]);
+  const [AIColour, setAIColour] = useState(null);
+  const [humanColour, setHumanColour] = useState(null);
+  const [moveLimit, setMoveLimit] = useState(DEFAULT_MOVE_LIMIT);
+  const [historyEntries, setHistoryEntries] = useState([]);
   // Total calculation time for AI in seconds
-  const [totalTime, setTotalTime] = React.useState(0);
-  const [timeTakenForLastMove, setTimeTakenForLastMove] = React.useState(0);
-  const [numTurns, setNumTurns] = React.useState(1);
-  const [timeLimitInSecondsWhite] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
-  const [timeLimitInSecondsBlack] = React.useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
-  const [isConfigModalShown, setIsConfigModalShown] = React.useState(true);
-  const [selectedMarbles, setselectedMarbles] = React.useState(new Set());
-  const [firstTurn, setFirstTurn] = React.useState(true);
+  const [totalTime, setTotalTime] = useState(0);
+  const [timeTakenForLastMove, setTimeTakenForLastMove] = useState(0);
+  const [numTurns, setNumTurns] = useState(1);
+  const [humanTimeLimit, setHumanTimeLimit] = useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [aiTimeLimit, setAITimeLimit] = useState(DEFAULT_TIME_LIMIT_IN_SECONDS);
+  const [selectedMarbles, setSelectedMarbles] = useState(new Set());
   // previous gamestate so that we can use the undo button
-  const [previousState, setPreviousState] = React.useState();
-  const [whiteScore, setWhiteScore] = React.useState(0);
-  const [blackScore, setBlackScore] = React.useState(0);
-  // or
-  // let previousState = {
-  //   turn: undefined,
-  //   legalMoves: undefined,
-  //   gamestate: undefined,
-  //   historyEntries: undefined,
-  //   firstTurn: undefined,
-  //   numTurns: undefined,
-  //   timeTakenForLastMove: undefined,
-  //   totalTime: totalTime,
-  // };
-  // let previousState = {};
+  const [previousState, setPreviousState] = useState();
+  const [whiteScore, setWhiteScore] = useState(0);
+  const [blackScore, setBlackScore] = useState(0);
+  const [turn, setTurn] = useState(null);
+  const [firstTurn, setFirstTurn] = useState(true);
+  const [legalDirections, setLegalDirections] = useState(DIRECTIONS_OBJECT);
+  const [humanMoveStart, setHumanMoveStart] = useState(null);
 
-  
+  const previousValues = useRef({ turn, gameState });
+
+  useEffect(() => {
+    if (previousValues.current.turn !== turn && previousValues.current.gameState !== gameState) {
+      if (!configModalOpen) {
+        if (turn === AIColour) {
+          if (firstTurn) {
+            makeRandomMove();
+          } else {
+            makeBestMove();
+          }
+        } else {
+          const now = new Date().getTime();
+          setHumanMoveStart(now);
+          getAllMoves((moves) => {
+            setLegalMoves(moves);
+          });
+        }
+      }
+      previousValues.current = { turn, gameState };
+    }
+  }, [gameState, turn]);
+
+  const onPlayClick = (layout, aiColour, moveLimit, humanTime, aiTime) => {
+    switch (layout) {
+      case BOARD_LAYOUT_NAMES.STANDARD:
+        setGameState(BOARD_LAYOUTS.STANDARD);
+        break;
+      case BOARD_LAYOUT_NAMES.GERMAN_DAISY:
+        setGameState(BOARD_LAYOUTS.GERMAN_DAISY);
+        break;
+      case BOARD_LAYOUT_NAMES.BELGIAN_DAISY:
+        setGameState(BOARD_LAYOUTS.BELGIAN_DAISY);
+        break;
+      default:
+        break;
+    }
+    setConfigModalOpen(false);
+    setAIColour(aiColour);
+    setHumanColour(aiColour === BLK ? WHT : BLK);
+    setMoveLimit(moveLimit);
+    setHumanTimeLimit(humanTime);
+    setAITimeLimit(aiTime);
+    setTurn(BLK);
+  };
 
   const restorePreviousState = () => {
     setTurn(previousState.turn);
     setLegalMoves(previousState.legalMoves);
     setGameState(previousState.gamestate);
     setHistoryEntries(previousState.historyEntries);
-    setFirstTurn(previousState.firstTurn);
     setNumTurns(previousState.numTurns);
     setTimeTakenForLastMove(previousState.timeTakenForLastMove);
     setTotalTime(previousState.totalTime);
-  }
+  };
+
+  const switchTurn = () => {
+    const scores = getPlayerScores(gameState);
+    setBlackScore(scores.BLK);
+    setWhiteScore(scores.WHT);
+    setFirstTurn(false);
+    setTurn(turn === BLK ? WHT : BLK);
+  };
 
   const chooseRandomMove = (move_list) => {
+    if (move_list.length === 0) console.log('no moves');
     let rand = getRandomInt(move_list.length);
     return move_list[rand];
-    }
+  };
 
   const getRandomInt = (max) => {
     return Math.floor(Math.random() * Math.floor(max));
-  }
+  };
 
+  const getAllMoves = (callback) => {
+    const req = new XMLHttpRequest();
+    const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
+    req.open('GET', 'http://localhost:5000/allmoves' + queryString);
+    req.onreadystatechange = () => {
+      if (req.readyState === 4 && req.status === 200) {
+        callback(JSON.parse(req.responseText));
+      }
+    };
+    req.send();
+  };
 
-  React.useEffect(() => {
-    if (!isConfigModalShown) {
-        const req = new XMLHttpRequest();
-        const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
-        let moves;
-        req.open('GET', 'http://localhost:5000/allmoves' + queryString);
-        req.onreadystatechange = () => {
-          if (req.readyState === 4 && req.status === 200) {
-            setLegalMoves(JSON.parse(req.responseText));
-            if (firstTurn) {
-              let random_move = chooseRandomMove(JSON.parse(req.responseText));
-              console.log("random move: " + random_move);    
-              setFirstTurn(false);
-            }
-          }
-        };
-        req.send();
-        if (turn === AIColour && !firstTurn) {
-          const req = new XMLHttpRequest();
-          const queryString = `?state=${JSON.stringify(gameState)}&colour=${turn}`;
-          req.open('GET', 'http://localhost:5000/bestmove' + queryString);
-          req.onreadystatechange = () => {
-            if (req.readyState === 4 && req.status === 200) {
-              let response = JSON.parse(req.responseText);
-              console.log(response.move)
-              setTimeTakenForLastMove(response.time / 1000);
-            }
-          };
-          req.send();
+  const getStateFromMove = (move, callback) => {
+    const req = new XMLHttpRequest();
+    const queryString = `?state=${JSON.stringify(gameState)}&move=${move}&side=${turn}`;
+    req.open('GET', 'http://localhost:5000/state' + queryString);
+    req.onreadystatechange = () => {
+      if (req.readyState === 4 && req.status === 200) {
+        callback(JSON.parse(req.responseText));
+      } else if (req.status === 400) {
+        console.log(req.responseText);
+      }
+    };
+    req.send();
+  };
+
+  const updateStateFromMove = (move) => {
+    getStateFromMove(move, (result) => {
+      setGameState(result);
+    });
+  };
+
+  const getBestMove = (callback) => {
+    const req = new XMLHttpRequest();
+    const queryString = `?state=${JSON.stringify(
+      gameState
+    )}&colour=${AIColour}&timeLimit=${aiTimeLimit}`;
+    req.open('GET', 'http://localhost:5000/bestmove' + queryString);
+    req.onreadystatechange = () => {
+      if (req.readyState === 4 && req.status === 200) {
+        callback(JSON.parse(req.responseText));
+      }
+    };
+    req.send();
+  };
+
+  const makeBestMove = () => {
+    setIsLoading(true);
+    getBestMove((response) => {
+      setIsLoading(false);
+      const { move, result, time } = response;
+      const timeInSec = time / 1000;
+      setTimeTakenForLastMove(timeInSec);
+      setGameState(result);
+      switchTurn();
+      addHistoryEntry({
+        numTurn: numTurns,
+        playerColour: AIColour,
+        move: move,
+        timeTaken: timeInSec
+      });
+    });
+  };
+
+  const makeRandomMove = () => {
+    getAllMoves((moves) => {
+      const move = chooseRandomMove(moves);
+      updateStateFromMove(move);
+      switchTurn();
+      addHistoryEntry({
+        numTurn: numTurns,
+        playerColour: AIColour,
+        move: move,
+        timeTaken: timeTakenForLastMove
+      });
+    });
+  };
+
+  const clearMoveDirections = () => {
+    return {
+      NE: { active: false, move: null },
+      E: { active: false, move: null },
+      SE: { active: false, move: null },
+      SW: { active: false, move: null },
+      W: { active: false, move: null },
+      NW: { active: false, move: null }
+    };
+  };
+
+  const getDirectionsFromMoves = (moves) => {
+    const directions = clearMoveDirections();
+    moves.forEach((move) => {
+      const direction = move.split(' ')[2];
+      directions[direction].active = true;
+      directions[direction].move = move;
+    });
+    setLegalDirections(directions);
+  };
+
+  const onMarbleClick = (row, col) => {
+    if (gameState[row][col] === turn) {
+      //deselect if clicking on same or if trying to add more than allowed to group
+      if (selectedMarbles.size > 1 || selectedMarbles.has(`${row}${col}`)) {
+        setSelectedMarbles(new Set());
+        setLegalDirections(clearMoveDirections());
+        return;
+      }
+      const newSelectedMarbles = new Set(selectedMarbles);
+      if (selectedMarbles.size === 1) {
+        const selectedMarble = Array.from(selectedMarbles)[0];
+        const posBetween = getMarblePositionBetween(selectedMarble, `${row}${col}`);
+        if (posBetween != null && isFriendly(selectedMarble, posBetween)) {
+          newSelectedMarbles.add(posBetween);
+        } else if (!isNeighbor(Array.from(selectedMarbles)[0], `${row}${col}`)) {
+          setSelectedMarbles(new Set([`${row}${col}`]));
+          return;
         }
       }
-    }, [gameState]);
-
-  const handleInitBoardLayoutChange = (e) => {
-    setInitBoardLayout(parseInt(e.target.value));
-  };
-
-  const handleGameModeChange = (e) => {
-    setGameMode(parseInt(e.target.value));
-  };
-
-  const handleGameStateChange = (newGameState) =>  {
-    setGameState(newGameState);
-  };
-
-  const handleAIColourChange = (e) => {
-    setAIColour(parseInt(e.target.value));
-  };
-
-  const onPlayClick = () => {
-    setIsConfigModalShown(false);
-    if (initBoardLayout === BOARD_LAYOUT_NAMES.STANDARD) {
-      handleGameStateChange(BOARD_LAYOUTS.STANDARD);
-    } else if (initBoardLayout === BOARD_LAYOUT_NAMES.BELGIAN_DAISY) {
-      handleGameStateChange(BOARD_LAYOUTS.BELGIAN_DAISY);
-    } else if (initBoardLayout === BOARD_LAYOUT_NAMES.GERMAN_DAISY) {
-      handleGameStateChange(BOARD_LAYOUTS.GERMAN_DAISY);
+      newSelectedMarbles.add(`${row}${col}`);
+      setSelectedMarbles(newSelectedMarbles);
+      const moves = getLegalMoveInfo(legalMoves, newSelectedMarbles);
+      if (moves.length !== 0) {
+        getDirectionsFromMoves(moves);
+      }
     }
-  };
-
-  const getPosition = (position, direction) => {
-    const row = position[0];
-    const col = parseInt(position[1]);
-
-    let newrow = row;
-    let newcol = col;
-    const ascii = row.charCodeAt(0);
-    let newascii = ascii;
-
-    switch (direction) {
-      case DIRECTION.E:
-        newcol = col + 1;
-        break;
-      case DIRECTION.W:
-        newcol = col - 1;
-        break;
-      case DIRECTION.NE:
-        newascii = ascii + 1;
-        newcol = col + 1;
-        break;
-      case DIRECTION.NW:
-        newascii = ascii + 1;
-        break;
-      case DIRECTION.SE:
-        newascii = ascii - 1;
-        break;
-      case DIRECTION.SW:
-        newascii = ascii - 1;
-        newcol = col - 1;
-        break;
-    }
-    newrow = String.fromCharCode(newascii);
-    if (newascii > 96 && newascii < 107 && gameState[newrow][newcol] !== undefined) {
-      return `${newrow}${newcol}`;
-    } else {
-      return null;
-    }
-  };
-
-  const getDirection = (position1, position2) => {
-    const pos1row = position1[0];
-    const pos1col = parseInt(position1[1]);
-    const pos2row = position2[0];
-    const pos2col = parseInt(position2[1]);
-
-    const rowDiff = pos1row.charCodeAt(0) - pos2row.charCodeAt(0);
-    const colDiff = pos1col - pos2col;
-
-    if (rowDiff === -1 && colDiff === 0) {
-      return DIRECTION.NW;
-    } else if (rowDiff === -1 && colDiff === -1) {
-      return DIRECTION.NE;
-    } else if (rowDiff === 0 && colDiff === -1) {
-      return DIRECTION.E;
-    } else if (rowDiff === 0 && colDiff === 1) {
-      return DIRECTION.W;
-    } else if (rowDiff === 1 && colDiff === 1) {
-      return DIRECTION.SW;
-    } else if (rowDiff === 1 && colDiff === 0) {
-      return DIRECTION.SE;
-    }
-  };
-
-  const isNeighbor = (position1, position2) => {
-    return getDirection(position1, position2) !== undefined;
   };
 
   const isFriendly = (position1, position2) => {
@@ -392,274 +322,59 @@ export const Game = () => {
     );
   };
 
-  const getMarblePositionBetween = (position1, position2) => {
-    const pos1row = position1[0].charCodeAt(0);
-    const pos1col = parseInt(position1[1]);
-    const pos2row = position2[0].charCodeAt(0);
-    const pos2col = parseInt(position2[1]);
-
-    if (Math.abs(pos1row - pos2row) === 2) {
-      if (pos1col > pos2col && pos1col - pos2col === 2) {
-        return `${String.fromCharCode(pos1row - 1)}${pos1col - 1}`;
-      } else if (pos1col < pos2col && pos2col - pos1col === 2) {
-        return `${String.fromCharCode(pos2row - 1)}${pos2col - 1}`;
-      } else if (pos1col === pos2col && pos1row > pos2row) {
-        return `${String.fromCharCode(pos1row - 1)}${pos1col}`;
-      } else if (pos1col === pos2col && pos2row > pos1row) {
-        return `${String.fromCharCode(pos2row - 1)}${pos1col}`;
-      }
-    } else if (pos1row === pos2row) {
-      if (pos1col > pos2col && pos1col - pos2col === 2) {
-        return `${position1[0]}${pos1col - 1}`;
-      } else if (pos1col < pos2col && pos2col - pos1col === 2) {
-        return `${position1[0]}${pos2col - 1}`;
-      }
-    }
-    return null;
-  };
-
-  const onMarbleClick = (row, col) => {
-    if (gameState[row][col] === turn) {
-      // Push opponent Marble logic
-      if (selectedMarbles.size > 1) {
-        setselectedMarbles(new Set());
-        return;
-      }
-      if (selectedMarbles.has(`${row}${col}`)) {
-        setselectedMarbles(new Set());  
-        return;
-      }
-      const newselectedMarbles = new Set(selectedMarbles);
-      if (selectedMarbles.size === 1) {
-        const selectedMarble = Array.from(selectedMarbles)[0];
-        const posBetween = getMarblePositionBetween(selectedMarble, `${row}${col}`);
-        if (posBetween !== null && isFriendly(selectedMarble, posBetween)) {
-          newselectedMarbles.add(posBetween);
-        } else if (!isNeighbor(Array.from(selectedMarbles)[0], `${row}${col}`)) {
-          setselectedMarbles(new Set([`${row}${col}`]));
-          return;
-        }
-      }
-      newselectedMarbles.add(`${row}${col}`);
-      setselectedMarbles(newselectedMarbles);
+  const addHistoryEntry = (newEntry) => {
+    if (historyEntries.length === 0) {
+      setHistoryEntries([newEntry]);
     } else {
-      const moves = getLegalMoveInfo(legalMoves, selectedMarbles);
-      if (moves.length !== 0) {
-        const dir = parseInt(prompt(moves.join(' / ')) -1);
-        // if empty string then continue.
-        if (isNaN(dir)) {
-          console.log("user cancelled");
-          return;
-        }
-        try {
-          // If the user enter in like 124 when there are only 2 moves, catch the error and let them try again.
-          let move;
-          try {
-            move = moves[dir].split(' ');
-          } catch(err) {
-            console.log(err)
-            console.log("invalid input");
-            return;
-          }
-          const req = new XMLHttpRequest();
-          const queryString = `?state=${JSON.stringify(gameState)}&move=${moves[dir]}&side=${turn}`;
-          req.open('GET', 'http://localhost:5000/state' + queryString);
-          req.onreadystatechange = () => {
-            if (req.readyState === 4 && req.status === 200) {
-              setGameState(JSON.parse(req.responseText));
-              setPreviousState({
-                turn: turn,
-                legalMoves: legalMoves,
-                gamestate: gameState,
-                historyEntries: historyEntries,
-                firstTurn: firstTurn,
-                numTurns: numTurns,
-                timeTakenForLastMove: timeTakenForLastMove,
-                totalTime: totalTime,
-                });
-              let scores = getPlayerScores(JSON.parse(req.responseText));
-              setBlackScore(scores[1]);
-              setWhiteScore(scores[0]);
-            }
-          };
-          req.send();
-          // Set total time taken for AI
-          if (turn === AIColour){
-            setTotalTime((timeTakenForLastMove) + totalTime)
-          }
-          setselectedMarbles(new Set());
-          setTurn(turn === BLK ? WHT : BLK);
-          addHistoryEntry({
-          numTurn: numTurns,
-          playerColour: turn,
-          move: moves[dir],
-          timeTaken: turn === AIColour ? timeTakenForLastMove : 0
-          });
-          setNumTurns(numTurns + 1);
-        } catch(err) {
-          console.log("not a valid option");
-          console.log(err);
-          return;
-        }
-      }
+      const existingEntries = historyEntries;
+      setHistoryEntries([newEntry, ...existingEntries]);
     }
   };
 
-
-  const historyEntryRender = () => 
-    historyEntries.map((entry) => 
-      <tr key={entry.numTurn}>
-        <td>{entry.numTurn}</td>
-        <td>{entry.playerColour === BLK ? "Black" : "White"}</td>
-        <td>{entry.move}</td>
-        <td>{entry.playerColour !== AIColour ? 0 : entry.timeTaken}</td>
-      </tr>
-    );
-
-    const addHistoryEntry = (newEntry) => {
-      if (historyEntries.length === 0) {
-        setHistoryEntries([newEntry]);
-      } else {
-        setHistoryEntries([...historyEntries, newEntry]);
-      }
-    }
+  const handleMoveArrowClick = (direction) => {
+    const move = legalDirections[direction].move;
+    updateStateFromMove(move);
+    switchTurn();
+    setSelectedMarbles(new Set());
+    setLegalDirections(clearMoveDirections());
+    addHistoryEntry({
+      numTurn: numTurns,
+      playerColour: turn,
+      move: move,
+      timeTaken: (new Date().getTime() - humanMoveStart) / 1000
+    });
+    setNumTurns(numTurns + 1);
+  };
 
   return (
-    <Wrapper>
-      <ConfigModal
-        open={isConfigModalShown}
-        onClose={() => {}}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description">
-        <Paper>
-          <ConfigTitle>Game Configuration</ConfigTitle>
-          <ConfigBody>
-            <FormLabel component="legend">Board Layout</FormLabel>
-            <ConfigRow row>
-              <RadioGroup row value={initBoardLayout} onChange={handleInitBoardLayoutChange}>
-                <FormControlLabel
-                  value={BOARD_LAYOUT_NAMES.STANDARD}
-                  control={<Radio />}
-                  label="Standard"
-                />
-                <FormControlLabel
-                  value={BOARD_LAYOUT_NAMES.GERMAN_DAISY}
-                  control={<Radio />}
-                  label="German Daisy"
-                />
-                <FormControlLabel
-                  value={BOARD_LAYOUT_NAMES.BELGIAN_DAISY}
-                  control={<Radio />}
-                  label="Belgian Daisy"
-                />
-              </RadioGroup>
-            </ConfigRow>
-            <FormLabel component="legend">AI Marble Colour</FormLabel>
-            <ConfigRow>
-              <RadioGroup row value={AIColour} onChange={handleAIColourChange}>
-                <FormControlLabel value={BLK} control={<Radio />} label="Black"/>
-                <FormControlLabel value={WHT} control={<Radio />} label="White"/>
-              </RadioGroup>
-            </ConfigRow>
-            <FormLabel component="legend">Movement Settings</FormLabel>
-            <ConfigRow style={{ justifyContent: 'space-between' }}>
-              <TextField
-                label="Move Limit"
-                variant="filled"
-                size="small"
-                defaultValue={moveLimit}
-              />
-            </ConfigRow>
-            <FormLabel component="legend">Timing (In Seconds)</FormLabel>
-            <ConfigRow>
-            <TextField
-                label="Time Limit (White Player)"
-                variant="filled"
-                size="small"
-                defaultValue={timeLimitInSecondsWhite}
-              />
-              <TextField
-                label="Time Limit (Black Player)"
-                variant="filled"
-                size="small"
-                defaultValue={timeLimitInSecondsBlack}
-              />
-            </ConfigRow>
-            <ConfigRow>
-              <Button onClick={onPlayClick} variant="contained" color="secondary" fullWidth>
-                PLAY
-              </Button>
-            </ConfigRow>
-            <FormLabel component="legend">State Generation</FormLabel>
-            <ConfigRow>
-              <InputFile />
-            </ConfigRow>
-          </ConfigBody>
-        </Paper>
-      </ConfigModal>
-      {/* <ButtonContainer /> */}
-      <ButtonGroup>
-      <IconButton>
-        <PlayArrowIcon />
-      </IconButton>
-      <IconButton>
-        <StopIcon />
-      </IconButton>
-      <IconButton>
-        <AutorenewIcon />
-      </IconButton>
-      <IconButton>
-        <PauseIcon />
-      </IconButton>
-      <IconButton>
-        <UndoIcon onClick={restorePreviousState}/>
-      </IconButton>
-    </ButtonGroup>
-      <BoardContainer>
-        <Board>
-          {Object.keys(gameState).map((k) => (
-            <BoardRow key={k}>
-              {Object.keys(gameState[k]).map((col) => (
-                <BoardTile
-                  key={`${k}${col}`}
-                  for={gameState[k][col]}
-                  selected={selectedMarbles.has(`${k}${col}`)}
-                  onClick={() => onMarbleClick(k, col)}>
-                  {`${k}${col}`}
-                </BoardTile>
-              ))}
-            </BoardRow>
-          ))}
-        </Board>
-      </BoardContainer>
-      <History>
-      <HistoryDisplay>History</HistoryDisplay>
-              <TotalTime><span>Total Time ({AIColour === 1 ? "Black" : "White"}): {totalTime}</span></TotalTime>
-        <table>
-        <thead>
-          <th>Turn</th>
-          <th>Player</th>
-          <th>Move</th>
-          <th>Time</th>
-        </thead>
-          <tbody>
-            {historyEntryRender()}
-          </tbody>
-        </table>
-      </History>
-      <ScoreContainer>
-        <ScoreTitle>Score</ScoreTitle>
-        <ScoreTable>
-                <tr>
-                  <td>White</td>
-                  <td>Black</td>
-                </tr>
-                <tr>
-                <td>{whiteScore}</td>
-                <td>{blackScore}</td>
-                </tr>
-        </ScoreTable>
-      </ScoreContainer>
-    </Wrapper>
+    <Box className="rowWrapper">
+      <ConfigModal isOpen={configModalOpen} onSubmit={onPlayClick} />
+      <Box className="colWrapper">
+        <ButtonContainer onUndoClicked={restorePreviousState} />
+        <Box className="colWrapper">
+          <Board>
+            <MoveArrows activeDirections={legalDirections} onArrowClick={handleMoveArrowClick} />
+            {Object.keys(gameState).map((k) => (
+              <BoardRow key={k}>
+                {Object.keys(gameState[k]).map((col) => (
+                  <BoardTile
+                    key={`${k}${col}`}
+                    for={gameState[k][col]}
+                    selected={selectedMarbles.has(`${k}${col}`)}
+                    onClick={() => onMarbleClick(k, col)}>
+                    {`${k}${col}`}
+                  </BoardTile>
+                ))}
+              </BoardRow>
+            ))}
+          </Board>
+        </Box>
+      </Box>
+      <Box className="colWrapper">
+        <Score blackScore={blackScore} whiteScore={whiteScore} />
+        <LinearProgress className={`progress ${!isLoading && 'hidden'}`} />
+        <History aiColor={AIColour} totalTime={totalTime} historyEntries={historyEntries} />
+      </Box>
+    </Box>
   );
 };

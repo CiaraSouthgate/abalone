@@ -6,7 +6,7 @@ import AutorenewIcon from '@material-ui/icons/Autorenew';
 import UndoIcon from '@material-ui/icons/Undo';
 import { ButtonGroup, IconButton } from '@material-ui/core';
 
-export const ButtonContainer = () => {
+export const ButtonContainer = ({ onUndoClicked }) => {
   return (
     <ButtonGroup>
       <IconButton>
@@ -21,7 +21,7 @@ export const ButtonContainer = () => {
       <IconButton>
         <PauseIcon />
       </IconButton>
-      <IconButton>
+      <IconButton onClick={onUndoClicked}>
         <UndoIcon />
       </IconButton>
     </ButtonGroup>

@@ -163,13 +163,14 @@ const distanceFromCenter = {
 };
 
 const getFriendlyNeighbours = (state, marble) => {
+  const row = marble.row.charCodeAt(0);
   const spacesAround = [
-    { row: String.fromCharCode(marble.row - 1), col: marble.col - 1 },
-    { row: String.fromCharCode(marble.row - 1), col: marble.col },
-    { row: String.fromCharCode(marble.row), col: marble.col - 1 },
-    { row: String.fromCharCode(marble.row), col: marble.col + 1 },
-    { row: String.fromCharCode(marble.row + 1), col: marble.col },
-    { row: String.fromCharCode(marble.row + 1), col: marble.col + 1 }
+    { row: String.fromCharCode(row - 1), col: marble.col - 1 },
+    { row: String.fromCharCode(row - 1), col: marble.col },
+    { row: String.fromCharCode(row), col: marble.col - 1 },
+    { row: String.fromCharCode(row), col: marble.col + 1 },
+    { row: String.fromCharCode(row + 1), col: marble.col },
+    { row: String.fromCharCode(row + 1), col: marble.col + 1 }
   ];
 
   let numFriendly = 0;
@@ -188,29 +189,55 @@ const getFriendlyNeighbours = (state, marble) => {
  * Rewards proximity to centre, number of friendly neighbours surrounding each marble,
  * and number of captured enemy marbles; penalizes captured own marbles.
  */
-const ciaraHeuristic = (state, player) => {
-  const colour = player === 'w' ? WHT : BLK;
-  const opponent = player === 'w' ? BLK : WHT;
+const ciaraHeuristic = (state, playerSide, log) => {
+  const opponent = playerSide === WHT ? BLK : WHT;
 
   let distanceScore = 0;
+  let oppDistanceScore = 0;
   let neighbourScore = 0;
   let numOpponent = 0;
   let numFriendly = 0;
 
   Object.entries(state).forEach(([rowIdx, row]) => {
     Object.entries(row).forEach(([colIdx, cell]) => {
-      if (cell === colour) {
+      if (cell === playerSide) {
         numFriendly++;
         distanceScore += 1 - distanceFromCenter[rowIdx][colIdx] / MAX_DISTANCE;
-        const marble = { row: rowIdx, col: colIdx };
-        neighbourScore += getFriendlyNeighbours(state, marble, colour) / MAX_FRIENDLY;
+        const marble = { row: rowIdx, col: parseInt(colIdx) };
+        neighbourScore += 1 - getFriendlyNeighbours(state, marble, playerSide) / MAX_FRIENDLY;
       } else if (cell === opponent) {
         numOpponent++;
+        oppDistanceScore += distanceFromCenter[rowIdx][colIdx] / MAX_DISTANCE;
       }
     });
   });
 
-  return distanceScore + neighbourScore + (MAX_MARBLES - numOpponent) - (MAX_MARBLES - numFriendly);
+  const total =
+    distanceScore +
+    oppDistanceScore +
+    neighbourScore +
+    (MAX_MARBLES - numOpponent) -
+    (MAX_MARBLES - numFriendly);
+
+  if (log) {
+    if (log === 'ALL') {
+      console.log(
+        'distanceScore:',
+        distanceScore,
+        '\noppDistanceScore:',
+        oppDistanceScore,
+        '\nneighbourScore',
+        neighbourScore,
+        '\nnumOpponent',
+        numOpponent,
+        '\nnumFriendly',
+        numFriendly
+      );
+    }
+    console.log('SCORE:', total);
+  }
+
+  return total;
 };
 
 module.exports = {

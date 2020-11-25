@@ -1,4 +1,4 @@
-import { BLK, BOARD_LAYOUTS, DIRECTION, EMP, WHT } from '../constants';
+import { BLK, DIRECTION, EMP, WHT } from '../constants';
 
 export const convertGameStateToCordinateArray = (state) => {
   const coordinates = [];
@@ -12,7 +12,6 @@ export const convertGameStateToCordinateArray = (state) => {
   return coordinates;
 };
 
-// Return an array, with white then black player score.
 export const getPlayerScores = (state) => {
   let numWhite = 0;
   let numBlack = 0;
@@ -20,32 +19,21 @@ export const getPlayerScores = (state) => {
   let blackScore;
   Object.keys(state).forEach((row) => {
     Object.keys(state[row]).forEach((column) => {
-      if(state[row][column] === WHT) {
+      if (state[row][column] === WHT) {
         numWhite++;
       } else if (state[row][column] === BLK) {
         numBlack++;
       }
     });
   });
-  whiteScore = (14 - numBlack);
-  blackScore = (14 - numWhite);
-  return [whiteScore, blackScore];
-}
+  whiteScore = 14 - numBlack;
+  blackScore = 14 - numWhite;
+  return { WHT: whiteScore, BLK: blackScore };
+};
 
-export const getLegalMoveInfo = (legalMoves, coordinates) => {
-  const coordArr = Array.from(coordinates);
-  coordArr.sort();
-  const legalDirections = [];
-
-  for (let i = 0; i < legalMoves.length; i++) {
-    const moveInfo = legalMoves[i].split(' ');
-    const coordinate = moveInfo[1];
-    const coordinatesString = coordArr.join('').toUpperCase();
-    if (coordinatesString === coordinate) {
-      legalDirections.push(legalMoves[i]);
-    }
-  }
-  return legalDirections;
+export const getLegalMoveInfo = (legalMoves, marbles) => {
+  const marbleString = Array.from(marbles).sort().join('').toUpperCase();
+  return legalMoves.filter((move) => move.split(' ')[1] === marbleString);
 };
 
 export const coordinatesToGameState = (coordinates) => {
@@ -78,4 +66,58 @@ export const mapToColour = (colour) => {
     default:
       return null;
   }
+};
+
+const getDirection = (position1, position2) => {
+  const pos1row = position1[0];
+  const pos1col = parseInt(position1[1]);
+  const pos2row = position2[0];
+  const pos2col = parseInt(position2[1]);
+
+  const rowDiff = pos1row.charCodeAt(0) - pos2row.charCodeAt(0);
+  const colDiff = pos1col - pos2col;
+
+  if (rowDiff === -1 && colDiff === 0) {
+    return DIRECTION.NW;
+  } else if (rowDiff === -1 && colDiff === -1) {
+    return DIRECTION.NE;
+  } else if (rowDiff === 0 && colDiff === -1) {
+    return DIRECTION.E;
+  } else if (rowDiff === 0 && colDiff === 1) {
+    return DIRECTION.W;
+  } else if (rowDiff === 1 && colDiff === 1) {
+    return DIRECTION.SW;
+  } else if (rowDiff === 1 && colDiff === 0) {
+    return DIRECTION.SE;
+  }
+};
+
+export const isNeighbor = (position1, position2) => {
+  return getDirection(position1, position2) !== undefined;
+};
+
+export const getMarblePositionBetween = (position1, position2) => {
+  const pos1row = position1[0].charCodeAt(0);
+  const pos1col = parseInt(position1[1]);
+  const pos2row = position2[0].charCodeAt(0);
+  const pos2col = parseInt(position2[1]);
+
+  if (Math.abs(pos1row - pos2row) === 2) {
+    if (pos1col > pos2col && pos1col - pos2col === 2) {
+      return `${String.fromCharCode(pos1row - 1)}${pos1col - 1}`;
+    } else if (pos1col < pos2col && pos2col - pos1col === 2) {
+      return `${String.fromCharCode(pos2row - 1)}${pos2col - 1}`;
+    } else if (pos1col === pos2col && pos1row > pos2row) {
+      return `${String.fromCharCode(pos1row - 1)}${pos1col}`;
+    } else if (pos1col === pos2col && pos2row > pos1row) {
+      return `${String.fromCharCode(pos2row - 1)}${pos1col}`;
+    }
+  } else if (pos1row === pos2row) {
+    if (pos1col > pos2col && pos1col - pos2col === 2) {
+      return `${position1[0]}${pos1col - 1}`;
+    } else if (pos1col < pos2col && pos2col - pos1col === 2) {
+      return `${position1[0]}${pos2col - 1}`;
+    }
+  }
+  return null;
 };

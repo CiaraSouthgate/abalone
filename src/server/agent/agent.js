@@ -7,16 +7,20 @@ const generateMoves = stateGen.generateMoves;
 const BLK = constants.BLK;
 const WHT = constants.WHT;
 
+// time delta to ensure we return on time
+const TIME_DELTA = 50;
 // negative infinity
 const NEG_INF = Number.NEGATIVE_INFINITY;
 // positive infinity
 const POS_INF = Number.POSITIVE_INFINITY;
 // global variable for depth
-const DEPTH = 2;
+const DEPTH = 1;
 // global variable for best move
 let bestMove;
 // global variable for state after best move
 let bestMoveResult;
+// global variable for time result must be returned by (in MS since epoch)
+let returnBy;
 // Colour of Max, aka the colour of our game playing agent.
 let maxSide;
 // Colour of Min, aka the colour of the opponent.
@@ -28,9 +32,10 @@ const orderNodes = (actions, state, side) => {
   return actions
     .map((action) => {
       const newState = createStateFromMove(state, action, side);
+      console.log(action);
       return {
         action: action,
-        score: utility(newState, side),
+        score: utility(newState, side, true),
         result: newState
       };
     })
@@ -45,7 +50,8 @@ const orderNodes = (actions, state, side) => {
 };
 
 // Returns an action
-const alphaBetaSearch = (state, aiSide) => {
+const alphaBetaSearch = (state, aiSide, endTime) => {
+  returnBy = endTime;
   maxSide = aiSide;
   minSide = maxSide === WHT ? BLK : WHT;
   let v = maxValue(state, NEG_INF, POS_INF, DEPTH);
@@ -88,11 +94,11 @@ const min_value = (state, alpha, beta, d) => {
 
 // Returns true when depth is zero and if the state is a terminal state. but for now only returns true when the depth is zero or less.
 const cutoff_test = (state, depth) => {
-  return depth <= 0;
+  return depth === 0 || returnBy - new Date().getTime() <= TIME_DELTA;
 };
 
 module.exports = {
-  getMove: (state, colour, callback) => {
-    callback(alphaBetaSearch(state, colour));
+  getMove: (state, colour, endTime, callback) => {
+    callback(alphaBetaSearch(state, colour, endTime));
   }
 };

@@ -1,5 +1,6 @@
 * {
   outline: none;
+  box-sizing: border-box;
 }
 
 body {
@@ -14,4 +15,124 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+table {
+  width: 100%;
+}
+
+table, th, td {
+  border-collapse: collapse;
+}
+th, td {
+  border-bottom: 1px solid black;
+  padding: 5px;
+  text-align: center;
+}
+
+.infoContainer {
+  border: solid 1px;
+  width: 100%;
+  max-width: 300px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.history {
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.infoTitle {
+  padding: 5px;
+  border-bottom: solid 1px;
+  font-weight: bold;
+}
+
+.totalTime {
+  font-weight: bold;
+  border-bottom: 1px solid;
+  padding: 5px;
+}
+
+.configPaper {
+  display: inline-block;
+  padding: 10px 20px;
+  align-self: center;
+  justify-self: center;
+}
+
+.configModal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rowWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: row;
+}
+
+.colWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 0 1em;
+}
+
+.progress {
+  width: 100%;
+}
+
+.arrow {
+  position: absolute !important;
+
+}
+
+.NE {
+  top: 0;
+  right: 0;
+  transform: rotate(-45deg);
+}
+
+.E {
+  top: 50%;
+  right: 0;
+  transform: translate(0, -50%);
+}
+
+.SE {
+  bottom: 0;
+  right: 0;
+  transform: rotate(45deg);
+}
+
+.SW {
+  bottom: 0;
+  left: 0;
+  transform: rotate(-45deg);
+}
+
+.W {
+  top: 50%;
+  left: 0;
+  transform: translate(0, -50%);
+}
+
+.NW {
+  top: 0;
+  left: 0;
+  transform: rotate(45deg);
+}
+
+.gone {
+  display: none !important;
+}
+
+.hidden {
+  visibility: hidden;
 }

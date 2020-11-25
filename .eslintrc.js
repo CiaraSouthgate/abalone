@@ -33,6 +33,8 @@ module.exports = {
     ], // Use our .prettierrc file as source
     'no-unused-vars': 'warn',
     'no-empty': 'off',
-    'no-extra-boolean-cast': 'off'
+    'no-extra-boolean-cast': 'off',
+    'react/prop-types': 'off',
+    'no-prototype-builtins': 'off'
   }
 };
