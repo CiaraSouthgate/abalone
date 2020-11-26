@@ -171,7 +171,6 @@ const ciaraHeuristic = (state, playerSide, log) => {
 
   let distanceScore = 0;
   let oppDistanceScore = 0;
-  let neighbourScore = 0;
   let numOpponent = 0;
   let numFriendly = 0;
 
@@ -189,12 +188,10 @@ const ciaraHeuristic = (state, playerSide, log) => {
 
   distanceScore /= numFriendly;
   oppDistanceScore /= numOpponent;
-  neighbourScore /= numFriendly;
 
   const total =
     distanceScore +
     oppDistanceScore +
-    neighbourScore +
     (MAX_MARBLES - numOpponent) -
     (MAX_MARBLES - numFriendly);
 
