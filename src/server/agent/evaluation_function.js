@@ -162,29 +162,6 @@ const distanceFromCenter = {
   i: { 5: 4, 6: 4, 7: 4, 8: 4, 9: 4 }
 };
 
-const getFriendlyNeighbours = (state, marble) => {
-  const row = marble.row.charCodeAt(0);
-  const spacesAround = [
-    { row: String.fromCharCode(row - 1), col: marble.col - 1 },
-    { row: String.fromCharCode(row - 1), col: marble.col },
-    { row: String.fromCharCode(row), col: marble.col - 1 },
-    { row: String.fromCharCode(row), col: marble.col + 1 },
-    { row: String.fromCharCode(row + 1), col: marble.col },
-    { row: String.fromCharCode(row + 1), col: marble.col + 1 }
-  ];
-
-  let numFriendly = 0;
-
-  spacesAround.forEach((space) => {
-    try {
-      const neighbour = state[space.row][space.col];
-      if (neighbour === state[marble.row][marble.col]) numFriendly++;
-    } catch (ignored) {}
-  });
-
-  return numFriendly;
-};
-
 /**
  * Rewards proximity to centre, number of friendly neighbours surrounding each marble,
  * and number of captured enemy marbles; penalizes captured own marbles.
@@ -203,14 +180,16 @@ const ciaraHeuristic = (state, playerSide, log) => {
       if (cell === playerSide) {
         numFriendly++;
         distanceScore += 1 - distanceFromCenter[rowIdx][colIdx] / MAX_DISTANCE;
-        const marble = { row: rowIdx, col: parseInt(colIdx) };
-        neighbourScore += 1 - getFriendlyNeighbours(state, marble, playerSide) / MAX_FRIENDLY;
       } else if (cell === opponent) {
         numOpponent++;
         oppDistanceScore += distanceFromCenter[rowIdx][colIdx] / MAX_DISTANCE;
       }
     });
   });
+
+  distanceScore /= numFriendly;
+  oppDistanceScore /= numOpponent;
+  neighbourScore /= numFriendly;
 
   const total =
     distanceScore +
