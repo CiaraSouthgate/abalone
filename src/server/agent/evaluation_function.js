@@ -202,8 +202,6 @@ const ciaraHeuristic = (state, playerSide, log) => {
         distanceScore,
         '\noppDistanceScore:',
         oppDistanceScore,
-        '\nneighbourScore',
-        neighbourScore,
         '\nnumOpponent',
         numOpponent,
         '\nnumFriendly',
