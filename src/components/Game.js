@@ -118,6 +118,9 @@ export const Game = () => {
 
   useEffect(() => {
     if (previousValues.current.turn !== turn && previousValues.current.gameState !== gameState) {
+      const scores = getPlayerScores(gameState);
+      setBlackScore(scores.BLK);
+      setWhiteScore(scores.WHT);
       if (!configModalOpen) {
         if (turn === AIColour) {
           if (firstTurn) {
@@ -163,17 +166,28 @@ export const Game = () => {
   const restorePreviousState = () => {
     setTurn(previousState.turn);
     setLegalMoves(previousState.legalMoves);
-    setGameState(previousState.gamestate);
+    setGameState(previousState.gameState);
+    setFirstTurn(previousState.firstTurn);
     setHistoryEntries(previousState.historyEntries);
     setNumTurns(previousState.numTurns);
     setTimeTakenForLastMove(previousState.timeTakenForLastMove);
     setTotalTime(previousState.totalTime);
   };
 
+  const updatePrevious = () => {
+    setPreviousState({
+      turn: turn,
+      legalMoves: legalMoves,
+      gameState: gameState,
+      firstTurn: firstTurn,
+      historyEntries: historyEntries,
+      numTurns: numTurns,
+      timeTakenForLastMove: timeTakenForLastMove,
+      totalTime: totalTime
+    });
+  };
+
   const switchTurn = () => {
-    const scores = getPlayerScores(gameState);
-    setBlackScore(scores.BLK);
-    setWhiteScore(scores.WHT);
     setFirstTurn(false);
     setTurn(turn === BLK ? WHT : BLK);
   };
@@ -216,6 +230,7 @@ export const Game = () => {
 
   const updateStateFromMove = (move) => {
     getStateFromMove(move, (result) => {
+      updatePrevious();
       setGameState(result);
     });
   };
@@ -240,6 +255,7 @@ export const Game = () => {
       setIsLoading(false);
       const { move, result, time } = response;
       const timeInSec = time / 1000;
+      updatePrevious();
       setTimeTakenForLastMove(timeInSec);
       setGameState(result);
       switchTurn();
