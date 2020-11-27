@@ -171,6 +171,15 @@ export const Game = () => {
     console.log("game stopped");
   }
 
+  // Asks the user if they want to restart the game, if they confirm then the page is refreshed.
+  const restartGame = () => {
+    // If user confirms, reload else do nothing 
+    if(window.confirm("Are you sure you want to restart the game?")){
+      // reload page
+      document.location.reload();
+    }
+  }
+
   const restorePreviousState = () => {
     setTurn(previousState.turn);
     setLegalMoves(previousState.legalMoves);
@@ -375,7 +384,7 @@ export const Game = () => {
     <Box className="rowWrapper">
       <ConfigModal isOpen={configModalOpen} onSubmit={onPlayClick} />
       <Box className="colWrapper">
-        <ButtonContainer onUndoClicked={restorePreviousState} onStopClicked={stopGame} />
+        <ButtonContainer onUndoClicked={restorePreviousState} onStopClicked={stopGame} onRestartClicked={restartGame}/>
         <Box className="colWrapper">
           <Board>
             <MoveArrows activeDirections={legalDirections} onArrowClick={handleMoveArrowClick} />
