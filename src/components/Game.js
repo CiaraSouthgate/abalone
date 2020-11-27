@@ -267,6 +267,7 @@ export const Game = () => {
       setTimeTakenForLastMove(timeInSec);
       setGameState(result);
       switchTurn();
+      setTotalTime(totalTime + timeInSec);
       addHistoryEntry({
         numTurn: numTurns,
         playerColour: AIColour,
