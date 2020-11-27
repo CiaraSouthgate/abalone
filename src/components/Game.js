@@ -163,6 +163,14 @@ export const Game = () => {
     setTurn(BLK);
   };
 
+  // Will end the game and display the Game Finished window
+  // Game finished window will contain:
+  // Button to start a new game.
+  // Scores of both players and an indicator for who won.
+  const stopGame = () => {
+    console.log("game stopped");
+  }
+
   const restorePreviousState = () => {
     setTurn(previousState.turn);
     setLegalMoves(previousState.legalMoves);
@@ -366,7 +374,7 @@ export const Game = () => {
     <Box className="rowWrapper">
       <ConfigModal isOpen={configModalOpen} onSubmit={onPlayClick} />
       <Box className="colWrapper">
-        <ButtonContainer onUndoClicked={restorePreviousState} />
+        <ButtonContainer onUndoClicked={restorePreviousState} onStopClicked={stopGame} />
         <Box className="colWrapper">
           <Board>
             <MoveArrows activeDirections={legalDirections} onArrowClick={handleMoveArrowClick} />
@@ -389,7 +397,7 @@ export const Game = () => {
       <Box className="colWrapper">
         <Score blackScore={blackScore} whiteScore={whiteScore} />
         <LinearProgress className={`progress ${!isLoading && 'hidden'}`} />
-        <History aiColor={AIColour} totalTime={totalTime} historyEntries={historyEntries} />
+        <History aiColour={AIColour} totalTime={totalTime} historyEntries={historyEntries} />
       </Box>
     </Box>
   );
