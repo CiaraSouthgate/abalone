@@ -163,6 +163,23 @@ export const Game = () => {
     setTurn(BLK);
   };
 
+  // Will end the game and display the Game Finished window
+  // Game finished window will contain:
+  // Button to start a new game.
+  // Scores of both players and an indicator for who won.
+  const stopGame = () => {
+    console.log("game stopped");
+  }
+
+  // Asks the user if they want to restart the game, if they confirm then the page is refreshed.
+  const restartGame = () => {
+    // If user confirms, reload else do nothing 
+    if(window.confirm("Are you sure you want to restart the game?")){
+      // reload page
+      document.location.reload();
+    }
+  }
+
   const restorePreviousState = () => {
     setTurn(previousState.turn);
     setLegalMoves(previousState.legalMoves);
@@ -259,6 +276,7 @@ export const Game = () => {
       setTimeTakenForLastMove(timeInSec);
       setGameState(result);
       switchTurn();
+      setTotalTime(totalTime + timeInSec);
       addHistoryEntry({
         numTurn: numTurns,
         playerColour: AIColour,
@@ -366,7 +384,7 @@ export const Game = () => {
     <Box className="rowWrapper">
       <ConfigModal isOpen={configModalOpen} onSubmit={onPlayClick} />
       <Box className="colWrapper">
-        <ButtonContainer onUndoClicked={restorePreviousState} />
+        <ButtonContainer onUndoClicked={restorePreviousState} onStopClicked={stopGame} onRestartClicked={restartGame}/>
         <Box className="colWrapper">
           <Board>
             <MoveArrows activeDirections={legalDirections} onArrowClick={handleMoveArrowClick} />
@@ -389,7 +407,7 @@ export const Game = () => {
       <Box className="colWrapper">
         <Score blackScore={blackScore} whiteScore={whiteScore} />
         <LinearProgress className={`progress ${!isLoading && 'hidden'}`} />
-        <History aiColor={AIColour} totalTime={totalTime} historyEntries={historyEntries} />
+        <History aiColour={AIColour} totalTime={totalTime} historyEntries={historyEntries} />
       </Box>
     </Box>
   );

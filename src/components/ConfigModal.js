@@ -70,9 +70,9 @@ export const ConfigModal = ({ isOpen, onSubmit }) => {
         </ConfigRow>
         <FormLabel component="legend">AI Marble Colour</FormLabel>
         <ConfigRow>
-          <RadioGroup row value={aiColour} onChange={onAIColourChanged}>
-            <FormControlLabel value={BLK} control={<Radio />} label="Black" />
-            <FormControlLabel value={WHT} control={<Radio />} label="White" />
+          <RadioGroup row value={aiColour} >
+            <FormControlLabel value={BLK} control={<Radio />} label="Black" onChange={onAIColourChanged}/>
+            <FormControlLabel value={WHT} control={<Radio />} label="White" onChange={onAIColourChanged}/>
           </RadioGroup>
         </ConfigRow>
         <FormLabel component="legend">Movement Settings</FormLabel>
