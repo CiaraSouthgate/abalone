@@ -24,6 +24,7 @@ import { ButtonContainer } from './ButtonContainer';
 import { ConfigModal } from './ConfigModal';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { MoveArrows } from './MoveArrows';
+import { EndScreen } from './EndScreen';
 
 const MARGIN_SIZE = 1;
 
@@ -114,6 +115,10 @@ export const Game = () => {
   const [legalDirections, setLegalDirections] = useState(DIRECTIONS_OBJECT);
   const [humanMoveStart, setHumanMoveStart] = useState(null);
 
+  // These are used for the end game pop up screen.
+  const [isGameFinished, setIsGameFinished] = useState(false);
+  const [endGameReason, setEndGameReason] = useState("");
+
   const previousValues = useRef({ turn, gameState });
 
   useEffect(() => {
@@ -167,8 +172,11 @@ export const Game = () => {
   // Game finished window will contain:
   // Button to start a new game.
   // Scores of both players and an indicator for who won.
-  const stopGame = () => {
-    console.log("game stopped");
+  const stopGameClick = () => {
+    if (window.confirm("Are you sure you want to end the game?")){
+      setIsGameFinished(true);
+      setEndGameReason("Manual Termination");
+    }
   }
 
   // Asks the user if they want to restart the game, if they confirm then the page is refreshed.
@@ -384,7 +392,7 @@ export const Game = () => {
     <Box className="rowWrapper">
       <ConfigModal isOpen={configModalOpen} onSubmit={onPlayClick} />
       <Box className="colWrapper">
-        <ButtonContainer onUndoClicked={restorePreviousState} onStopClicked={stopGame} onRestartClicked={restartGame}/>
+        <ButtonContainer onUndoClicked={restorePreviousState} onStopClicked={stopGameClick} onRestartClicked={restartGame}/>
         <Box className="colWrapper">
           <Board>
             <MoveArrows activeDirections={legalDirections} onArrowClick={handleMoveArrowClick} />
@@ -409,6 +417,7 @@ export const Game = () => {
         <LinearProgress className={`progress ${!isLoading && 'hidden'}`} />
         <History aiColour={AIColour} totalTime={totalTime} historyEntries={historyEntries} />
       </Box>
+      <EndScreen isOpen={isGameFinished} whiteScore={whiteScore} blackScore={blackScore} reason={endGameReason}/>
     </Box>
   );
 };

@@ -14,7 +14,7 @@ const NEG_INF = Number.NEGATIVE_INFINITY;
 // positive infinity
 const POS_INF = Number.POSITIVE_INFINITY;
 // global variable for depth
-const DEPTH = 5;
+const DEPTH = 2;
 // global variable for best move
 let bestMove;
 // global variable for state after best move
