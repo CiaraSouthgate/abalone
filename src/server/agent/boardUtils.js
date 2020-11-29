@@ -4,7 +4,7 @@ const DIRECTION = constants.DIRECTION;
 class Marble {
   constructor(row, col, side) {
     this.row = row;
-    this.col = col;
+    this.col = parseInt(col);
     this.side = side;
   }
 
@@ -21,7 +21,7 @@ class Marble {
 
 const getNeighbours = (marble, state) => {
   const letterCode = marble.row.charCodeAt(0);
-  const num = marble.col;
+  const num = parseInt(marble.col);
   const neighbours = [];
 
   const neighbourSpaces = [
@@ -125,7 +125,7 @@ const getOppositeDirection = (direction) => {
     case DIRECTION.W:
       return DIRECTION.E;
     case DIRECTION.NW:
-      return direction.SE;
+      return DIRECTION.SE;
   }
 };
 

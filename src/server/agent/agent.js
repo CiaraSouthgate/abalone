@@ -95,7 +95,6 @@ const alphabeta = (state, depth, alpha, beta, isMax) => {
       }
       bestMove = nodes[i].action;
       bestMoveResult = nodes[i].result;
-      console.log('updating best move:', bestMove);
     }
     return value;
   } else {

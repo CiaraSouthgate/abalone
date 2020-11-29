@@ -1,11 +1,13 @@
 const constants = require('./constants');
+const utils = require('./boardUtils');
+
+const Marble = utils.Marble;
 
 const DIRECTION = constants.DIRECTION;
 const WHT = constants.WHT;
 const BLK = constants.BLK;
 
 const MAX_DISTANCE = 4;
-const MAX_FRIENDLY = 6;
 const MAX_MARBLES = 14;
 
 const jihyoHeuristic = (state, colour) => {
@@ -162,6 +164,48 @@ const distanceFromCenter = {
   i: { 5: 4, 6: 4, 7: 4, 8: 4, 9: 4 }
 };
 
+const isInDanger = (marble, state, opponentSide) => {
+  const letterCode = marble.row.charCodeAt(0);
+  const num = parseInt(marble.col);
+
+  const neighbourSpaces = [
+    { row: String.fromCharCode(letterCode - 1), col: num - 1 },
+    { row: String.fromCharCode(letterCode - 1), col: num },
+    { row: String.fromCharCode(letterCode), col: num - 1 },
+    { row: String.fromCharCode(letterCode), col: num + 1 },
+    { row: String.fromCharCode(letterCode + 1), col: num },
+    { row: String.fromCharCode(letterCode + 1), col: num + 1 }
+  ];
+
+  for (const space of neighbourSpaces) {
+    try {
+      const neighbourSide = state[space.row][space.col];
+      if (neighbourSide !== undefined) {
+        const neighbour = new Marble(space.row, space.col, neighbourSide);
+        const direction = utils.getDirection(marble, neighbour);
+        const pushDirection = utils.getOppositeDirection(direction);
+        if (utils.getNeighbourWithDirection(marble, pushDirection, state).side !== undefined) {
+          continue;
+        }
+        let friendlyCount = 1;
+        let opponentCount = 0;
+        let next = neighbour;
+        while (true) {
+          if (next.side === marble.side) {
+            if (opponentCount > 0 || ++friendlyCount === 3) break;
+          } else if (next.side === opponentSide) {
+            if (++opponentCount > friendlyCount) {
+              return true;
+            }
+          } else break;
+          next = utils.getNeighbourWithDirection(next, direction, state);
+        }
+      }
+      return false;
+    } catch (ignored) {}
+  }
+};
+
 /**
  * Rewards proximity to centre, number of friendly neighbours surrounding each marble,
  * and number of captured enemy marbles; penalizes captured own marbles.
@@ -173,15 +217,31 @@ const ciaraHeuristic = (state, playerSide, log) => {
   let oppDistanceScore = 0;
   let numOpponent = 0;
   let numFriendly = 0;
+  let canBePushed = 0;
+  let canPush = 0;
 
   Object.entries(state).forEach(([rowIdx, row]) => {
     Object.entries(row).forEach(([colIdx, cell]) => {
       if (cell === playerSide) {
         numFriendly++;
-        distanceScore += 1 - distanceFromCenter[rowIdx][colIdx] / MAX_DISTANCE;
+        const marbleDistanceScore = 1 - distanceFromCenter[rowIdx][colIdx] / MAX_DISTANCE;
+        distanceScore += marbleDistanceScore;
+        if (marbleDistanceScore === 0) {
+          const marble = new Marble(rowIdx, colIdx, playerSide);
+          if (isInDanger(marble, state, opponent)) {
+            canBePushed += 1;
+          }
+        }
       } else if (cell === opponent) {
         numOpponent++;
-        oppDistanceScore += distanceFromCenter[rowIdx][colIdx] / MAX_DISTANCE;
+        const marbleDistanceScore = distanceFromCenter[rowIdx][colIdx] / MAX_DISTANCE;
+        oppDistanceScore += marbleDistanceScore;
+        // if (marbleDistanceScore === 1) {
+        //   const marble = new Marble(rowIdx, colIdx, opponent);
+        //   if (isInDanger(marble, state, opponent)) {
+        //     canPush += 1;
+        //   }
+        // }
       }
     });
   });
@@ -189,8 +249,19 @@ const ciaraHeuristic = (state, playerSide, log) => {
   distanceScore /= numFriendly;
   oppDistanceScore /= numOpponent;
 
+  if (numFriendly > numOpponent) {
+    canPush *= numFriendly - numOpponent;
+  } else if (numFriendly < numOpponent) {
+    canBePushed *= numOpponent - numFriendly;
+  }
+
   const total =
-    distanceScore + oppDistanceScore + (MAX_MARBLES - numOpponent) - (MAX_MARBLES - numFriendly);
+    distanceScore +
+    oppDistanceScore +
+    canPush -
+    canBePushed +
+    (MAX_MARBLES - numOpponent) -
+    (MAX_MARBLES - numFriendly);
 
   if (log) {
     if (log === 'ALL') {
