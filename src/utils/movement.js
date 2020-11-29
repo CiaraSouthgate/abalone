@@ -92,6 +92,38 @@ const getDirection = (position1, position2) => {
   }
 };
 
+export const getPositionInDirection = (position, direction) => {
+  const row = position.charCodeAt(0);
+  const col = parseInt(position[1]);
+
+  let afterRow = row;
+  let afterCol = col;
+
+  switch (direction) {
+    case DIRECTION.NW:
+      afterRow++;
+      break;
+    case DIRECTION.NE:
+      afterCol++;
+      afterRow++;
+      break;
+    case DIRECTION.E:
+      afterCol++;
+      break;
+    case DIRECTION.SE:
+      afterRow--;
+      break;
+    case DIRECTION.SW:
+      afterRow--;
+      afterCol--;
+      break;
+    case DIRECTION.W:
+      afterCol--;
+  }
+
+  return `${String.fromCharCode(afterRow)}${afterCol}`;
+};
+
 export const isNeighbor = (position1, position2) => {
   return getDirection(position1, position2) !== undefined;
 };

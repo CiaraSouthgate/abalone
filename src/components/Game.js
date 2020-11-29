@@ -13,6 +13,7 @@ import {
 } from '../constants';
 import { Box } from '@material-ui/core';
 import {
+  getPositionInDirection,
   getLegalMoveInfo,
   getMarblePositionBetween,
   getPlayerScores,
@@ -68,6 +69,8 @@ const BoardTile = styled.div`
   border: ${(props) => {
     if (props.selected) {
       return '2px solid teal';
+    } else if (props.justMoved) {
+      return '2px solid red';
     }
     return '1px solid #00000010';
   }};
@@ -114,10 +117,11 @@ export const Game = () => {
   const [firstTurn, setFirstTurn] = useState(true);
   const [legalDirections, setLegalDirections] = useState(DIRECTIONS_OBJECT);
   const [humanMoveStart, setHumanMoveStart] = useState(null);
+  const [justMoved, setJustMoved] = useState(new Set());
 
   // These are used for the end game pop up screen.
   const [isGameFinished, setIsGameFinished] = useState(false);
-  const [endGameReason, setEndGameReason] = useState("");
+  const [endGameReason, setEndGameReason] = useState('');
 
   const previousValues = useRef({ turn, gameState });
 
@@ -126,10 +130,10 @@ export const Game = () => {
       const scores = getPlayerScores(gameState);
       setBlackScore(scores.BLK);
       setWhiteScore(scores.WHT);
-      
+
       // Checking end game conditions
       if (scores.BLK === 6 || scores.WHT === 6) {
-        stopGame("Maximum Score Reached");
+        stopGame('Maximum Score Reached');
       }
 
       if (!configModalOpen) {
@@ -140,8 +144,8 @@ export const Game = () => {
             makeBestMove();
             if (turn === WHT) {
               setNumTurns(numTurns + 1);
-              if (numTurns+1 === moveLimit+1) {
-                  stopGame("Maximum Moves Reached");
+              if (numTurns + 1 === moveLimit + 1) {
+                stopGame('Maximum Moves Reached');
               }
             }
           }
@@ -185,26 +189,26 @@ export const Game = () => {
   // Button to start a new game.
   // Scores of both players and an indicator for who won.
   const stopGameClick = () => {
-    if (window.confirm("Are you sure you want to end the game?")){
+    if (window.confirm('Are you sure you want to end the game?')) {
       setIsGameFinished(true);
-      setEndGameReason("Manual Termination");
+      setEndGameReason('Manual Termination');
     }
-  }
+  };
 
   // General Stop game method used for ending the game when certain events happen
   const stopGame = (reason) => {
     setIsGameFinished(true);
     setEndGameReason(reason);
-  }
+  };
 
   // Asks the user if they want to restart the game, if they confirm then the page is refreshed.
   const restartGame = () => {
-    // If user confirms, reload else do nothing 
-    if(window.confirm("Are you sure you want to restart the game?")){
+    // If user confirms, reload else do nothing
+    if (window.confirm('Are you sure you want to restart the game?')) {
       // reload page
       document.location.reload();
     }
-  }
+  };
 
   const restorePreviousState = () => {
     setTurn(previousState.turn);
@@ -301,6 +305,7 @@ export const Game = () => {
       updatePrevious();
       setTimeTakenForLastMove(timeInSec);
       setGameState(result);
+      updateJustMoved(move);
       switchTurn();
       setTotalTime(totalTime + timeInSec);
       addHistoryEntry({
@@ -316,6 +321,7 @@ export const Game = () => {
     getAllMoves((moves) => {
       const move = chooseRandomMove(moves);
       updateStateFromMove(move);
+      updateJustMoved(move);
       switchTurn();
       addHistoryEntry({
         numTurn: numTurns,
@@ -324,6 +330,19 @@ export const Game = () => {
         timeTaken: timeTakenForLastMove
       });
     });
+  };
+
+  const updateJustMoved = (move) => {
+    const moveArray = move.split(' ');
+    const coords = moveArray[1].match(/.{1,2}/g); //split into pairs
+    const direction = moveArray[2];
+
+    const moved = new Set();
+    coords.forEach((coord) => {
+      moved.add(getPositionInDirection(coord, direction).toLowerCase());
+    });
+
+    setJustMoved(moved);
   };
 
   const clearMoveDirections = () => {
@@ -397,6 +416,7 @@ export const Game = () => {
     switchTurn();
     setSelectedMarbles(new Set());
     setLegalDirections(clearMoveDirections());
+    setJustMoved(new Set());
     addHistoryEntry({
       numTurn: numTurns,
       playerColour: turn,
@@ -405,8 +425,8 @@ export const Game = () => {
     });
     if (turn === WHT) {
       setNumTurns(numTurns + 1);
-      if (numTurns+1 === moveLimit+1) {
-        stopGame("Maximum Moves Reached");
+      if (numTurns + 1 === moveLimit + 1) {
+        stopGame('Maximum Moves Reached');
       }
     }
   };
@@ -415,19 +435,24 @@ export const Game = () => {
     <Box className="rowWrapper">
       <ConfigModal isOpen={configModalOpen} onSubmit={onPlayClick} />
       <Box className="colWrapper">
-        <ButtonContainer onUndoClicked={restorePreviousState} onStopClicked={stopGameClick} onRestartClicked={restartGame}/>
+        <ButtonContainer
+          onUndoClicked={restorePreviousState}
+          onStopClicked={stopGameClick}
+          onRestartClicked={restartGame}
+        />
         <Box className="colWrapper">
           <Board>
             <MoveArrows activeDirections={legalDirections} onArrowClick={handleMoveArrowClick} />
-            {Object.keys(gameState).map((k) => (
-              <BoardRow key={k}>
-                {Object.keys(gameState[k]).map((col) => (
+            {Object.keys(gameState).map((row) => (
+              <BoardRow key={row}>
+                {Object.keys(gameState[row]).map((col) => (
                   <BoardTile
-                    key={`${k}${col}`}
-                    for={gameState[k][col]}
-                    selected={selectedMarbles.has(`${k}${col}`)}
-                    onClick={() => onMarbleClick(k, col)}>
-                    {`${k}${col}`}
+                    key={`${row}${col}`}
+                    for={gameState[row][col]}
+                    justMoved={justMoved.has(`${row}${col}`)}
+                    selected={selectedMarbles.has(`${row}${col}`)}
+                    onClick={() => onMarbleClick(row, col)}>
+                    {`${row}${col}`}
                   </BoardTile>
                 ))}
               </BoardRow>
@@ -440,7 +465,12 @@ export const Game = () => {
         <LinearProgress className={`progress ${!isLoading && 'hidden'}`} />
         <History aiColour={AIColour} totalTime={totalTime} historyEntries={historyEntries} />
       </Box>
-      <EndScreen isOpen={isGameFinished} whiteScore={whiteScore} blackScore={blackScore} reason={endGameReason}/>
+      <EndScreen
+        isOpen={isGameFinished}
+        whiteScore={whiteScore}
+        blackScore={blackScore}
+        reason={endGameReason}
+      />
     </Box>
   );
 };

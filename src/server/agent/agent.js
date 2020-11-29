@@ -41,13 +41,13 @@ const utility = (state, side) => {
   } else {
     return table_value;
   }
-}
+};
 
 const orderNodes = (actions, state, side) => {
   return actions
     .map((action) => {
       const newState = createStateFromMove(state, action, side);
-      
+
       return {
         action: action,
         score: utility(newState, side, true),
@@ -95,7 +95,7 @@ const alphabeta = (state, depth, alpha, beta, isMax) => {
       }
       bestMove = nodes[i].action;
       bestMoveResult = nodes[i].result;
-      console.log("updating best move:", bestMove);
+      console.log('updating best move:', bestMove);
     }
     return value;
   } else {
@@ -111,8 +111,7 @@ const alphabeta = (state, depth, alpha, beta, isMax) => {
     }
     return value;
   }
-}
-
+};
 
 // Returns true when depth is zero and if the state is a terminal state. but for now only returns true when the depth is zero or less.
 const cutoff_test = (state, depth) => {
