@@ -20,8 +20,6 @@ import {
   const Title = styled.div`
     text-align: center;
   `
-
-
   
 
 

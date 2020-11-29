@@ -126,6 +126,9 @@ export const Game = () => {
       const scores = getPlayerScores(gameState);
       setBlackScore(scores.BLK);
       setWhiteScore(scores.WHT);
+      if (scores.BLK === 6 || scores.WHT === 6) {
+        stopGame("Maximum Score Reached");
+      }
       if (!configModalOpen) {
         if (turn === AIColour) {
           if (firstTurn) {
@@ -177,6 +180,12 @@ export const Game = () => {
       setIsGameFinished(true);
       setEndGameReason("Manual Termination");
     }
+  }
+
+  // General Stop game method used for ending the game when certain events happen
+  const stopGame = (reason) => {
+    setIsGameFinished(true);
+    setEndGameReason(reason);
   }
 
   // Asks the user if they want to restart the game, if they confirm then the page is refreshed.
