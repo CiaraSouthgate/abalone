@@ -248,20 +248,18 @@ const ciaraHeuristic = (state, playerSide, log) => {
 
   distanceScore /= numFriendly;
   oppDistanceScore /= numOpponent;
+  canBePushed /= numFriendly;
+  canPush /= numOpponent;
 
-  if (numFriendly > numOpponent) {
-    canPush *= numFriendly - numOpponent;
-  } else if (numFriendly < numOpponent) {
-    canBePushed *= numOpponent - numFriendly;
-  }
+  // if (numFriendly > numOpponent) {
+  //   canPush *= numFriendly - numOpponent;
+  // } else if (numFriendly < numOpponent) {
+  //   canBePushed *= numOpponent - numFriendly;
+  // }
 
-  const total =
-    distanceScore +
-    oppDistanceScore +
-    canPush -
-    canBePushed +
-    (MAX_MARBLES - numOpponent) -
-    (MAX_MARBLES - numFriendly);
+  const total = distanceScore + oppDistanceScore + canPush - canBePushed;
+  // (MAX_MARBLES - numOpponent) -
+  // (MAX_MARBLES - numFriendly);
 
   if (log) {
     if (log === 'ALL') {
@@ -270,10 +268,14 @@ const ciaraHeuristic = (state, playerSide, log) => {
         distanceScore,
         '\noppDistanceScore:',
         oppDistanceScore,
-        '\nnumOpponent',
-        numOpponent,
-        '\nnumFriendly',
-        numFriendly
+        '\ncanPush',
+        canPush,
+        '\ncanBePushed',
+        canBePushed
+        // '\nnumOpponent',
+        // numOpponent,
+        // '\nnumFriendly',
+        // numFriendly
       );
     }
     console.log('SCORE:', total);
