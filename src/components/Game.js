@@ -126,14 +126,17 @@ export const Game = () => {
       const scores = getPlayerScores(gameState);
       setBlackScore(scores.BLK);
       setWhiteScore(scores.WHT);
-
+      
       // Checking end game conditions
       if (scores.BLK === 6 || scores.WHT === 6) {
         stopGame("Maximum Score Reached");
       }
-      if (turn === WHT && numTurns === moveLimit) {
-        stopGame("Maximum Moves Reached");
-      }
+      // if (turn === BLK && numTurns === moveLimit+1){
+      //   stopGame("Maximum Moves Reached");
+      // }
+      // if (turn === WHT && numTurns === moveLimit+1) {
+      //   stopGame("Maximum Moves Reached");
+      // }
 
       if (!configModalOpen) {
         if (turn === AIColour) {
@@ -143,6 +146,9 @@ export const Game = () => {
             makeBestMove();
             if (turn === WHT) {
               setNumTurns(numTurns + 1);
+              if (numTurns+1 === moveLimit+1) {
+                  stopGame("Maximum Moves Reached");
+              }
             }
           }
         } else {
@@ -405,6 +411,9 @@ export const Game = () => {
     });
     if (turn === WHT) {
       setNumTurns(numTurns + 1);
+      if (numTurns+1 === moveLimit+1) {
+        stopGame("Maximum Moves Reached");
+      }
     }
   };
 
