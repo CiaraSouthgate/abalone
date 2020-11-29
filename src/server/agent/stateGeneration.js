@@ -32,12 +32,12 @@ const getMarbleMoves = (side) => {
             if (marble.compareTo(neighbour) <= 0) {
               // this is a valid pair
               const pair = [marble, neighbour];
-              const direction = getDirection(marble, neighbour);
+              const direction = utils.getDirection(marble, neighbour);
               // get moves for this pair
               const pairMoves = getGroupMoves(pair, direction);
               if (!!pairMoves) moves = moves.concat(pairMoves);
               // find trios from pair
-              const nextInLine = getNeighbourWithDirection(neighbour, direction);
+              const nextInLine = utils.getNeighbourWithDirection(neighbour, direction, state);
               if (nextInLine.side !== undefined && nextInLine.side === side) {
                 const trio = [...pair, nextInLine];
                 //get moves for this trio
@@ -47,8 +47,8 @@ const getMarbleMoves = (side) => {
             }
           } else if (neighbour.side === EMP) {
             // space is empty; this is a valid move
-            const direction = getDirection(marble, neighbour);
-            moves.push(`SINGLE ${getMarblesString([marble])} ${direction}`);
+            const direction = utils.getDirection(marble, neighbour);
+            moves.push(`SINGLE ${utils.getMarblesString([marble])} ${direction}`);
           }
         });
       }
@@ -88,10 +88,10 @@ const getGroupMoves = (marbles, direction) => {
  */
 const checkSumito = (startMarble, direction, groupSize) => {
   let count = 1;
-  let nextMarble = getNeighbourWithDirection(startMarble, direction);
+  let nextMarble = utils.getNeighbourWithDirection(startMarble, direction, state);
   while (nextMarble.side === startMarble.side) {
     if (++count === groupSize) return false; // can't be pushed if same number
-    nextMarble = getNeighbourWithDirection(nextMarble, direction);
+    nextMarble = utils.getNeighbourWithDirection(nextMarble, direction, state);
   }
   //if next space is empty or undefined (off the board), it's a valid sumito
   return nextMarble.side === EMP || nextMarble.side === undefined;
@@ -108,13 +108,13 @@ const getInlineMoves = (marbles, directions) => {
   directions.forEach((direction) => {
     const leadMarble =
       marble1directions.indexOf(direction) >= 0 ? marbles[0] : marbles[marbles.length - 1];
-    const neighbour = getNeighbourWithDirection(leadMarble, direction);
+    const neighbour = utils.getNeighbourWithDirection(leadMarble, direction, state);
     if (
       !(neighbour.side === undefined || neighbour.side === leadMarble.side) && //off the edge of the board or into own marbles
       (neighbour.side === EMP || //into empty space
         (neighbour.side !== EMP && checkSumito(neighbour, direction, marbles.length))) //sumito
     ) {
-      moves.push(`INLINE ${getMarblesString(marbles)} ${direction}`);
+      moves.push(`INLINE ${utils.getMarblesString(marbles)} ${direction}`);
     }
   });
   return moves.length > 0 ? moves : null;
@@ -130,10 +130,10 @@ const getSidestepMoves = (marbles, directions) => {
   const moves = [];
   directions.forEach((direction) => {
     const numClear = marbles.filter((marble) => {
-      return getNeighbourWithDirection(marble, direction).side === EMP;
+      return utils.getNeighbourWithDirection(marble, direction, state).side === EMP;
     }).length;
     if (numClear === marbles.length) {
-      moves.push(`SIDESTEP ${getMarblesString(marbles)} ${direction}`);
+      moves.push(`SIDESTEP ${utils.getMarblesString(marbles)} ${direction}`);
     }
   });
   return moves.length > 0 ? moves : null;
@@ -168,63 +168,6 @@ const setMultiMoveGroups = (direction) => {
   }
 
   return [inline, sidestep];
-};
-
-/**
- * Creates a string in the format "A1A1A1" for a group of marbles
- * @param marbles group of marbles
- * @returns formatted string
- */
-const getMarblesString = (marbles) => {
-  return marbles.reduce((str, marble) => {
-    return str + marble.row.toUpperCase() + marble.col;
-  }, '');
-};
-
-const getMarblesListFromString = (marbleString, state) => {
-  const marbles = [];
-  for (let i = 0; i < marbleString.length / 2; i++) {
-    const row = marbleString[i * 2].toLowerCase();
-    const col = parseInt(marbleString[i * 2 + 1]);
-    const side = state[row][col];
-    marbles.push(new Marble(row, col, side));
-  }
-  return marbles;
-};
-
-/**
- * Returns the direction of two neighbouring positions
- * @param pos1
- * @param pos2
- * @returns the direction
- */
-const getDirection = (pos1, pos2) => {
-  const rowDiff = pos1.row.charCodeAt(0) - pos2.row.charCodeAt(0);
-  const colDiff = pos1.col - pos2.col;
-
-  if (rowDiff === -1 && colDiff === 0) return DIRECTION.NW;
-  if (rowDiff === -1 && colDiff === -1) return DIRECTION.NE;
-  if (rowDiff === 0 && colDiff === -1) return DIRECTION.E;
-  if (rowDiff === 0 && colDiff === 1) return DIRECTION.W;
-  if (rowDiff === 1 && colDiff === 1) return DIRECTION.SW;
-  if (rowDiff === 1 && colDiff === 0) return DIRECTION.SE;
-};
-
-/**
- * Gets the neighbour of a given marble in a given direction
- * @param marble
- * @param direction
- * @returns the neighbour
- */
-const getNeighbourWithDirection = (marble, direction) => {
-  const modifier = utils.getCoordinateModifierFromDirection(direction);
-  const row = String.fromCharCode(marble.row.charCodeAt(0) + modifier.row);
-  const col = marble.col + modifier.col;
-  let side;
-  try {
-    side = state[row][col];
-  } catch (ignored) {}
-  return new Marble(row, col, side);
 };
 
 const generateOutput = (moves, side, startState) => {
@@ -270,7 +213,7 @@ const getStatesFromMoves = (moves, side, startState) => {
 
 const createStateFromMove = (startState, move) => {
   const [moveType, marbleString, direction] = move.split(' ');
-  const marbles = getMarblesListFromString(marbleString, startState);
+  const marbles = utils.getMarblesListFromString(marbleString, startState);
   if (moveType === 'SINGLE') {
     return moveSingleMarble(...marbles, direction, startState);
   } else {
@@ -297,7 +240,7 @@ const moveMarbleGroup = (marbles, direction, moveType, startState) => {
   if (moveType === 'INLINE') {
     let leadMarble;
     let tailMarble;
-    if (direction === getDirection(marbles[0], marbles[1])) {
+    if (direction === utils.getDirection(marbles[0], marbles[1])) {
       leadMarble = marbles[marbles.length - 1];
       tailMarble = marbles[0];
     } else {
@@ -305,7 +248,7 @@ const moveMarbleGroup = (marbles, direction, moveType, startState) => {
       tailMarble = marbles[marbles.length - 1];
     }
 
-    let nextMarble = getNeighbourWithDirection(leadMarble, direction);
+    let nextMarble = utils.getNeighbourWithDirection(leadMarble, direction, state);
 
     if (nextMarble.side === EMP) {
       newState[nextMarble.row][nextMarble.col] = leadMarble.side;
@@ -314,7 +257,7 @@ const moveMarbleGroup = (marbles, direction, moveType, startState) => {
       const opponentSide = nextMarble.side;
       const opponentStart = utils.deepCopy(nextMarble);
       while (nextMarble.side === opponentSide) {
-        nextMarble = getNeighbourWithDirection(nextMarble, direction);
+        nextMarble = utils.getNeighbourWithDirection(nextMarble, direction, state);
       }
       if (nextMarble.side === EMP) {
         newState[nextMarble.row][nextMarble.col] = opponentSide;

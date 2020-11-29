@@ -35,6 +35,7 @@ module.exports = {
     'no-empty': 'off',
     'no-extra-boolean-cast': 'off',
     'react/prop-types': 'off',
-    'no-prototype-builtins': 'off'
+    'no-prototype-builtins': 'off',
+    'no-constant-condition': 'off'
   }
 };
