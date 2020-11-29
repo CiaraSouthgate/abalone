@@ -131,12 +131,6 @@ export const Game = () => {
       if (scores.BLK === 6 || scores.WHT === 6) {
         stopGame("Maximum Score Reached");
       }
-      // if (turn === BLK && numTurns === moveLimit+1){
-      //   stopGame("Maximum Moves Reached");
-      // }
-      // if (turn === WHT && numTurns === moveLimit+1) {
-      //   stopGame("Maximum Moves Reached");
-      // }
 
       if (!configModalOpen) {
         if (turn === AIColour) {
