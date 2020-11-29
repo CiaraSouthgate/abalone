@@ -14,7 +14,7 @@ const NEG_INF = Number.NEGATIVE_INFINITY;
 // positive infinity
 const POS_INF = Number.POSITIVE_INFINITY;
 // global variable for depth
-const DEPTH = 5;
+const DEPTH = 3;
 // global variable for best move
 let bestMove;
 // global variable for state after best move
@@ -26,7 +26,22 @@ let maxSide;
 // Colour of Min, aka the colour of the opponent.
 let minSide;
 
-const utility = heuristic.ciaraHeuristic;
+const heuristicFunc = heuristic.ciaraHeuristic;
+
+// const utility = heuristic.ciaraHeuristic;
+
+const transTable = new Map();
+
+const utility = (state, side) => {
+  let table_value = transTable.get(state);
+  if (table_value === undefined) {
+    let new_value = heuristicFunc(state, side);
+    transTable.set(state, new_value);
+    return new_value;
+  } else {
+    return table_value;
+  }
+}
 
 const orderNodes = (actions, state, side) => {
   return actions

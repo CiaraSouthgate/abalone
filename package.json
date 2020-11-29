@@ -23,7 +23,7 @@
   "proxy": "http://localhost:5000/",
   "scripts": {
     "start-front": "react-scripts start",
-    "start-server": "node src/server/server.js",
+    "start-server": "node --max-old-space-size=8192 src/server/server.js",
     "start": "concurrently \"npm run start-server\" \"npm run start-front\" --kill-others",
     "build": "node ./buildScript",
     "build-front": "react-scripts build",
